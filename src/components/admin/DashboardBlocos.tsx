@@ -57,9 +57,9 @@ interface MetricCardProps {
 
 const MetricCard = ({ title, value, subtitle, badge, icon, variant }: MetricCardProps) => {
   const variantStyles = {
-    pool: 'bg-pool-available-bg border-pool-available/20',
-    lojista: 'bg-lojista-blocks-bg border-lojista-blocks/20', 
-    client: 'bg-client-assigned-bg border-client-assigned/20'
+    pool: 'bg-pool-available-bg/80 border-pool-available/30 backdrop-blur-sm glow-effect',
+    lojista: 'bg-lojista-blocks-bg/80 border-lojista-blocks/30 backdrop-blur-sm glow-effect', 
+    client: 'bg-client-assigned-bg/80 border-client-assigned/30 backdrop-blur-sm glow-effect'
   };
 
   const iconStyles = {
@@ -77,14 +77,14 @@ const MetricCard = ({ title, value, subtitle, badge, icon, variant }: MetricCard
         </div>
       </CardHeader>
       <CardContent>
-        <div className="text-3xl font-bold text-foreground mb-1">
+        <div className="text-3xl font-bold golden-text mb-1">
           {value.toLocaleString('pt-BR')}
         </div>
         {subtitle && (
-          <p className="text-xs text-muted-foreground mb-2">{subtitle}</p>
+          <p className="text-xs text-muted-foreground mb-2 font-medium">{subtitle}</p>
         )}
         {badge && (
-          <Badge variant="secondary" className="text-xs">
+          <Badge variant="secondary" className="text-xs bg-gradient-golden text-foreground">
             {badge}
           </Badge>
         )}
@@ -156,7 +156,7 @@ const DashboardBlocos = () => {
           <TrendingUp className="h-5 w-5" />
           Controle da Numeração Sequencial
         </h2>
-        <Card className="shadow-soft">
+        <Card className="shadow-soft backdrop-blur-sm bg-card/80 border-border/50 pulse-glow">
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
               <CheckCircle className="h-5 w-5 text-success" />
@@ -213,36 +213,36 @@ const DashboardBlocos = () => {
           Atividade de Hoje
         </h2>
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-          <Card className="shadow-soft">
+          <Card className="shadow-soft backdrop-blur-sm bg-card/80 border-border/50 hover:glow-effect transition-all duration-300">
             <CardContent className="p-4">
               <div className="flex items-center justify-between">
                 <div>
                   <p className="text-sm text-muted-foreground">Blocos Vendidos</p>
-                  <p className="text-2xl font-bold text-foreground">{metrics.blocos_vendidos_hoje}</p>
+                  <p className="text-2xl font-bold golden-text">{metrics.blocos_vendidos_hoje}</p>
                 </div>
                 <Clock className="h-8 w-8 text-warning" />
               </div>
             </CardContent>
           </Card>
           
-          <Card className="shadow-soft">
+          <Card className="shadow-soft backdrop-blur-sm bg-card/80 border-border/50 hover:glow-effect transition-all duration-300">
             <CardContent className="p-4">
               <div className="flex items-center justify-between">
                 <div>
                   <p className="text-sm text-muted-foreground">Cupons Atribuídos</p>
-                  <p className="text-2xl font-bold text-foreground">{metrics.cupons_atribuidos_hoje.toLocaleString('pt-BR')}</p>
+                  <p className="text-2xl font-bold golden-text">{metrics.cupons_atribuidos_hoje.toLocaleString('pt-BR')}</p>
                 </div>
                 <Users className="h-8 w-8 text-client-assigned" />
               </div>
             </CardContent>
           </Card>
           
-          <Card className="shadow-soft">
+          <Card className="shadow-soft backdrop-blur-sm bg-card/80 border-border/50 hover:glow-effect transition-all duration-300">
             <CardContent className="p-4">
               <div className="flex items-center justify-between">
                 <div>
                   <p className="text-sm text-muted-foreground">Taxa de Atribuição</p>
-                  <p className="text-2xl font-bold text-foreground">89.2%</p>
+                  <p className="text-2xl font-bold golden-text">89.2%</p>
                 </div>
                 <TrendingUp className="h-8 w-8 text-success" />
               </div>

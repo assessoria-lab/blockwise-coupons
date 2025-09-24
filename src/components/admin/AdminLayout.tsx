@@ -12,6 +12,7 @@ import {
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
+import HeroBackground from './HeroBackground';
 
 interface AdminLayoutProps {
   children: React.ReactNode;
@@ -75,7 +76,8 @@ const AdminLayout = ({ children, currentPage, onNavigate }: AdminLayoutProps) =>
   ];
 
   return (
-    <div className="min-h-screen bg-background">
+    <div className="min-h-screen bg-background relative">
+      <HeroBackground />
       {/* Mobile sidebar backdrop */}
       {sidebarOpen && (
         <div 
@@ -86,7 +88,7 @@ const AdminLayout = ({ children, currentPage, onNavigate }: AdminLayoutProps) =>
 
       {/* Sidebar */}
       <div className={`
-        fixed inset-y-0 left-0 z-50 w-64 bg-sidebar border-r border-sidebar-border transform transition-transform duration-200 ease-in-out lg:translate-x-0 lg:static lg:inset-0
+        fixed inset-y-0 left-0 z-50 w-64 bg-sidebar/95 backdrop-blur-lg border-r border-sidebar-border/50 transform transition-transform duration-200 ease-in-out lg:translate-x-0 lg:static lg:inset-0 pulse-glow
         ${sidebarOpen ? 'translate-x-0' : '-translate-x-full'}
       `}>
         <div className="flex flex-col h-full">
@@ -169,7 +171,7 @@ const AdminLayout = ({ children, currentPage, onNavigate }: AdminLayoutProps) =>
       {/* Main content */}
       <div className="lg:pl-64">
         {/* Top bar */}
-        <div className="sticky top-0 z-30 flex h-16 items-center gap-x-4 border-b border-border bg-card px-4 shadow-soft lg:px-6">
+        <div className="sticky top-0 z-30 flex h-16 items-center gap-x-4 border-b border-border/50 bg-card/80 backdrop-blur-lg px-4 shadow-soft lg:px-6 glow-effect">
           <Button
             variant="ghost"
             size="sm"

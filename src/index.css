@@ -2,12 +2,12 @@
 @tailwind components;
 @tailwind utilities;
 
-/* Admin Panel Design System - Professional and Modern */
+/* Show de Prêmios Design System - Festive and Professional */
 @layer base {
   :root {
-    /* Base colors for professional admin interface */
-    --background: 248 250 252; /* slate-50 */
-    --foreground: 15 23 42; /* slate-800 */
+    /* Base colors inspired by Show de Prêmios green theme */
+    --background: 240 253 244; /* green-50 */
+    --foreground: 20 83 45; /* green-800 */
 
     /* Card system */
     --card: 255 255 255; /* white */
@@ -72,15 +72,18 @@
     --sidebar-border: 226 229 235; /* slate-200 */
     --sidebar-ring: 219 78% 48%; /* blue-600 */
 
-    /* Gradients inspired by Show de Prêmios colors */
-    --gradient-primary: linear-gradient(135deg, hsl(142 69% 38%) 0%, hsl(45 93% 47%) 100%);
+    /* Show de Prêmios Gradients - Festive and Radiant */
+    --gradient-primary: radial-gradient(ellipse at center, hsl(142 69% 50%) 0%, hsl(142 69% 35%) 70%);
+    --gradient-radiant: radial-gradient(ellipse at center, hsl(142 80% 45%) 0%, hsl(142 70% 25%) 100%);
+    --gradient-golden: linear-gradient(135deg, hsl(45 100% 60%) 0%, hsl(38 100% 50%) 100%);
     --gradient-success: linear-gradient(135deg, hsl(142 76% 36%) 0%, hsl(142 69% 45%) 100%);
     --gradient-warning: linear-gradient(135deg, hsl(45 93% 47%) 0%, hsl(38 92% 50%) 100%);
     
-    /* Shadows for depth */
+    /* Show de Prêmios Shadows with glow effects */
     --shadow-soft: 0 1px 3px 0 rgb(0 0 0 / 0.1), 0 1px 2px -1px rgb(0 0 0 / 0.1);
     --shadow-medium: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);
     --shadow-large: 0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -4px rgb(0 0 0 / 0.1);
+    --shadow-glow: 0 0 20px hsl(142 69% 50% / 0.3), 0 0 40px hsl(142 69% 50% / 0.1);
 
     --radius: 0.75rem;
   }
@@ -151,6 +154,8 @@
   body {
     @apply bg-background text-foreground;
     font-feature-settings: "rlig" 1, "calt" 1;
+    background: radial-gradient(ellipse at top, hsl(142 30% 97%) 0%, hsl(142 20% 99%) 100%);
+    min-height: 100vh;
   }
   
   /* Smooth scrolling for better UX */
@@ -173,5 +178,36 @@
   
   ::-webkit-scrollbar-thumb:hover {
     @apply bg-muted-foreground/50;
+  }
+}
+
+/* Show de Prêmios Custom Animations */
+@layer utilities {
+  .glow-effect {
+    box-shadow: var(--shadow-glow);
+  }
+  
+  .radiant-bg {
+    background: var(--gradient-radiant);
+  }
+  
+  .golden-text {
+    background: var(--gradient-golden);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
+  
+  .pulse-glow {
+    animation: pulse-glow 2s ease-in-out infinite alternate;
+  }
+  
+  @keyframes pulse-glow {
+    from {
+      box-shadow: 0 0 10px hsl(142 69% 50% / 0.2);
+    }
+    to {
+      box-shadow: 0 0 20px hsl(142 69% 50% / 0.4), 0 0 30px hsl(142 69% 50% / 0.2);
+    }
   }
 }
