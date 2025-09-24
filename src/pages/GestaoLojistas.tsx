@@ -1,6 +1,7 @@
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { LojistasTable } from '@/components/lojistas/LojistasTable';
 import { VendasBlocosStats } from '@/components/admin/VendasBlocosStats';
+import { LojistasStats } from '@/components/admin/LojistasStats';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Store, Users } from 'lucide-react';
@@ -34,17 +35,21 @@ export default function GestaoLojistas() {
           </TabsList>
 
           <TabsContent value="lojistas">
-            <Card>
-              <CardHeader>
-                <CardTitle>Lista de Lojistas</CardTitle>
-                <CardDescription>
-                  Visualize, busque e gerencie todos os lojistas cadastrados no sistema
-                </CardDescription>
-              </CardHeader>
-              <CardContent>
-                <LojistasTable />
-              </CardContent>
-            </Card>
+            <div className="space-y-6">
+              <LojistasStats />
+              
+              <Card>
+                <CardHeader>
+                  <CardTitle>Lista de Lojistas</CardTitle>
+                  <CardDescription>
+                    Visualize, busque e gerencie todos os lojistas cadastrados no sistema
+                  </CardDescription>
+                </CardHeader>
+                <CardContent>
+                  <LojistasTable />
+                </CardContent>
+              </Card>
+            </div>
           </TabsContent>
 
           <TabsContent value="vendas">
