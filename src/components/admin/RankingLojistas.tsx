@@ -30,53 +30,58 @@ const fetchRankingLojistas = async (): Promise<RankingLojista[]> => {
 
   if (errorLojistas) throw errorLojistas;
 
-  // Buscar todos os blocos vendidos
+  // Buscar todos os blocos vendidos agrupados por lojista
   const { data: blocos, error: errorBlocos } = await supabase
     .from('blocos')
-    .select('id, lojista_id, status, cupons_atribuidos, cupons_disponiveis')
+    .select('lojista_id, cupons_atribuidos, cupons_disponiveis')
     .eq('status', 'vendido')
     .not('lojista_id', 'is', null);
 
   if (errorBlocos) throw errorBlocos;
 
-  // Buscar todos os cupons atribuídos
+  // Buscar todos os cupons atribuídos agrupados por lojista
   const { data: cupons, error: errorCupons } = await supabase
     .from('cupons')
-    .select('id, lojista_id, status, valor_compra, data_atribuicao, cliente_id')
+    .select('lojista_id, valor_compra, data_atribuicao, cliente_id')
     .eq('status', 'atribuido')
     .not('lojista_id', 'is', null);
 
   if (errorCupons) throw errorCupons;
 
-  // Processar dados para criar o ranking
+  // Processar dados agrupando por lojista
   const rankingData: RankingLojista[] = (lojistas || []).map(lojista => {
+    // Filtrar e agrupar blocos do lojista
     const blocosLojista = (blocos || []).filter(b => b.lojista_id === lojista.id);
     const cuponsLojista = (cupons || []).filter(c => c.lojista_id === lojista.id);
     
+    // Somar todos os dados do lojista
+    const totalBlocosComprados = blocosLojista.length;
+    const totalCuponsAtribuidos = cuponsLojista.length;
     const cuponsDisponiveis = blocosLojista.reduce((acc, b) => acc + (b.cupons_disponiveis || 0), 0);
     const valorTotalGerado = cuponsLojista.reduce((acc, c) => acc + (c.valor_compra || 0), 0);
-    const clientesUnicos = new Set(cuponsLojista.map(c => c.cliente_id)).size;
     
-    // Data da última atribuição
+    // Contar clientes únicos
+    const clientesUnicos = new Set(cuponsLojista.map(c => c.cliente_id).filter(id => id)).size;
+    
+    // Encontrar a data da última atribuição
     const datasAtribuicao = cuponsLojista
       .map(c => c.data_atribuicao)
       .filter(d => d)
-      .sort()
-      .reverse();
+      .sort((a, b) => new Date(b).getTime() - new Date(a).getTime());
     const ultimaAtribuicao = datasAtribuicao[0] || null;
     
-    // Percentual de utilização
-    const totalCuponsComprados = blocosLojista.length * 100;
+    // Calcular percentual de utilização
+    const totalCuponsComprados = totalBlocosComprados * 100;
     const percentualUtilizacao = totalCuponsComprados > 0 
-      ? (cuponsLojista.length / totalCuponsComprados) * 100 
+      ? (totalCuponsAtribuidos / totalCuponsComprados) * 100 
       : 0;
 
     return {
       lojista_id: lojista.id,
       nome_loja: lojista.nome_loja,
       cidade: lojista.cidade,
-      total_blocos_comprados: blocosLojista.length,
-      total_cupons_atribuidos: cuponsLojista.length,
+      total_blocos_comprados: totalBlocosComprados,
+      total_cupons_atribuidos: totalCuponsAtribuidos,
       cupons_disponiveis: cuponsDisponiveis,
       valor_total_gerado: valorTotalGerado,
       clientes_unicos: clientesUnicos,
@@ -84,10 +89,18 @@ const fetchRankingLojistas = async (): Promise<RankingLojista[]> => {
       data_ultima_compra: lojista.data_ultima_compra,
       percentual_utilizacao: percentualUtilizacao
     };
+  })
+  // Filtrar apenas lojistas que têm dados relevantes (compraram blocos ou atribuíram cupons)
+  .filter(lojista => lojista.total_blocos_comprados > 0 || lojista.total_cupons_atribuidos > 0)
+  // Ordenar por cupons atribuídos (maior para menor), depois por valor gerado
+  .sort((a, b) => {
+    if (b.total_cupons_atribuidos !== a.total_cupons_atribuidos) {
+      return b.total_cupons_atribuidos - a.total_cupons_atribuidos;
+    }
+    return b.valor_total_gerado - a.valor_total_gerado;
   });
 
-  // Ordenar por cupons atribuídos (maior para menor)
-  return rankingData.sort((a, b) => b.total_cupons_atribuidos - a.total_cupons_atribuidos);
+  return rankingData;
 };
 
 const getRankingIcon = (posicao: number) => {
