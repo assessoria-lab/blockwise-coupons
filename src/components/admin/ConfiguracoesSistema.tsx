@@ -154,16 +154,6 @@ const ConfiguracoesSistema = () => {
 
   return (
     <div className="p-6 space-y-6">
-      {/* Header */}
-      <div className="flex items-center justify-between">
-        <div>
-          <h1 className="text-3xl font-bold">Configurações do Sistema</h1>
-          <p className="text-muted-foreground">
-            Gerencie usuários, configurações e logs do sistema.
-          </p>
-        </div>
-      </div>
-
       <Tabs defaultValue="configurations" className="space-y-6">
         <TabsList className="grid w-full grid-cols-4">
           <TabsTrigger value="configurations">Configurações</TabsTrigger>

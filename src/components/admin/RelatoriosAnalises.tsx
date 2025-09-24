@@ -216,22 +216,14 @@ export const RelatoriosAnalises = () => {
 
   return (
     <div className="p-6 space-y-6">
-      <div className="flex items-center justify-between">
-        <div>
-          <h2 className="text-2xl font-bold">Relatórios e Análises</h2>
-          <p className="text-muted-foreground">
-            Insights avançados e relatórios detalhados do sistema
-          </p>
-        </div>
-        <div className="flex gap-2">
-          <Button 
-            variant="outline" 
-            onClick={() => gerarRelatorioPDF(relatorioLojistas, 'lojistas')}
-          >
-            <Download className="h-4 w-4 mr-2" />
-            Exportar Relatório
-          </Button>
-        </div>
+      <div className="flex gap-2 justify-end">
+        <Button 
+          variant="outline" 
+          onClick={() => gerarRelatorioPDF(relatorioLojistas, 'lojistas')}
+        >
+          <Download className="h-4 w-4 mr-2" />
+          Exportar Relatório
+        </Button>
       </div>
 
       <Tabs defaultValue="performance" className="space-y-6">

@@ -43,27 +43,24 @@ const DashboardMonitoramento = () => {
 
   return (
     <div className="p-6 space-y-6">
-      {/* Status da Conexão */}
-      <div className="flex items-center justify-between">
-        <h1 className="text-2xl font-bold">Monitoramento em Tempo Real</h1>
-        <div className="flex items-center gap-4">
-          <Badge 
-            variant={isConnected ? "default" : "destructive"} 
-            className="flex items-center gap-2"
-          >
-            {isConnected ? <Wifi className="h-3 w-3" /> : <WifiOff className="h-3 w-3" />}
-            {isConnected ? 'Conectado' : 'Desconectado'}
-          </Badge>
-          <Button 
-            variant="outline" 
-            size="sm" 
-            onClick={refetchMetricas}
-            className="flex items-center gap-2"
-          >
-            <RefreshCw className="h-4 w-4" />
-            Atualizar
-          </Button>
-        </div>
+      {/* Status e Controles */}
+      <div className="flex justify-end gap-4">
+        <Badge 
+          variant={isConnected ? "default" : "destructive"} 
+          className="flex items-center gap-2"
+        >
+          {isConnected ? <Wifi className="h-3 w-3" /> : <WifiOff className="h-3 w-3" />}
+          {isConnected ? 'Conectado' : 'Desconectado'}
+        </Badge>
+        <Button 
+          variant="outline" 
+          size="sm" 
+          onClick={refetchMetricas}
+          className="flex items-center gap-2"
+        >
+          <RefreshCw className="h-4 w-4" />
+          Atualizar
+        </Button>
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">

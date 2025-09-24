@@ -111,14 +111,6 @@ const DashboardBlocos = () => {
 
   return (
     <div className="p-4 lg:p-6 space-y-6">
-      {/* Main Header */}
-      <div className="bg-white rounded-lg p-6 shadow-sm border border-border">
-        <h1 className="text-2xl font-bold text-foreground mb-2">Dashboard do Sistema</h1>
-        <p className="text-muted-foreground">
-          Visão geral dos blocos de cupons e métricas do sistema
-        </p>
-      </div>
-
       {/* Block Metrics */}
       <section>
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">

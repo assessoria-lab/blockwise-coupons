@@ -96,18 +96,7 @@ const GestaoClientes = () => {
   };
 
   return (
-    <div className="space-y-6 p-6">
-      {/* Header */}
-      <div className="flex items-center justify-between">
-        <div>
-          <h1 className="text-3xl font-bold tracking-tight">Gestão de Clientes</h1>
-          <p className="text-muted-foreground">
-            Gerencie e monitore todos os clientes do sistema
-          </p>
-        </div>
-        <Users className="h-8 w-8 text-primary" />
-      </div>
-
+    <div className="p-6 space-y-6">
       {/* Estatísticas */}
       <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
         <Card>

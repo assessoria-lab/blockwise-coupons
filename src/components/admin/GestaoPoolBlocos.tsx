@@ -58,16 +58,6 @@ const GestaoPoolBlocos = () => {
 
   return (
     <div className="p-6 space-y-6">
-      <div className="border-b border-border pb-4">
-        <h2 className="text-2xl font-bold text-foreground flex items-center gap-2">
-          <Package className="h-6 w-6" />
-          Gestão do Pool de Blocos
-        </h2>
-        <p className="text-muted-foreground mt-1">
-          Criar novos blocos de cupons no sistema
-        </p>
-      </div>
-
       <Card className="shadow-soft">
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
