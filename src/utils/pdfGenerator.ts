@@ -10,6 +10,9 @@ interface CupomData {
   data_atribuicao: string;
   valor_compra: number;
   tipo_cliente: 'varejo' | 'atacado';
+  telefone_cliente?: string;
+  email_cliente?: string;
+  vendedor?: string;
 }
 
 export const generateCuponsPDF = async (
@@ -124,7 +127,7 @@ export const generateCuponsPDF = async (
           font-weight: 600;
           color: #1f2937;
         ">
-          (62) 9${Math.floor(Math.random() * 9)}${Math.floor(Math.random() * 9)}${Math.floor(Math.random() * 9)}${Math.floor(Math.random() * 9)}-${Math.floor(Math.random() * 9)}${Math.floor(Math.random() * 9)}${Math.floor(Math.random() * 9)}${Math.floor(Math.random() * 9)}
+          ${cupom.telefone_cliente || ''}
         </div>
 
         <!-- Shopping/Galeria - ajustado mais para cima e direita -->
@@ -173,7 +176,7 @@ export const generateCuponsPDF = async (
           font-weight: 600;
           color: #1f2937;
         ">
-          ${cupom.nome_cliente.toLowerCase().replace(/\s+/g, '.')}@email.com
+          ${cupom.email_cliente || ''}
         </div>
 
         <!-- Loja - mantido como estava (correto) -->
@@ -205,7 +208,7 @@ export const generateCuponsPDF = async (
           font-weight: 600;
           color: #1f2937;
         ">
-          Vendedor ${Math.floor(Math.random() * 99) + 1}
+          ${cupom.vendedor || ''}
         </div>
 
       </div>
