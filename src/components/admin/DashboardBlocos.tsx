@@ -57,34 +57,39 @@ interface MetricCardProps {
 
 const MetricCard = ({ title, value, subtitle, badge, icon, variant }: MetricCardProps) => {
   const variantStyles = {
-    pool: 'bg-pool-available text-pool-available-foreground border-pool-available/30',
-    lojista: 'bg-lojista-blocks text-lojista-blocks-foreground border-lojista-blocks/30', 
-    client: 'bg-client-assigned text-client-assigned-foreground border-client-assigned/30'
+    pool: 'bg-white border-l-4 border-pool-available shadow-sm hover:shadow-md',
+    lojista: 'bg-white border-l-4 border-lojista-blocks shadow-sm hover:shadow-md', 
+    client: 'bg-white border-l-4 border-client-assigned shadow-sm hover:shadow-md'
   };
 
   const iconStyles = {
-    pool: 'text-pool-available-foreground',
-    lojista: 'text-lojista-blocks-foreground',
-    client: 'text-client-assigned-foreground'
+    pool: 'text-pool-available bg-pool-available/10 p-2 rounded-full',
+    lojista: 'text-lojista-blocks bg-lojista-blocks/10 p-2 rounded-full',
+    client: 'text-client-assigned bg-client-assigned/10 p-2 rounded-full'
   };
 
   return (
-    <Card className={`${variantStyles[variant]} border shadow-soft hover:shadow-medium transition-all duration-200 glow-effect`}>
-      <CardHeader className="pb-2">
+    <Card className={`${variantStyles[variant]} border-border transition-all duration-200 hover:scale-[1.02]`}>
+      <CardHeader className="pb-4">
         <div className="flex items-center justify-between">
-          <CardTitle className="text-sm font-medium">{title}</CardTitle>
-          <div className={iconStyles[variant]}>{icon}</div>
+          <div className="flex items-center space-x-3">
+            <div className={iconStyles[variant]}>{icon}</div>
+            <CardTitle className="text-sm font-medium text-muted-foreground uppercase tracking-wide">{title}</CardTitle>
+          </div>
         </div>
       </CardHeader>
       <CardContent>
-        <div className="text-3xl font-bold mb-1">
+        <div className="text-3xl font-bold text-foreground mb-2">
           {value.toLocaleString('pt-BR')}
         </div>
         {subtitle && (
-          <p className="text-xs opacity-90 mb-2 font-medium">{subtitle}</p>
+          <p className="text-sm text-muted-foreground mb-3">{subtitle}</p>
         )}
         {badge && (
-          <Badge variant="secondary" className="text-xs bg-white/20 text-current border-white/30">
+          <Badge 
+            variant="secondary" 
+            className="text-xs bg-muted text-muted-foreground border border-border"
+          >
             {badge}
           </Badge>
         )}
@@ -107,20 +112,16 @@ const DashboardBlocos = () => {
   return (
     <div className="space-y-6">
       {/* Main Header */}
-      <div className="border-b border-border pb-4">
-        <h1 className="text-3xl font-bold text-foreground">Dashboard do Sistema</h1>
-        <p className="text-muted-foreground mt-1">
+      <div className="bg-white rounded-lg p-6 shadow-sm border border-border">
+        <h1 className="text-2xl font-bold text-foreground mb-2">Dashboard do Sistema</h1>
+        <p className="text-muted-foreground">
           Visão geral dos blocos de cupons e métricas do sistema
         </p>
       </div>
 
       {/* Block Metrics */}
       <section>
-        <h2 className="text-xl font-semibold text-foreground mb-4 flex items-center gap-2">
-          <Package className="h-5 w-5" />
-          Visão Geral dos Blocos
-        </h2>
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
           <MetricCard
             title="Blocos no Pool Geral"
             value={metrics.blocos_pool_geral}
@@ -152,102 +153,84 @@ const DashboardBlocos = () => {
 
       {/* Sequence Control */}
       <section>
-        <h2 className="text-xl font-semibold text-foreground mb-4 flex items-center gap-2">
-          <TrendingUp className="h-5 w-5" />
-          Controle da Numeração Sequencial
-        </h2>
-        <Card className="shadow-soft backdrop-blur-sm bg-card/80 border-border/50 pulse-glow">
-          <CardHeader>
-            <CardTitle className="flex items-center gap-2">
-              <CheckCircle className="h-5 w-5 text-success" />
-              Status da Sequência Global de Cupons
-            </CardTitle>
+        <Card className="shadow-sm bg-white border border-border">
+          <CardHeader className="border-b border-border">
+            <div className="flex items-center justify-between">
+              <CardTitle className="flex items-center gap-2 text-lg font-semibold">
+                <CheckCircle className="h-5 w-5 text-success" />
+                Status da Sequência Global de Cupons
+              </CardTitle>
+              <Badge 
+                variant={metrics.integridade_ok ? "default" : "destructive"}
+                className={metrics.integridade_ok ? "bg-success text-success-foreground" : ""}
+              >
+                {metrics.integridade_ok ? 'OK' : 'ERRO'}
+              </Badge>
+            </div>
           </CardHeader>
-          <CardContent>
-            <div className="grid grid-cols-2 md:grid-cols-4 gap-4 text-center mb-6">
-              <div className="p-4 bg-accent rounded-lg">
-                <div className="text-2xl font-bold text-foreground">
+          <CardContent className="p-6">
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
+              <div className="text-center p-4 bg-gray-50 rounded-lg border border-border">
+                <div className="text-xl font-bold text-foreground mb-1">
                   {metrics.primeiro_numero.toLocaleString('pt-BR')}
                 </div>
-                <div className="text-sm text-muted-foreground">Primeiro Cupom</div>
+                <div className="text-xs text-muted-foreground">Primeiro Cupom</div>
               </div>
-              <div className="p-4 bg-accent rounded-lg">
-                <div className="text-2xl font-bold text-foreground">
+              <div className="text-center p-4 bg-gray-50 rounded-lg border border-border">
+                <div className="text-xl font-bold text-foreground mb-1">
                   {metrics.ultimo_numero.toLocaleString('pt-BR')}
                 </div>
-                <div className="text-sm text-muted-foreground">Último Cupom</div>
+                <div className="text-xs text-muted-foreground">Último Cupom</div>
               </div>
-              <div className="p-4 bg-success-bg rounded-lg">
-                <div className="text-2xl font-bold text-success">
+              <div className="text-center p-4 bg-success/10 rounded-lg border border-success/20">
+                <div className="text-xl font-bold text-success mb-1">
                   {metrics.total_unicos.toLocaleString('pt-BR')}
                 </div>
-                <div className="text-sm text-muted-foreground">Cupons Únicos Criados</div>
+                <div className="text-xs text-muted-foreground">Cupons Únicos</div>
               </div>
-              <div className="p-4 bg-pool-available-bg rounded-lg">
-                <div className="text-2xl font-bold text-pool-available">
+              <div className="text-center p-4 bg-primary/10 rounded-lg border border-primary/20">
+                <div className="text-xl font-bold text-primary mb-1">
                   {metrics.proximo_disponivel.toLocaleString('pt-BR')}
                 </div>
-                <div className="text-sm text-muted-foreground">Próximo Sequencial</div>
+                <div className="text-xs text-muted-foreground">Próximo Sequencial</div>
               </div>
             </div>
             
-            <div className="p-4 bg-success-bg border border-success/20 rounded-lg">
-              <div className="flex items-center space-x-3">
-                <div className={`w-3 h-3 ${metrics.integridade_ok ? 'bg-success' : 'bg-destructive'} rounded-full`} />
-                <span className="font-medium text-success">
-                  Integridade Sequencial: {metrics.integridade_ok ? 'OK' : 'ERRO'}
-                </span>
-              </div>
-              <p className="text-sm text-muted-foreground mt-2">
-                Capacidade máxima: {metrics.capacidade_maxima.cupons_suportados.toLocaleString('pt-BR')} cupons
+            <div className="p-4 bg-success/5 border border-success/20 rounded-lg">
+              <p className="text-sm text-muted-foreground">
+                <strong>Capacidade máxima:</strong> {metrics.capacidade_maxima.cupons_suportados.toLocaleString('pt-BR')} cupons
               </p>
             </div>
           </CardContent>
         </Card>
       </section>
 
-      {/* Quick Stats */}           
+      {/* Activity Stats */}           
       <section>
-        <h2 className="text-xl font-semibold text-foreground mb-4 flex items-center gap-2">
-          <Calendar className="h-5 w-5" />
-          Atividade de Hoje
-        </h2>
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-          <Card className="shadow-soft backdrop-blur-sm bg-card/80 border-border/50 hover:glow-effect transition-all duration-300">
-            <CardContent className="p-4">
-              <div className="flex items-center justify-between">
-                <div>
-                  <p className="text-sm text-muted-foreground">Blocos Vendidos</p>
-                  <p className="text-2xl font-bold golden-text">{metrics.blocos_vendidos_hoje}</p>
-                </div>
-                <Clock className="h-8 w-8 text-warning" />
-              </div>
-            </CardContent>
-          </Card>
-          
-          <Card className="shadow-soft backdrop-blur-sm bg-card/80 border-border/50 hover:glow-effect transition-all duration-300">
-            <CardContent className="p-4">
-              <div className="flex items-center justify-between">
-                <div>
-                  <p className="text-sm text-muted-foreground">Cupons Atribuídos</p>
-                  <p className="text-2xl font-bold golden-text">{metrics.cupons_atribuidos_hoje.toLocaleString('pt-BR')}</p>
-                </div>
-                <Users className="h-8 w-8 text-client-assigned" />
-              </div>
-            </CardContent>
-          </Card>
-          
-          <Card className="shadow-soft backdrop-blur-sm bg-card/80 border-border/50 hover:glow-effect transition-all duration-300">
-            <CardContent className="p-4">
-              <div className="flex items-center justify-between">
-                <div>
-                  <p className="text-sm text-muted-foreground">Taxa de Atribuição</p>
-                  <p className="text-2xl font-bold golden-text">89.2%</p>
-                </div>
-                <TrendingUp className="h-8 w-8 text-success" />
-              </div>
-            </CardContent>
-          </Card>
+        <div className="bg-white rounded-lg p-6 shadow-sm border border-border">
+          <h2 className="text-lg font-semibold text-foreground mb-4 flex items-center gap-2">
+            <Calendar className="h-5 w-5" />
+            Atividade de Hoje
+          </h2>
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+            <div className="text-center p-6 bg-gray-50 rounded-lg border border-border hover:shadow-md transition-shadow">
+              <Clock className="h-8 w-8 text-warning mx-auto mb-3" />
+              <div className="text-2xl font-bold text-foreground mb-1">{metrics.blocos_vendidos_hoje}</div>
+              <div className="text-sm text-muted-foreground">Blocos Vendidos</div>
+            </div>
+            
+            <div className="text-center p-6 bg-gray-50 rounded-lg border border-border hover:shadow-md transition-shadow">
+              <Users className="h-8 w-8 text-client-assigned mx-auto mb-3" />
+              <div className="text-2xl font-bold text-foreground mb-1">{metrics.cupons_atribuidos_hoje.toLocaleString('pt-BR')}</div>
+              <div className="text-sm text-muted-foreground">Cupons Atribuídos</div>
+            </div>
+            
+            <div className="text-center p-6 bg-gray-50 rounded-lg border border-border hover:shadow-md transition-shadow">
+              <TrendingUp className="h-8 w-8 text-success mx-auto mb-3" />
+              <div className="text-2xl font-bold text-foreground mb-1">89.2%</div>
+              <div className="text-sm text-muted-foreground">Taxa de Atribuição</div>
+            </div>
+          </div>
         </div>
       </section>
     </div>
