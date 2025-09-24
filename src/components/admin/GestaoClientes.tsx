@@ -38,6 +38,7 @@ const GestaoClientes = () => {
   });
 
   const [showAddDialog, setShowAddDialog] = useState(false);
+  const [selectedClientId, setSelectedClientId] = useState<string | null>(null);
   const [formData, setFormData] = useState({
     nome: '',
     cpf: '',
@@ -171,6 +172,70 @@ const GestaoClientes = () => {
         total_lojas: lojasUnicas.size
       };
     }
+  });
+
+  // Buscar detalhes completos do cliente selecionado
+  const { data: clienteDetalhes, isLoading: loadingDetalhes } = useQuery({
+    queryKey: ['cliente-detalhes', selectedClientId],
+    queryFn: async () => {
+      if (!selectedClientId) return null;
+      
+      // Buscar dados básicos do cliente
+      const { data: cliente, error: clienteError } = await supabase
+        .from('clientes')
+        .select('*')
+        .eq('id', selectedClientId)
+        .single();
+
+      if (clienteError) throw clienteError;
+
+      // Buscar cupons do cliente com dados da loja e bloco
+      const { data: cupons, error: cuponsError } = await supabase
+        .from('cupons')
+        .select(`
+          id,
+          numero_formatado,
+          valor_compra,
+          data_atribuicao,
+          status,
+          lojistas!inner(
+            nome_loja,
+            cidade,
+            shopping
+          ),
+          blocos!inner(
+            numero_bloco
+          )
+        `)
+        .eq('cliente_id', selectedClientId)
+        .order('data_atribuicao', { ascending: false });
+
+      if (cuponsError) throw cuponsError;
+
+      // Buscar prêmios ganhos
+      const { data: premios, error: premiosError } = await supabase
+        .from('ganhadores_sorteios')
+        .select(`
+          id,
+          premio,
+          valor_premio,
+          data_sorteio,
+          tipo_sorteio,
+          numero_cupom,
+          observacoes
+        `)
+        .eq('cliente_id', selectedClientId)
+        .order('data_sorteio', { ascending: false });
+
+      if (premiosError) throw premiosError;
+
+      return {
+        cliente,
+        cupons,
+        premios
+      };
+    },
+    enabled: !!selectedClientId
   });
 
   // Mutation para atribuir cupons
@@ -597,7 +662,11 @@ const GestaoClientes = () => {
                       </div>
                     </div>
                     
-                    <Button variant="outline" size="sm">
+                    <Button 
+                      variant="outline" 
+                      size="sm" 
+                      onClick={() => setSelectedClientId(cliente.id)}
+                    >
                       <Eye className="h-4 w-4 mr-2" />
                       Ver Detalhes
                     </Button>
@@ -608,6 +677,215 @@ const GestaoClientes = () => {
           )}
         </CardContent>
       </Card>
+
+      {/* Modal de Detalhes do Cliente */}
+      <Dialog open={!!selectedClientId} onOpenChange={(open) => !open && setSelectedClientId(null)}>
+        <DialogContent className="max-w-4xl max-h-[80vh] overflow-y-auto">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <Users className="h-5 w-5" />
+              Detalhes do Cliente
+            </DialogTitle>
+          </DialogHeader>
+          
+          {loadingDetalhes ? (
+            <div className="text-center py-8">Carregando detalhes...</div>
+          ) : clienteDetalhes ? (
+            <div className="space-y-6">
+              {/* Informações Básicas */}
+              <Card>
+                <CardHeader>
+                  <CardTitle className="text-lg">Informações Pessoais</CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <div className="grid grid-cols-2 gap-4">
+                    <div>
+                      <p><strong>Nome:</strong> {clienteDetalhes.cliente.nome}</p>
+                      <p><strong>CPF:</strong> {formatCPF(clienteDetalhes.cliente.cpf)}</p>
+                      <p><strong>Telefone:</strong> {clienteDetalhes.cliente.telefone ? formatPhone(clienteDetalhes.cliente.telefone) : 'Não informado'}</p>
+                    </div>
+                    <div>
+                      <p><strong>Email:</strong> {clienteDetalhes.cliente.email || 'Não informado'}</p>
+                      <p><strong>Cidade:</strong> {clienteDetalhes.cliente.cidade || 'Não informado'}</p>
+                      <p><strong>Status:</strong> 
+                        <Badge className="ml-2" variant={clienteDetalhes.cliente.status === 'ativo' ? 'default' : 'secondary'}>
+                          {clienteDetalhes.cliente.status}
+                        </Badge>
+                      </p>
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+
+              {/* Resumo de Atividade */}
+              <div className="grid grid-cols-3 gap-4">
+                <Card>
+                  <CardContent className="p-4">
+                    <div className="text-center">
+                      <p className="text-2xl font-bold text-blue-600">{clienteDetalhes.cupons?.length || 0}</p>
+                      <p className="text-sm text-muted-foreground">Cupons Totais</p>
+                    </div>
+                  </CardContent>
+                </Card>
+                <Card>
+                  <CardContent className="p-4">
+                    <div className="text-center">
+                      <p className="text-2xl font-bold text-green-600">
+                        {new Set(clienteDetalhes.cupons?.map(c => c.lojistas?.nome_loja)).size || 0}
+                      </p>
+                      <p className="text-sm text-muted-foreground">Lojas Diferentes</p>
+                    </div>
+                  </CardContent>
+                </Card>
+                <Card>
+                  <CardContent className="p-4">
+                    <div className="text-center">
+                      <p className="text-2xl font-bold text-purple-600">{clienteDetalhes.premios?.length || 0}</p>
+                      <p className="text-sm text-muted-foreground">Prêmios Ganhos</p>
+                    </div>
+                  </CardContent>
+                </Card>
+              </div>
+
+              {/* Cupons do Cliente */}
+              <Card>
+                <CardHeader>
+                  <CardTitle className="text-lg">Cupons do Cliente ({clienteDetalhes.cupons?.length || 0})</CardTitle>
+                </CardHeader>
+                <CardContent>
+                  {!clienteDetalhes.cupons || clienteDetalhes.cupons.length === 0 ? (
+                    <p className="text-center py-4 text-muted-foreground">Nenhum cupom encontrado</p>
+                  ) : (
+                    <div className="space-y-3 max-h-60 overflow-y-auto">
+                      {clienteDetalhes.cupons.map((cupom: any) => (
+                        <div key={cupom.id} className="border rounded-lg p-3">
+                          <div className="flex justify-between items-start">
+                            <div className="flex-1">
+                              <div className="flex items-center gap-2 mb-1">
+                                <code className="bg-muted px-2 py-1 rounded text-sm font-mono">
+                                  {cupom.numero_formatado}
+                                </code>
+                                <Badge variant="outline">{cupom.status}</Badge>
+                              </div>
+                              <p className="text-sm">
+                                <strong>Loja:</strong> {cupom.lojistas?.nome_loja}
+                              </p>
+                              <p className="text-sm">
+                                <strong>Cidade:</strong> {cupom.lojistas?.cidade}
+                                {cupom.lojistas?.shopping && ` - ${cupom.lojistas.shopping}`}
+                              </p>
+                              <p className="text-sm">
+                                <strong>Bloco:</strong> {cupom.blocos?.numero_bloco}
+                              </p>
+                            </div>
+                            <div className="text-right text-sm">
+                              <p className="font-semibold">
+                                R$ {Number(cupom.valor_compra || 0).toLocaleString('pt-BR', { minimumFractionDigits: 2 })}
+                              </p>
+                              <p className="text-muted-foreground">
+                                {format(new Date(cupom.data_atribuicao), 'dd/MM/yyyy HH:mm', { locale: ptBR })}
+                              </p>
+                            </div>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  )}
+                </CardContent>
+              </Card>
+
+              {/* Prêmios Ganhos */}
+              <Card>
+                <CardHeader>
+                  <CardTitle className="text-lg">Prêmios Ganhos ({clienteDetalhes.premios?.length || 0})</CardTitle>
+                </CardHeader>
+                <CardContent>
+                  {!clienteDetalhes.premios || clienteDetalhes.premios.length === 0 ? (
+                    <p className="text-center py-4 text-muted-foreground">Nenhum prêmio ganho ainda</p>
+                  ) : (
+                    <div className="space-y-3">
+                      {clienteDetalhes.premios.map((premio: any) => (
+                        <div key={premio.id} className="border rounded-lg p-3 bg-green-50">
+                          <div className="flex justify-between items-start">
+                            <div className="flex-1">
+                              <div className="flex items-center gap-2 mb-1">
+                                <Badge variant="default" className="bg-green-600">
+                                  {premio.tipo_sorteio}
+                                </Badge>
+                              </div>
+                              <p className="text-sm font-semibold">{premio.premio}</p>
+                              <p className="text-sm">
+                                <strong>Cupom:</strong> {premio.numero_cupom}
+                              </p>
+                              {premio.observacoes && (
+                                <p className="text-sm text-muted-foreground mt-1">
+                                  {premio.observacoes}
+                                </p>
+                              )}
+                            </div>
+                            <div className="text-right">
+                              <p className="font-semibold text-green-600">
+                                R$ {Number(premio.valor_premio || 0).toLocaleString('pt-BR', { minimumFractionDigits: 2 })}
+                              </p>
+                              <p className="text-sm text-muted-foreground">
+                                {format(new Date(premio.data_sorteio), 'dd/MM/yyyy', { locale: ptBR })}
+                              </p>
+                            </div>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  )}
+                </CardContent>
+              </Card>
+
+              {/* Resumo por Loja */}
+              {clienteDetalhes.cupons && clienteDetalhes.cupons.length > 0 && (
+                <Card>
+                  <CardHeader>
+                    <CardTitle className="text-lg">Resumo por Loja</CardTitle>
+                  </CardHeader>
+                  <CardContent>
+                    <div className="space-y-2">
+                      {Object.entries(
+                        clienteDetalhes.cupons.reduce((acc: any, cupom: any) => {
+                          const loja = cupom.lojistas?.nome_loja || 'Loja não identificada';
+                          if (!acc[loja]) {
+                            acc[loja] = {
+                              quantidade: 0,
+                              valor_total: 0,
+                              cidade: cupom.lojistas?.cidade || '',
+                              shopping: cupom.lojistas?.shopping || ''
+                            };
+                          }
+                          acc[loja].quantidade += 1;
+                          acc[loja].valor_total += Number(cupom.valor_compra || 0);
+                          return acc;
+                        }, {})
+                      ).map(([loja, dados]: [string, any]) => (
+                        <div key={loja} className="flex justify-between items-center p-2 bg-muted rounded">
+                          <div>
+                            <p className="font-medium">{loja}</p>
+                            <p className="text-sm text-muted-foreground">
+                              {dados.cidade}{dados.shopping && ` - ${dados.shopping}`}
+                            </p>
+                          </div>
+                          <div className="text-right">
+                            <p className="font-semibold">{dados.quantidade} cupons</p>
+                            <p className="text-sm text-muted-foreground">
+                              R$ {dados.valor_total.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}
+                            </p>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  </CardContent>
+                </Card>
+              )}
+            </div>
+          ) : null}
+        </DialogContent>
+      </Dialog>
     </div>
   );
 };
