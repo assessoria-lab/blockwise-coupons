@@ -176,11 +176,11 @@ export function GraficoVolumesCupons() {
             <Line
               type="monotone"
               dataKey="atribuicoes"
-              stroke="#22c55e"
+              stroke="#eab308"
               strokeWidth={2}
-              dot={{ fill: '#22c55e', strokeWidth: 2, r: 4 }}
+              dot={{ fill: '#eab308', strokeWidth: 2, r: 4 }}
               name="Atribuições"
-              activeDot={{ r: 6, fill: '#22c55e' }}
+              activeDot={{ r: 6, fill: '#eab308' }}
             />
           </LineChart>
         </ResponsiveContainer>
