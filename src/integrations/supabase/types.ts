@@ -966,6 +966,22 @@ export type Database = {
         Args: { "": string } | { "": unknown }
         Returns: unknown
       }
+      buscar_detalhes_bloco: {
+        Args: { p_numero_bloco: string }
+        Returns: {
+          bloco_id: string
+          cupons: Json
+          cupons_atribuidos: number
+          cupons_disponiveis: number
+          cupons_no_bloco: number
+          data_venda: string
+          lojista_id: string
+          lojista_nome: string
+          lojista_whatsapp: string
+          numero_bloco: string
+          status: string
+        }[]
+      }
       buscar_embeddings_similares: {
         Args: {
           data_filtro: string
@@ -1186,6 +1202,21 @@ export type Database = {
       refresh_dashboard_views: {
         Args: Record<PropertyKey, never>
         Returns: undefined
+      }
+      relatorio_utilizacao_blocos: {
+        Args: { p_lojista_id?: string }
+        Returns: {
+          clientes_atendidos: number
+          comprado_em: string
+          cupons_atribuidos: number
+          cupons_disponiveis: number
+          cupons_total: number
+          dias_desde_compra: number
+          lojista_nome: string
+          numero_bloco: string
+          utilizacao_percentual: number
+          valor_gerado: number
+        }[]
       }
       sparsevec_out: {
         Args: { "": unknown }

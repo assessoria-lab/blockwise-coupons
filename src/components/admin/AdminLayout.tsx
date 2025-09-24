@@ -9,7 +9,9 @@ import {
   X,
   Trophy,
   BarChart3,
-  ChevronLeft
+  ChevronLeft,
+  Search,
+  TrendingUp
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -44,6 +46,20 @@ const AdminLayout = ({ children, currentPage, onNavigate }: AdminLayoutProps) =>
       href: '#blocos', 
       icon: Package, 
       current: currentPage === 'blocos',
+      badge: null
+    },
+    { 
+      name: 'Rastreamento de Blocos', 
+      href: '/admin/rastreamento', 
+      icon: Search, 
+      current: currentPage === 'rastreamento',
+      badge: 'Novo'
+    },
+    { 
+      name: 'Performance de Blocos', 
+      href: '/admin/performance', 
+      icon: TrendingUp, 
+      current: currentPage === 'performance',
       badge: null
     },
     { 

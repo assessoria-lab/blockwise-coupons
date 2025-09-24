@@ -9,6 +9,8 @@ import GestaoLojistas from "./pages/GestaoLojistas";
 import { HistoricoCupons } from "./components/admin/HistoricoCupons";
 import { DashboardFinanceiro } from "./components/admin/DashboardFinanceiro";
 import { RelatoriosAnalises } from "./components/admin/RelatoriosAnalises";
+import RastreamentoPorBloco from "./components/admin/RastreamentoPorBloco";
+import RelatorioPerformanceBlocos from "./components/admin/RelatorioPerformanceBlocos";
 
 const queryClient = new QueryClient();
 
@@ -24,6 +26,8 @@ const App = () => (
           <Route path="/admin/historico" element={<HistoricoCupons />} />
           <Route path="/admin/financeiro" element={<DashboardFinanceiro />} />
           <Route path="/admin/lojistas" element={<GestaoLojistas />} />
+          <Route path="/admin/rastreamento" element={<RastreamentoPorBloco />} />
+          <Route path="/admin/performance" element={<RelatorioPerformanceBlocos />} />
           {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
           <Route path="*" element={<NotFound />} />
         </Routes>
