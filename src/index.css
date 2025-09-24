@@ -17,10 +17,10 @@
     --popover: 255 255 255;
     --popover-foreground: 15 23 42;
 
-    /* Primary brand - Professional blue */
-    --primary: 219 78% 48%; /* blue-600 */
+    /* Primary brand - Show de Prêmios Green */
+    --primary: 142 69% 38%; /* green-600 inspired by logo */
     --primary-foreground: 248 250 252; /* slate-50 */
-    --primary-hover: 219 78% 42%; /* blue-700 */
+    --primary-hover: 142 69% 32%; /* darker green */
 
     /* Secondary - Clean slate */
     --secondary: 241 245 249; /* slate-100 */
@@ -30,9 +30,9 @@
     --muted: 248 250 252; /* slate-50 */
     --muted-foreground: 100 116 139; /* slate-500 */
 
-    /* Accent - Subtle blue */
-    --accent: 239 246 255; /* blue-50 */
-    --accent-foreground: 30 64 175; /* blue-700 */
+    /* Accent - Golden yellow from logo */
+    --accent: 45 93% 92%; /* yellow-50 */
+    --accent-foreground: 45 93% 25%; /* dark yellow */
 
     /* Status colors for block states */
     --pool-available: 219 95% 50%; /* blue-500 */
@@ -72,10 +72,10 @@
     --sidebar-border: 226 229 235; /* slate-200 */
     --sidebar-ring: 219 78% 48%; /* blue-600 */
 
-    /* Gradients for modern look */
-    --gradient-primary: linear-gradient(135deg, hsl(219 78% 48%) 0%, hsl(245 101% 50%) 100%);
-    --gradient-success: linear-gradient(135deg, hsl(142 76% 36%) 0%, hsl(34 197% 94%) 100%);
-    --gradient-warning: linear-gradient(135deg, hsl(38 92% 50%) 0%, hsl(45 93% 47%) 100%);
+    /* Gradients inspired by Show de Prêmios colors */
+    --gradient-primary: linear-gradient(135deg, hsl(142 69% 38%) 0%, hsl(45 93% 47%) 100%);
+    --gradient-success: linear-gradient(135deg, hsl(142 76% 36%) 0%, hsl(142 69% 45%) 100%);
+    --gradient-warning: linear-gradient(135deg, hsl(45 93% 47%) 0%, hsl(38 92% 50%) 100%);
     
     /* Shadows for depth */
     --shadow-soft: 0 1px 3px 0 rgb(0 0 0 / 0.1), 0 1px 2px -1px rgb(0 0 0 / 0.1);

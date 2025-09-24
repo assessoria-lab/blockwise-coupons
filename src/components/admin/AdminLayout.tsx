@@ -91,14 +91,16 @@ const AdminLayout = ({ children, currentPage, onNavigate }: AdminLayoutProps) =>
       `}>
         <div className="flex flex-col h-full">
           {/* Logo/Header */}
-          <div className="flex items-center justify-between h-16 px-4 border-b border-sidebar-border">
-            <div className="flex items-center space-x-2">
-              <div className="w-8 h-8 bg-gradient-primary rounded-lg flex items-center justify-center">
-                <Package className="w-5 h-5 text-white" />
-              </div>
+          <div className="flex items-center justify-between h-20 px-4 border-b border-sidebar-border">
+            <div className="flex items-center space-x-3">
+              <img 
+                src="/lovable-uploads/30762c46-4536-4a6c-bd54-a016f6a4ff1c.png" 
+                alt="Show de Prêmios - Vem Pra 44" 
+                className="h-12 w-auto"
+              />
               <div>
-                <h1 className="text-lg font-bold text-sidebar-foreground">Blocos Admin</h1>
-                <p className="text-xs text-sidebar-foreground/60">Sistema de Cupons</p>
+                <h1 className="text-lg font-bold text-sidebar-foreground">Painel Admin</h1>
+                <p className="text-xs text-sidebar-foreground/60">Sistema de Blocos</p>
               </div>
             </div>
             <Button
