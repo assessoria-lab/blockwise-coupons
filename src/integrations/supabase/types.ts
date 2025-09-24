@@ -135,30 +135,48 @@ export type Database = {
       }
       clientes: {
         Row: {
+          cidade: string | null
           cpf: string
           created_at: string
+          data_primeiro_cupom: string | null
           email: string | null
           id: string
           nome: string
+          observacoes: string | null
+          status: string | null
           telefone: string | null
+          total_cupons_recebidos: number | null
+          total_valor_compras: number | null
           updated_at: string
         }
         Insert: {
+          cidade?: string | null
           cpf: string
           created_at?: string
+          data_primeiro_cupom?: string | null
           email?: string | null
           id?: string
           nome: string
+          observacoes?: string | null
+          status?: string | null
           telefone?: string | null
+          total_cupons_recebidos?: number | null
+          total_valor_compras?: number | null
           updated_at?: string
         }
         Update: {
+          cidade?: string | null
           cpf?: string
           created_at?: string
+          data_primeiro_cupom?: string | null
           email?: string | null
           id?: string
           nome?: string
+          observacoes?: string | null
+          status?: string | null
           telefone?: string | null
+          total_cupons_recebidos?: number | null
+          total_valor_compras?: number | null
           updated_at?: string
         }
         Relationships: []
@@ -464,47 +482,130 @@ export type Database = {
           cnpj: string
           created_at: string
           cupons_nao_atribuidos: number
+          data_cadastro: string | null
+          data_ultima_compra: string | null
+          data_ultimo_acesso: string | null
+          ddd: string | null
           email: string | null
           endereco: string | null
+          estado: string | null
           id: string
           nome_loja: string
+          nome_responsavel: string | null
+          observacoes: string | null
           responsavel_nome: string | null
           responsavel_telefone: string | null
           status: string
           telefone: string | null
           updated_at: string
+          whatsapp: string | null
         }
         Insert: {
           cidade: string
           cnpj: string
           created_at?: string
           cupons_nao_atribuidos?: number
+          data_cadastro?: string | null
+          data_ultima_compra?: string | null
+          data_ultimo_acesso?: string | null
+          ddd?: string | null
           email?: string | null
           endereco?: string | null
+          estado?: string | null
           id?: string
           nome_loja: string
+          nome_responsavel?: string | null
+          observacoes?: string | null
           responsavel_nome?: string | null
           responsavel_telefone?: string | null
           status?: string
           telefone?: string | null
           updated_at?: string
+          whatsapp?: string | null
         }
         Update: {
           cidade?: string
           cnpj?: string
           created_at?: string
           cupons_nao_atribuidos?: number
+          data_cadastro?: string | null
+          data_ultima_compra?: string | null
+          data_ultimo_acesso?: string | null
+          ddd?: string | null
           email?: string | null
           endereco?: string | null
+          estado?: string | null
           id?: string
           nome_loja?: string
+          nome_responsavel?: string | null
+          observacoes?: string | null
           responsavel_nome?: string | null
           responsavel_telefone?: string | null
           status?: string
           telefone?: string | null
           updated_at?: string
+          whatsapp?: string | null
         }
         Relationships: []
+      }
+      pagamentos: {
+        Row: {
+          created_at: string | null
+          dados_pagamento: Json | null
+          data_aprovacao: string | null
+          data_expiracao: string | null
+          data_solicitacao: string | null
+          forma_pagamento: string
+          id: string
+          lojista_id: string
+          observacoes: string | null
+          quantidade_blocos: number
+          referencia_externa: string | null
+          status_pagamento: string | null
+          updated_at: string | null
+          valor: number
+        }
+        Insert: {
+          created_at?: string | null
+          dados_pagamento?: Json | null
+          data_aprovacao?: string | null
+          data_expiracao?: string | null
+          data_solicitacao?: string | null
+          forma_pagamento: string
+          id?: string
+          lojista_id: string
+          observacoes?: string | null
+          quantidade_blocos: number
+          referencia_externa?: string | null
+          status_pagamento?: string | null
+          updated_at?: string | null
+          valor: number
+        }
+        Update: {
+          created_at?: string | null
+          dados_pagamento?: Json | null
+          data_aprovacao?: string | null
+          data_expiracao?: string | null
+          data_solicitacao?: string | null
+          forma_pagamento?: string
+          id?: string
+          lojista_id?: string
+          observacoes?: string | null
+          quantidade_blocos?: number
+          referencia_externa?: string | null
+          status_pagamento?: string | null
+          updated_at?: string | null
+          valor?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "pagamentos_lojista_id_fkey"
+            columns: ["lojista_id"]
+            isOneToOne: false
+            referencedRelation: "lojistas"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       pereira_gouveia_roberta: {
         Row: {
@@ -593,6 +694,59 @@ export type Database = {
         }
         Relationships: []
       }
+      transacoes_whatsapp: {
+        Row: {
+          created_at: string | null
+          dados_processados: Json | null
+          data_interacao: string | null
+          erro_detalhes: string | null
+          id: string
+          lojista_id: string | null
+          mensagem_enviada: string | null
+          mensagem_resposta: string | null
+          numero_whatsapp: string
+          status_processamento: string | null
+          tempo_processamento_ms: number | null
+          tipo_interacao: string
+        }
+        Insert: {
+          created_at?: string | null
+          dados_processados?: Json | null
+          data_interacao?: string | null
+          erro_detalhes?: string | null
+          id?: string
+          lojista_id?: string | null
+          mensagem_enviada?: string | null
+          mensagem_resposta?: string | null
+          numero_whatsapp: string
+          status_processamento?: string | null
+          tempo_processamento_ms?: number | null
+          tipo_interacao: string
+        }
+        Update: {
+          created_at?: string | null
+          dados_processados?: Json | null
+          data_interacao?: string | null
+          erro_detalhes?: string | null
+          id?: string
+          lojista_id?: string | null
+          mensagem_enviada?: string | null
+          mensagem_resposta?: string | null
+          numero_whatsapp?: string
+          status_processamento?: string | null
+          tempo_processamento_ms?: number | null
+          tipo_interacao?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "transacoes_whatsapp_lojista_id_fkey"
+            columns: ["lojista_id"]
+            isOneToOne: false
+            referencedRelation: "lojistas"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       user_roles: {
         Row: {
           created_at: string | null
@@ -614,6 +768,51 @@ export type Database = {
           role?: Database["public"]["Enums"]["app_role"]
           updated_at?: string | null
           user_id?: string
+        }
+        Relationships: []
+      }
+      usuarios_admin: {
+        Row: {
+          created_at: string | null
+          data_bloqueio: string | null
+          email: string
+          id: string
+          nivel_permissao: string | null
+          nome: string
+          observacoes: string | null
+          senha_hash: string
+          status: string | null
+          tentativas_login: number | null
+          ultimo_login: string | null
+          updated_at: string | null
+        }
+        Insert: {
+          created_at?: string | null
+          data_bloqueio?: string | null
+          email: string
+          id?: string
+          nivel_permissao?: string | null
+          nome: string
+          observacoes?: string | null
+          senha_hash: string
+          status?: string | null
+          tentativas_login?: number | null
+          ultimo_login?: string | null
+          updated_at?: string | null
+        }
+        Update: {
+          created_at?: string | null
+          data_bloqueio?: string | null
+          email?: string
+          id?: string
+          nivel_permissao?: string | null
+          nome?: string
+          observacoes?: string | null
+          senha_hash?: string
+          status?: string | null
+          tentativas_login?: number | null
+          ultimo_login?: string | null
+          updated_at?: string | null
         }
         Relationships: []
       }
