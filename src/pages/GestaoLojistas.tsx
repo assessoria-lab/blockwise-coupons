@@ -2,6 +2,7 @@ import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { LojistasTable } from '@/components/lojistas/LojistasTable';
 import { VendasBlocosStats } from '@/components/admin/VendasBlocosStats';
 import { LojistasStats } from '@/components/admin/LojistasStats';
+import { HistoricoVendasRecentes } from '@/components/admin/HistoricoVendasRecentes';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Store, Users } from 'lucide-react';
@@ -68,21 +69,7 @@ export default function GestaoLojistas() {
                 </CardContent>
               </Card>
               
-              <Card>
-                <CardHeader>
-                  <CardTitle>Histórico de Vendas Recentes</CardTitle>
-                  <CardDescription>
-                    Últimas transações de venda de blocos realizadas
-                  </CardDescription>
-                </CardHeader>
-                <CardContent>
-                  <div className="text-center py-8 text-muted-foreground">
-                    <Store className="h-12 w-12 mx-auto mb-4 opacity-50" />
-                    <p>Histórico de vendas em desenvolvimento</p>
-                    <p className="text-sm">Em breve você poderá visualizar todas as transações</p>
-                  </div>
-                </CardContent>
-              </Card>
+              <HistoricoVendasRecentes />
             </div>
           </TabsContent>
         </Tabs>
