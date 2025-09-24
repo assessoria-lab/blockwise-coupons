@@ -1,6 +1,7 @@
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { LojistasTable } from '@/components/lojistas/LojistasTable';
 import { AtribuirCuponsManual } from '@/components/lojistas/AtribuirCuponsManual';
+import { VendasBlocosStats } from '@/components/admin/VendasBlocosStats';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Store, Users, Gift } from 'lucide-react';
@@ -52,21 +53,37 @@ export default function GestaoLojistas() {
           </TabsContent>
 
           <TabsContent value="vendas">
-            <Card>
-              <CardHeader>
-                <CardTitle>Histórico de Vendas</CardTitle>
-                <CardDescription>
-                  Acompanhe todas as vendas de blocos realizadas para os lojistas
-                </CardDescription>
-              </CardHeader>
-              <CardContent>
-                <div className="text-center py-8 text-muted-foreground">
-                  <Store className="h-12 w-12 mx-auto mb-4 opacity-50" />
-                  <p>Funcionalidade em desenvolvimento</p>
-                  <p className="text-sm">Em breve você poderá visualizar o histórico completo de vendas</p>
-                </div>
-              </CardContent>
-            </Card>
+            <div className="space-y-6">
+              <VendasBlocosStats />
+              
+              <Card>
+                <CardHeader>
+                  <CardTitle>Venda Manual de Blocos</CardTitle>
+                  <CardDescription>
+                    Use a tabela de lojistas abaixo para fazer vendas manuais. Clique no botão "Vender" para vender blocos.
+                  </CardDescription>
+                </CardHeader>
+                <CardContent>
+                  <LojistasTable />
+                </CardContent>
+              </Card>
+              
+              <Card>
+                <CardHeader>
+                  <CardTitle>Histórico de Vendas Recentes</CardTitle>
+                  <CardDescription>
+                    Últimas transações de venda de blocos realizadas
+                  </CardDescription>
+                </CardHeader>
+                <CardContent>
+                  <div className="text-center py-8 text-muted-foreground">
+                    <Store className="h-12 w-12 mx-auto mb-4 opacity-50" />
+                    <p>Histórico de vendas em desenvolvimento</p>
+                    <p className="text-sm">Em breve você poderá visualizar todas as transações</p>
+                  </div>
+                </CardContent>
+              </Card>
+            </div>
           </TabsContent>
 
           <TabsContent value="cupons">

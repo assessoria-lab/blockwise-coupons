@@ -158,8 +158,10 @@ export const LojistasTable = () => {
                 // TODO: Implementar visualização de perfil detalhado
                 console.log('Ver perfil:', lojista.id);
               }}
+              title="Ver Detalhes"
             >
-              <Eye className="h-4 w-4" />
+              <Eye className="h-4 w-4 mr-1" />
+              Ver
             </Button>
             <Button
               variant="outline"
@@ -168,8 +170,10 @@ export const LojistasTable = () => {
                 setSelectedLojista(lojista);
                 setShowVendaModal(true);
               }}
+              title="Vender Blocos"
             >
-              <DollarSign className="h-4 w-4" />
+              <DollarSign className="h-4 w-4 mr-1" />
+              Vender
             </Button>
           </div>
         );

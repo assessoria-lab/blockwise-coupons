@@ -29,7 +29,7 @@ export const VendaBlocosModal = ({ lojista, onClose, onSuccess }: VendaBlocosMod
 
   const { mutate: venderBlocos, isPending } = useMutation({
     mutationFn: async () => {
-      const { data, error } = await supabase.rpc('vender_blocos_para_lojista', {
+      const { data, error } = await supabase.rpc('vender_blocos_para_lojista_v2', {
         p_lojista_id: lojista.id,
         p_quantidade_blocos: quantidade,
         p_valor_total: valor * quantidade,
