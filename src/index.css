@@ -2,95 +2,144 @@
 @tailwind components;
 @tailwind utilities;
 
-/* Definition of the design system. All colors, gradients, fonts, etc should be defined here. 
-All colors MUST be HSL.
-*/
-
+/* Admin Panel Design System - Professional and Modern */
 @layer base {
   :root {
-    --background: 0 0% 100%;
-    --foreground: 222.2 84% 4.9%;
+    /* Base colors for professional admin interface */
+    --background: 248 250 252; /* slate-50 */
+    --foreground: 15 23 42; /* slate-800 */
 
-    --card: 0 0% 100%;
-    --card-foreground: 222.2 84% 4.9%;
+    /* Card system */
+    --card: 255 255 255; /* white */
+    --card-foreground: 15 23 42; /* slate-800 */
 
-    --popover: 0 0% 100%;
-    --popover-foreground: 222.2 84% 4.9%;
+    /* Popover system */
+    --popover: 255 255 255;
+    --popover-foreground: 15 23 42;
 
-    --primary: 222.2 47.4% 11.2%;
-    --primary-foreground: 210 40% 98%;
+    /* Primary brand - Professional blue */
+    --primary: 219 78% 48%; /* blue-600 */
+    --primary-foreground: 248 250 252; /* slate-50 */
+    --primary-hover: 219 78% 42%; /* blue-700 */
 
-    --secondary: 210 40% 96.1%;
-    --secondary-foreground: 222.2 47.4% 11.2%;
+    /* Secondary - Clean slate */
+    --secondary: 241 245 249; /* slate-100 */
+    --secondary-foreground: 51 65 85; /* slate-700 */
 
-    --muted: 210 40% 96.1%;
-    --muted-foreground: 215.4 16.3% 46.9%;
+    /* Muted elements */
+    --muted: 248 250 252; /* slate-50 */
+    --muted-foreground: 100 116 139; /* slate-500 */
 
-    --accent: 210 40% 96.1%;
-    --accent-foreground: 222.2 47.4% 11.2%;
+    /* Accent - Subtle blue */
+    --accent: 239 246 255; /* blue-50 */
+    --accent-foreground: 30 64 175; /* blue-700 */
 
-    --destructive: 0 84.2% 60.2%;
-    --destructive-foreground: 210 40% 98%;
+    /* Status colors for block states */
+    --pool-available: 219 95% 50%; /* blue-500 */
+    --pool-available-bg: 239 246 255; /* blue-50 */
+    
+    --lojista-blocks: 245 101% 50%; /* indigo-500 */
+    --lojista-blocks-bg: 238 242 255; /* indigo-50 */
+    
+    --client-assigned: 34 197% 94%; /* emerald-500 */
+    --client-assigned-bg: 236 253 245; /* emerald-50 */
 
-    --border: 214.3 31.8% 91.4%;
-    --input: 214.3 31.8% 91.4%;
-    --ring: 222.2 84% 4.9%;
+    /* Warning and success */
+    --warning: 38 92% 50%; /* amber-500 */
+    --warning-foreground: 23 83% 95%; /* amber-50 */
+    --warning-bg: 254 243 199; /* amber-100 */
 
-    --radius: 0.5rem;
+    --success: 142 76% 36%; /* green-600 */
+    --success-foreground: 220 142% 95%; /* green-50 */
+    --success-bg: 187 247 208; /* green-100 */
 
-    --sidebar-background: 0 0% 98%;
+    /* Destructive */
+    --destructive: 0 84% 60%;
+    --destructive-foreground: 248 113% 98%;
 
-    --sidebar-foreground: 240 5.3% 26.1%;
+    /* Borders and inputs */
+    --border: 226 229 235; /* slate-200 */
+    --input: 248 250 252; /* slate-50 */
+    --ring: 219 78% 48%; /* blue-600 */
 
-    --sidebar-primary: 240 5.9% 10%;
+    /* Sidebar specific */
+    --sidebar-background: 255 255 255; /* white */
+    --sidebar-foreground: 51 65 85; /* slate-700 */
+    --sidebar-primary: 219 78% 48%; /* blue-600 */
+    --sidebar-primary-foreground: 248 250 252; /* slate-50 */
+    --sidebar-accent: 241 245 249; /* slate-100 */
+    --sidebar-accent-foreground: 15 23 42; /* slate-800 */
+    --sidebar-border: 226 229 235; /* slate-200 */
+    --sidebar-ring: 219 78% 48%; /* blue-600 */
 
-    --sidebar-primary-foreground: 0 0% 98%;
+    /* Gradients for modern look */
+    --gradient-primary: linear-gradient(135deg, hsl(219 78% 48%) 0%, hsl(245 101% 50%) 100%);
+    --gradient-success: linear-gradient(135deg, hsl(142 76% 36%) 0%, hsl(34 197% 94%) 100%);
+    --gradient-warning: linear-gradient(135deg, hsl(38 92% 50%) 0%, hsl(45 93% 47%) 100%);
+    
+    /* Shadows for depth */
+    --shadow-soft: 0 1px 3px 0 rgb(0 0 0 / 0.1), 0 1px 2px -1px rgb(0 0 0 / 0.1);
+    --shadow-medium: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);
+    --shadow-large: 0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -4px rgb(0 0 0 / 0.1);
 
-    --sidebar-accent: 240 4.8% 95.9%;
-
-    --sidebar-accent-foreground: 240 5.9% 10%;
-
-    --sidebar-border: 220 13% 91%;
-
-    --sidebar-ring: 217.2 91.2% 59.8%;
+    --radius: 0.75rem;
   }
 
   .dark {
-    --background: 222.2 84% 4.9%;
-    --foreground: 210 40% 98%;
+    --background: 15 23 42; /* slate-800 */
+    --foreground: 248 250 252; /* slate-50 */
 
-    --card: 222.2 84% 4.9%;
-    --card-foreground: 210 40% 98%;
+    --card: 15 23 42; /* slate-800 */
+    --card-foreground: 248 250 252; /* slate-50 */
 
-    --popover: 222.2 84% 4.9%;
-    --popover-foreground: 210 40% 98%;
+    --popover: 15 23 42;
+    --popover-foreground: 248 250 252;
 
-    --primary: 210 40% 98%;
-    --primary-foreground: 222.2 47.4% 11.2%;
+    --primary: 219 78% 58%; /* blue-500 */
+    --primary-foreground: 15 23 42; /* slate-800 */
+    --primary-hover: 219 78% 52%; /* blue-600 */
 
-    --secondary: 217.2 32.6% 17.5%;
-    --secondary-foreground: 210 40% 98%;
+    --secondary: 30 41 59; /* slate-600 */
+    --secondary-foreground: 248 250 252; /* slate-50 */
 
-    --muted: 217.2 32.6% 17.5%;
-    --muted-foreground: 215 20.2% 65.1%;
+    --muted: 30 41 59; /* slate-600 */
+    --muted-foreground: 148 163 184; /* slate-400 */
 
-    --accent: 217.2 32.6% 17.5%;
-    --accent-foreground: 210 40% 98%;
+    --accent: 30 41 59; /* slate-600 */
+    --accent-foreground: 248 250 252; /* slate-50 */
 
-    --destructive: 0 62.8% 30.6%;
-    --destructive-foreground: 210 40% 98%;
+    --pool-available: 219 95% 60%; 
+    --pool-available-bg: 30 41 59;
+    
+    --lojista-blocks: 245 101% 60%;
+    --lojista-blocks-bg: 30 41 59;
+    
+    --client-assigned: 34 197% 54%;
+    --client-assigned-bg: 30 41 59;
 
-    --border: 217.2 32.6% 17.5%;
-    --input: 217.2 32.6% 17.5%;
-    --ring: 212.7 26.8% 83.9%;
-    --sidebar-background: 240 5.9% 10%;
-    --sidebar-foreground: 240 4.8% 95.9%;
-    --sidebar-primary: 224.3 76.3% 48%;
-    --sidebar-primary-foreground: 0 0% 100%;
-    --sidebar-accent: 240 3.7% 15.9%;
-    --sidebar-accent-foreground: 240 4.8% 95.9%;
-    --sidebar-border: 240 3.7% 15.9%;
-    --sidebar-ring: 217.2 91.2% 59.8%;
+    --warning: 38 92% 60%;
+    --warning-foreground: 15 23 42;
+    --warning-bg: 30 41 59;
+
+    --success: 142 76% 46%;
+    --success-foreground: 15 23 42;
+    --success-bg: 30 41 59;
+
+    --destructive: 0 84% 70%;
+    --destructive-foreground: 248 250 252;
+
+    --border: 51 65 85; /* slate-700 */
+    --input: 30 41 59; /* slate-600 */
+    --ring: 219 78% 58%; /* blue-500 */
+
+    --sidebar-background: 15 23 42; /* slate-800 */
+    --sidebar-foreground: 148 163 184; /* slate-400 */
+    --sidebar-primary: 219 78% 58%; /* blue-500 */
+    --sidebar-primary-foreground: 248 250 252; /* slate-50 */
+    --sidebar-accent: 30 41 59; /* slate-600 */
+    --sidebar-accent-foreground: 248 250 252; /* slate-50 */
+    --sidebar-border: 51 65 85; /* slate-700 */
+    --sidebar-ring: 219 78% 58%; /* blue-500 */
   }
 }
 
@@ -101,5 +150,28 @@ All colors MUST be HSL.
 
   body {
     @apply bg-background text-foreground;
+    font-feature-settings: "rlig" 1, "calt" 1;
+  }
+  
+  /* Smooth scrolling for better UX */
+  html {
+    scroll-behavior: smooth;
+  }
+  
+  /* Custom scrollbar */
+  ::-webkit-scrollbar {
+    width: 6px;
+  }
+  
+  ::-webkit-scrollbar-track {
+    @apply bg-muted;
+  }
+  
+  ::-webkit-scrollbar-thumb {
+    @apply bg-muted-foreground/30 rounded-full;
+  }
+  
+  ::-webkit-scrollbar-thumb:hover {
+    @apply bg-muted-foreground/50;
   }
 }

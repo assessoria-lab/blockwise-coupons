@@ -1,13 +1,33 @@
-// Update this page (the content is just a fallback if you fail to update the page)
+import { useState } from 'react';
+import AdminLayout from '@/components/admin/AdminLayout';
+import DashboardBlocos from '@/components/admin/DashboardBlocos';
+import GestaoPoolBlocos from '@/components/admin/GestaoPoolBlocos';
+import ConfiguracoesSistema from '@/components/admin/ConfiguracoesSistema';
 
 const Index = () => {
+  const [currentPage, setCurrentPage] = useState('dashboard');
+
+  const handleNavigation = (page: string) => {
+    setCurrentPage(page);
+  };
+
+  const renderCurrentPage = () => {
+    switch (currentPage) {
+      case 'dashboard':
+        return <DashboardBlocos />;
+      case 'blocos':
+        return <GestaoPoolBlocos />;
+      case 'configuracoes':
+        return <ConfiguracoesSistema />;
+      default:
+        return <DashboardBlocos />;
+    }
+  };
+
   return (
-    <div className="flex min-h-screen items-center justify-center bg-background">
-      <div className="text-center">
-        <h1 className="mb-4 text-4xl font-bold">Welcome to Your Blank App</h1>
-        <p className="text-xl text-muted-foreground">Start building your amazing project here!</p>
-      </div>
-    </div>
+    <AdminLayout currentPage={currentPage} onNavigate={handleNavigation}>
+      {renderCurrentPage()}
+    </AdminLayout>
   );
 };
 
