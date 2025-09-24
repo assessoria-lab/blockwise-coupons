@@ -1082,6 +1082,15 @@ export type Database = {
         }
         Returns: Json
       }
+      vender_blocos_para_lojista_v2: {
+        Args: {
+          p_forma_pagamento: string
+          p_lojista_id: string
+          p_quantidade_blocos: number
+          p_valor_total: number
+        }
+        Returns: Json
+      }
     }
     Enums: {
       app_role: "super_admin" | "admin" | "gerente" | "operador" | "auditor"
