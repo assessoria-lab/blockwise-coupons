@@ -101,7 +101,7 @@ const AdminLayout = ({
           </div>
 
           {/* Navigation */}
-          <nav className="flex-1 px-2 py-4 space-y-1">
+          <nav className="flex-1 px-2 pt-8 pb-4 space-y-1">
             {navigation.map(item => {
             const Icon = item.icon;
             return <div key={item.name} className="relative">
