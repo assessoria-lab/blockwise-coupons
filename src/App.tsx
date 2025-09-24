@@ -13,6 +13,8 @@ import RastreamentoPorBloco from "./components/admin/RastreamentoPorBloco";
 import RelatorioPerformanceBlocos from "./components/admin/RelatorioPerformanceBlocos";
 import DashboardMonitoramento from "./components/admin/DashboardMonitoramento";
 import BusinessIntelligence from "./components/admin/BusinessIntelligence";
+import AuditoriaCompliance from "./components/admin/AuditoriaCompliance";
+import ConfiguracoesSistema from "./components/admin/ConfiguracoesSistema";
 
 const queryClient = new QueryClient();
 
@@ -32,6 +34,8 @@ const App = () => (
           <Route path="/admin/performance" element={<RelatorioPerformanceBlocos />} />
           <Route path="/admin/monitoramento" element={<DashboardMonitoramento />} />
           <Route path="/admin/business-intelligence" element={<BusinessIntelligence />} />
+          <Route path="/admin/auditoria" element={<AuditoriaCompliance />} />
+          <Route path="/admin/configuracoes" element={<ConfiguracoesSistema />} />
           {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
           <Route path="*" element={<NotFound />} />
         </Routes>

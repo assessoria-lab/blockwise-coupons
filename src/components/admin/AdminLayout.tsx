@@ -13,7 +13,8 @@ import {
   Search,
   TrendingUp,
   Activity,
-  Brain
+  Brain,
+  Shield
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -98,6 +99,13 @@ const AdminLayout = ({ children, currentPage, onNavigate }: AdminLayoutProps) =>
       icon: BarChart3, 
       current: currentPage === 'relatorios',
       badge: null
+    },
+    { 
+      name: 'Auditoria & Compliance', 
+      href: '/admin/auditoria', 
+      icon: Shield, 
+      current: currentPage === 'auditoria',
+      badge: 'Segurança'
     },
     { 
       name: 'Configurações', 

@@ -1005,6 +1005,26 @@ export type Database = {
           similaridade: number
         }[]
       }
+      consultar_logs_auditoria: {
+        Args: {
+          p_data_fim?: string
+          p_data_inicio?: string
+          p_limite?: number
+          p_tabela?: string
+          p_usuario_id?: string
+        }
+        Returns: {
+          created_at: string
+          dados_contexto: Json
+          descricao: string
+          evento: string
+          id: string
+          ip_address: unknown
+          nivel: string
+          user_agent: string
+          usuario_id: string
+        }[]
+      }
       consultar_saldo_lojista: {
         Args: { p_whatsapp_lojista: string }
         Returns: Json
