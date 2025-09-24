@@ -27,7 +27,7 @@ const AdminLayout = ({
     current: currentPage === 'monitoramento',
     badge: 'Ao Vivo'
   }, {
-    name: 'Gestão de Lojistas',
+    name: 'Gestão de Lojas',
     href: '#lojistas',
     icon: Store,
     current: currentPage === 'lojistas',
