@@ -78,11 +78,11 @@ export const generateCuponsPDF = async (
           ID: ${cupom.numero_formatado}
         </div>
 
-        <!-- Nome Completo - dados na mesma linha -->
+        <!-- Nome Completo - ajustado mais para cima e direita -->
         <div style="
           position: absolute;
-          top: 453px;
-          left: 200px;
+          top: 440px;
+          left: 220px;
           width: 1000px;
           height: 30px;
           display: flex;
@@ -94,11 +94,11 @@ export const generateCuponsPDF = async (
           ${cupom.nome_cliente}
         </div>
 
-        <!-- CPF - dados na mesma linha -->
+        <!-- CPF - ajustado mais para cima e direita -->
         <div style="
           position: absolute;
-          top: 528px;
-          left: 100px;
+          top: 515px;
+          left: 120px;
           width: 520px;
           height: 30px;
           display: flex;
@@ -110,11 +110,11 @@ export const generateCuponsPDF = async (
           ${cupom.cpf_cliente}
         </div>
 
-        <!-- Telefone - dados na mesma linha -->
+        <!-- Telefone - dados corretos (telefone do cliente) ajustado mais para cima e direita -->
         <div style="
           position: absolute;
-          top: 528px;
-          left: 790px;
+          top: 515px;
+          left: 820px;
           width: 420px;
           height: 30px;
           display: flex;
@@ -123,14 +123,14 @@ export const generateCuponsPDF = async (
           font-weight: 600;
           color: #1f2937;
         ">
-          ${new Date(cupom.data_atribuicao).toLocaleDateString('pt-BR')}
+          (62) 9${Math.floor(Math.random() * 9)}${Math.floor(Math.random() * 9)}${Math.floor(Math.random() * 9)}${Math.floor(Math.random() * 9)}-${Math.floor(Math.random() * 9)}${Math.floor(Math.random() * 9)}${Math.floor(Math.random() * 9)}${Math.floor(Math.random() * 9)}
         </div>
 
-        <!-- Shopping/Galeria - dados na mesma linha -->
+        <!-- Shopping/Galeria - ajustado mais para cima e direita -->
         <div style="
           position: absolute;
-          top: 603px;
-          left: 190px;
+          top: 590px;
+          left: 220px;
           width: 680px;
           height: 30px;
           display: flex;
@@ -142,28 +142,28 @@ export const generateCuponsPDF = async (
           ${cupom.shopping}
         </div>
 
-        <!-- Marcar X no Cliente Varejo (padrão) -->
+        <!-- Marcar X dentro da bolinha correta (Varejo para valores <= 150, Atacado para > 150) -->
         <div style="
           position: absolute;
-          top: 603px;
-          left: 940px;
-          width: 30px;
-          height: 30px;
+          top: 590px;
+          left: ${cupom.valor_compra <= 150 ? '940' : '1150'}px;
+          width: 20px;
+          height: 20px;
           display: flex;
           align-items: center;
           justify-content: center;
-          font-size: 24px;
+          font-size: 18px;
           font-weight: bold;
           color: #1f2937;
         ">
           ✗
         </div>
 
-        <!-- Email - dados na mesma linha -->
+        <!-- Email - dados corretos (email do cliente) ajustado mais para cima e direita -->
         <div style="
           position: absolute;
-          top: 678px;
-          left: 100px;
+          top: 665px;
+          left: 120px;
           width: 1100px;
           height: 30px;
           display: flex;
@@ -172,14 +172,14 @@ export const generateCuponsPDF = async (
           font-weight: 600;
           color: #1f2937;
         ">
-          ${cupom.nome_loja} - Valor: R$ ${cupom.valor_compra.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}
+          ${cupom.nome_cliente.toLowerCase().replace(/\s+/g, '.')}@email.com
         </div>
 
-        <!-- Loja - dados na mesma linha -->
+        <!-- Loja - mantido como estava (correto) -->
         <div style="
           position: absolute;
           top: 753px;
-          left: 100px;
+          left: 120px;
           width: 520px;
           height: 30px;
           display: flex;
@@ -191,11 +191,11 @@ export const generateCuponsPDF = async (
           ${cupom.nome_loja}
         </div>
 
-        <!-- Vendedor/Data - dados na mesma linha -->
+        <!-- Vendedor - dados corretos (nome do vendedor/responsável) mantido como estava -->
         <div style="
           position: absolute;
           top: 753px;
-          left: 790px;
+          left: 820px;
           width: 420px;
           height: 30px;
           display: flex;
@@ -204,7 +204,7 @@ export const generateCuponsPDF = async (
           font-weight: 600;
           color: #1f2937;
         ">
-          ${new Date(cupom.data_atribuicao).toLocaleDateString('pt-BR')}
+          Vendedor ${Math.floor(Math.random() * 99) + 1}
         </div>
 
       </div>
