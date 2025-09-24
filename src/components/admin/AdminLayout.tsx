@@ -160,7 +160,6 @@ const AdminLayout = ({
                 <div className="text-xs font-medium">
                   {metricas ? `${metricas.cupons_atribuidos_total.toLocaleString()}/${metricas.cupons_disponiveis.toLocaleString()}` : '--/--'}
                 </div>
-                <span className="text-xs ml-1">Atribuídos/Disponíveis</span>
               </Badge>
             </div>
           </div>
