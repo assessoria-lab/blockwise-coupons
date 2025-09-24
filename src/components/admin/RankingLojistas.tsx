@@ -10,6 +10,7 @@ interface RankingLojista {
   lojista_id: string;
   nome_loja: string;
   cidade: string;
+  segmento: string | null;
   total_blocos_comprados: number;
   total_cupons_atribuidos: number;
   cupons_disponiveis: number;
@@ -24,7 +25,7 @@ const fetchRankingLojistas = async (): Promise<RankingLojista[]> => {
   // Buscar lojistas ativos
   const { data: lojistas, error: errorLojistas } = await supabase
     .from('lojistas')
-    .select('id, nome_loja, cidade, data_ultima_compra')
+    .select('id, nome_loja, cidade, segmento, data_ultima_compra')
     .eq('status', 'ativo')
     .order('nome_loja');
 
@@ -80,6 +81,7 @@ const fetchRankingLojistas = async (): Promise<RankingLojista[]> => {
       lojista_id: lojista.id,
       nome_loja: lojista.nome_loja,
       cidade: lojista.cidade,
+      segmento: lojista.segmento,
       total_blocos_comprados: totalBlocosComprados,
       total_cupons_atribuidos: totalCuponsAtribuidos,
       cupons_disponiveis: cuponsDisponiveis,
@@ -226,6 +228,11 @@ export function RankingLojistas() {
                     <Badge variant="outline" className="text-xs">
                       {lojista.cidade}
                     </Badge>
+                    {lojista.segmento && (
+                      <Badge variant="secondary" className="text-xs">
+                        {lojista.segmento}
+                      </Badge>
+                    )}
                     <Badge 
                       variant="outline" 
                       className={getUtilizacaoColor(lojista.percentual_utilizacao)}

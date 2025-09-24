@@ -14,28 +14,32 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Badge } from '@/components/ui/badge';
-import { Search, Plus, Eye, DollarSign } from 'lucide-react';
+import { Search, Plus, Eye, DollarSign, Edit } from 'lucide-react';
 import { VendaBlocosModal } from './VendaBlocosModal';
+import { LojistaModal } from './LojistaModal';
 
 interface Lojista {
   id: string;
   nome_loja: string;
   cnpj: string;
   shopping?: string;
+  segmento?: string;
   status: string;
   cupons_nao_atribuidos: number;
   blocos_comprados?: number;
   telefone?: string;
   email?: string;
   responsavel_nome?: string;
+  cidade: string;
+  endereco?: string;
 }
 
 const fetchLojistas = async (filters: { search?: string; status?: string }) => {
   let query = supabase
     .from('lojistas')
     .select(`
-      id, nome_loja, cnpj, shopping, status, cupons_nao_atribuidos,
-      telefone, email, responsavel_nome
+      id, nome_loja, cnpj, shopping, segmento, status, cupons_nao_atribuidos,
+      telefone, email, responsavel_nome, cidade, endereco
     `);
 
   if (filters.search) {
@@ -74,6 +78,8 @@ export const LojistasTable = () => {
   const [statusFilter, setStatusFilter] = useState('todos');
   const [selectedLojista, setSelectedLojista] = useState<Lojista | null>(null);
   const [showVendaModal, setShowVendaModal] = useState(false);
+  const [showLojistaModal, setShowLojistaModal] = useState(false);
+  const [editingLojista, setEditingLojista] = useState<Lojista | null>(null);
 
   const filters = useMemo(() => ({
     search: globalFilter,
@@ -105,6 +111,15 @@ export const LojistasTable = () => {
       header: 'Shopping',
       cell: ({ row }: any) => (
         <div>{row.getValue('shopping') || 'Não informado'}</div>
+      ),
+    },
+    {
+      accessorKey: 'segmento',
+      header: 'Segmento',
+      cell: ({ row }: any) => (
+        <Badge variant="outline" className="text-xs">
+          {row.getValue('segmento') || 'Não informado'}
+        </Badge>
       ),
     },
     {
@@ -155,13 +170,13 @@ export const LojistasTable = () => {
               variant="outline"
               size="sm"
               onClick={() => {
-                // TODO: Implementar visualização de perfil detalhado
-                console.log('Ver perfil:', lojista.id);
+                setEditingLojista(lojista);
+                setShowLojistaModal(true);
               }}
-              title="Ver Detalhes"
+              title="Editar Lojista"
             >
-              <Eye className="h-4 w-4 mr-1" />
-              Ver
+              <Edit className="h-4 w-4 mr-1" />
+              Editar
             </Button>
             <Button
               variant="outline"
@@ -231,8 +246,8 @@ export const LojistasTable = () => {
           </select>
         </div>
         <Button onClick={() => {
-          // TODO: Implementar modal de cadastro de novo lojista
-          console.log('Adicionar novo lojista');
+          setEditingLojista(null);
+          setShowLojistaModal(true);
         }}>
           <Plus className="h-4 w-4 mr-2" />
           Novo Lojista
@@ -294,6 +309,18 @@ export const LojistasTable = () => {
           }}
         />
       )}
+
+      <LojistaModal
+        lojista={editingLojista}
+        isOpen={showLojistaModal}
+        onClose={() => {
+          setShowLojistaModal(false);
+          setEditingLojista(null);
+        }}
+        onSuccess={() => {
+          refetch();
+        }}
+      />
     </div>
   );
 };

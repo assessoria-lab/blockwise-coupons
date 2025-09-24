@@ -24,7 +24,7 @@ const fetchRankingShopping = async (): Promise<RankingShopping[]> => {
   // Buscar lojistas ativos
   const { data: lojistas, error: errorLojistas } = await supabase
     .from('lojistas')
-    .select('id, nome_loja, cidade, shopping, data_ultima_compra')
+    .select('id, nome_loja, cidade, shopping, segmento, data_ultima_compra')
     .eq('status', 'ativo')
     .not('shopping', 'is', null)
     .order('shopping');

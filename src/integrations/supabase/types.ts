@@ -593,6 +593,7 @@ export type Database = {
           observacoes: string | null
           responsavel_nome: string | null
           responsavel_telefone: string | null
+          segmento: string | null
           shopping: string | null
           status: string
           telefone: string | null
@@ -617,6 +618,7 @@ export type Database = {
           observacoes?: string | null
           responsavel_nome?: string | null
           responsavel_telefone?: string | null
+          segmento?: string | null
           shopping?: string | null
           status?: string
           telefone?: string | null
@@ -641,6 +643,7 @@ export type Database = {
           observacoes?: string | null
           responsavel_nome?: string | null
           responsavel_telefone?: string | null
+          segmento?: string | null
           shopping?: string | null
           status?: string
           telefone?: string | null
@@ -799,6 +802,33 @@ export type Database = {
           embedding?: string | null
           id?: number
           metadata?: Json | null
+        }
+        Relationships: []
+      }
+      segmentos: {
+        Row: {
+          ativo: boolean | null
+          categoria: string | null
+          created_at: string | null
+          id: string
+          nome: string
+          updated_at: string | null
+        }
+        Insert: {
+          ativo?: boolean | null
+          categoria?: string | null
+          created_at?: string | null
+          id?: string
+          nome: string
+          updated_at?: string | null
+        }
+        Update: {
+          ativo?: boolean | null
+          categoria?: string | null
+          created_at?: string | null
+          id?: string
+          nome?: string
+          updated_at?: string | null
         }
         Relationships: []
       }
