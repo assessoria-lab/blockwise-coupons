@@ -5,7 +5,7 @@ import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import { Users, Search, Filter, Eye, Phone, Mail } from 'lucide-react';
+import { Users, Search, Filter, Eye, Phone, Mail, Store, Receipt } from 'lucide-react';
 import { format } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
 
@@ -59,31 +59,61 @@ const GestaoClientes = () => {
   const { data: estatisticas } = useQuery({
     queryKey: ['estatisticas-clientes'],
     queryFn: async () => {
-      const { data, error } = await supabase
+      // Buscar estatísticas dos clientes
+      const { data: clientesData, error: clientesError } = await supabase
         .from('clientes')
         .select('total_cupons_recebidos, total_valor_compras, status');
 
-      if (error) throw error;
+      if (clientesError) throw clientesError;
 
-      const stats = data?.reduce((acc, cliente) => {
+      // Buscar total de cupons atribuídos e lojas únicas
+      const { data: cuponsData, error: cuponsError } = await supabase
+        .from('cupons')
+        .select(`
+          id,
+          lojista_id,
+          lojistas(nome_loja)
+        `)
+        .eq('status', 'atribuido')
+        .not('cliente_id', 'is', null);
+
+      if (cuponsError) throw cuponsError;
+
+      // Calcular métricas
+      const clientesStats = clientesData?.reduce((acc, cliente) => {
         acc.total_clientes++;
-        acc.total_cupons += cliente.total_cupons_recebidos || 0;
+        acc.total_cupons_clientes += cliente.total_cupons_recebidos || 0;
         acc.total_valor += Number(cliente.total_valor_compras) || 0;
         acc.ativos += cliente.status === 'ativo' ? 1 : 0;
         return acc;
       }, { 
         total_clientes: 0, 
-        total_cupons: 0, 
+        total_cupons_clientes: 0, 
         total_valor: 0, 
         ativos: 0 
       }) || { 
         total_clientes: 0, 
-        total_cupons: 0, 
+        total_cupons_clientes: 0, 
         total_valor: 0, 
         ativos: 0 
       };
 
-      return stats;
+      // Calcular cupons totais atribuídos
+      const total_cupons_atribuidos = cuponsData?.length || 0;
+
+      // Calcular lojas únicas que têm cupons atribuídos a clientes
+      const lojasUnicas = new Set();
+      cuponsData?.forEach(cupom => {
+        if (cupom.lojista_id) {
+          lojasUnicas.add(cupom.lojista_id);
+        }
+      });
+
+      return {
+        ...clientesStats,
+        total_cupons_atribuidos,
+        total_lojas: lojasUnicas.size
+      };
     }
   });
 
@@ -98,50 +128,88 @@ const GestaoClientes = () => {
   return (
     <div className="p-6 space-y-6">
       {/* Estatísticas */}
-      <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
         <Card>
           <CardContent className="p-6">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-sm font-medium text-muted-foreground">Total de Clientes</p>
+                <p className="text-sm font-medium text-muted-foreground">Clientes</p>
                 <p className="text-2xl font-bold">{estatisticas?.total_clientes || 0}</p>
+                <p className="text-xs text-muted-foreground mt-1">
+                  {estatisticas?.ativos || 0} ativos
+                </p>
               </div>
-              <Users className="h-4 w-4 text-muted-foreground" />
+              <Users className="h-8 w-8 text-blue-500" />
             </div>
           </CardContent>
         </Card>
-        <Card>
-          <CardContent className="p-6">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-sm font-medium text-muted-foreground">Clientes Ativos</p>
-                <p className="text-2xl font-bold text-green-600">{estatisticas?.ativos || 0}</p>
-              </div>
-              <Badge variant="secondary" className="text-green-600">Ativo</Badge>
-            </div>
-          </CardContent>
-        </Card>
+        
         <Card>
           <CardContent className="p-6">
             <div className="flex items-center justify-between">
               <div>
                 <p className="text-sm font-medium text-muted-foreground">Total de Cupons</p>
-                <p className="text-2xl font-bold text-blue-600">{estatisticas?.total_cupons || 0}</p>
+                <p className="text-2xl font-bold text-green-600">{estatisticas?.total_cupons_atribuidos || 0}</p>
+                <p className="text-xs text-muted-foreground mt-1">
+                  Cupons atribuídos
+                </p>
               </div>
-              <Badge variant="outline">{estatisticas?.total_cupons || 0} cupons</Badge>
+              <Receipt className="h-8 w-8 text-green-500" />
             </div>
           </CardContent>
         </Card>
+        
         <Card>
           <CardContent className="p-6">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-sm font-medium text-muted-foreground">Volume Total</p>
-                <p className="text-2xl font-bold text-purple-600">
-                  R$ {(estatisticas?.total_valor || 0).toLocaleString('pt-BR', { minimumFractionDigits: 2 })}
+                <p className="text-sm font-medium text-muted-foreground">Total de Lojas</p>
+                <p className="text-2xl font-bold text-purple-600">{estatisticas?.total_lojas || 0}</p>
+                <p className="text-xs text-muted-foreground mt-1">
+                  Lojas participantes
                 </p>
               </div>
-              <Badge variant="secondary" className="text-purple-600">Vendas</Badge>
+              <Store className="h-8 w-8 text-purple-500" />
+            </div>
+          </CardContent>
+        </Card>
+      </div>
+
+      {/* Métricas Secundárias */}
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <Card>
+          <CardContent className="p-6">
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-sm font-medium text-muted-foreground">Volume Total de Compras</p>
+                <p className="text-2xl font-bold text-orange-600">
+                  R$ {(estatisticas?.total_valor || 0).toLocaleString('pt-BR', { minimumFractionDigits: 2 })}
+                </p>
+                <p className="text-xs text-muted-foreground mt-1">
+                  Total em vendas geradas
+                </p>
+              </div>
+              <Badge variant="secondary" className="text-orange-600">Vendas</Badge>
+            </div>
+          </CardContent>
+        </Card>
+        
+        <Card>
+          <CardContent className="p-6">
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-sm font-medium text-muted-foreground">Média por Cliente</p>
+                <p className="text-2xl font-bold text-indigo-600">
+                  {estatisticas?.total_clientes ? 
+                    (estatisticas.total_cupons_atribuidos / estatisticas.total_clientes).toFixed(1) : 
+                    '0.0'
+                  }
+                </p>
+                <p className="text-xs text-muted-foreground mt-1">
+                  Cupons por cliente
+                </p>
+              </div>
+              <Badge variant="outline" className="text-indigo-600">Média</Badge>
             </div>
           </CardContent>
         </Card>
