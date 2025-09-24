@@ -79,7 +79,6 @@ const AdminLayout = ({ children, currentPage, onNavigate }: AdminLayoutProps) =>
 
   return (
     <div className="min-h-screen bg-background relative">
-      <HeroBackground />
       {/* Mobile sidebar backdrop */}
       {sidebarOpen && (
         <div 
@@ -229,7 +228,7 @@ const AdminLayout = ({ children, currentPage, onNavigate }: AdminLayoutProps) =>
         </div>
 
         {/* Page content */}
-        <main className="p-4 lg:p-6 bg-gray-50 min-h-screen">
+        <main className="bg-gray-50 min-h-screen">
           {children}
         </main>
       </div>

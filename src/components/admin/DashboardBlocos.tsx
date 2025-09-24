@@ -110,7 +110,7 @@ const DashboardBlocos = () => {
   }
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-6 p-4 lg:p-6">
       {/* Main Header */}
       <div className="bg-white rounded-lg p-6 shadow-sm border border-border">
         <h1 className="text-2xl font-bold text-foreground mb-2">Dashboard do Sistema</h1>
