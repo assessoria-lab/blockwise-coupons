@@ -108,7 +108,7 @@ const MetricCard = ({ title, value, subtitle, badge, icon, variant }: MetricCard
         {badge && (
           <Badge 
             variant="secondary" 
-            className="text-xs bg-muted text-muted-foreground border border-border"
+            className="text-xs bg-muted text-muted-foreground border border-border hover:text-white"
           >
             {badge}
           </Badge>
