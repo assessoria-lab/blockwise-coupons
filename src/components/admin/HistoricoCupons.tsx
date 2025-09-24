@@ -155,7 +155,7 @@ export const HistoricoCupons = () => {
     if (!busca) return historico;
     
     return historico.filter(item =>
-      item.numero_cupom.toLowerCase().includes(busca.toLowerCase()) ||
+      item.numero_cupom.toString().toLowerCase().includes(busca.toLowerCase()) ||
       item.cliente.nome.toLowerCase().includes(busca.toLowerCase()) ||
       item.cliente.cpf.includes(busca) ||
       item.lojista.nome_loja.toLowerCase().includes(busca.toLowerCase())
