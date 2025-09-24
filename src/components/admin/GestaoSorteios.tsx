@@ -12,13 +12,17 @@ import {
   Award,
   Plus,
   FileText,
-  Target
+  Target,
+  UserPlus
 } from 'lucide-react';
 import { format } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
 import { useToast } from '@/hooks/use-toast';
 import { supabase } from '@/integrations/supabase/client';
 import { generateCuponsPDF } from '@/utils/pdfGenerator';
+import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from '@/components/ui/alert-dialog';
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
+import { Label } from '@/components/ui/label';
 
 interface Ganhador {
   id: string;
@@ -47,6 +51,15 @@ const GestaoSorteios = () => {
     premio: '',
     valor_premio: 0,
     tipo_sorteio: 'semanal' as 'mensal' | 'semanal' | 'especial'
+  });
+
+  const [showManualDialog, setShowManualDialog] = useState(false);
+  const [showManualForm, setShowManualForm] = useState(false);
+  const [dadosManual, setDadosManual] = useState({
+    nome_cliente: '',
+    cpf_cliente: '',
+    nome_loja: '',
+    cidade_loja: ''
   });
 
   // Buscar dados dos ganhadores
@@ -188,11 +201,8 @@ const GestaoSorteios = () => {
         .single();
 
       if (cupomError || !cupomData) {
-        toast({
-          title: "Cupom não encontrado",
-          description: "O número do cupom informado não foi encontrado.",
-          variant: "destructive",
-        });
+        setLoading(false);
+        setShowManualDialog(true);
         return;
       }
 
@@ -216,14 +226,7 @@ const GestaoSorteios = () => {
         description: `Prêmio "${novoGanhador.premio}" registrado com sucesso.`,
       });
 
-      setNovoGanhador({
-        numero_cupom: '',
-        premio: '',
-        valor_premio: 0,
-        tipo_sorteio: 'semanal'
-      });
-
-      // Recarregar a lista
+      resetForm();
       fetchGanhadores();
 
     } catch (error) {
@@ -236,6 +239,75 @@ const GestaoSorteios = () => {
     } finally {
       setLoading(false);
     }
+  };
+
+  const handleRegistrarManual = async () => {
+    if (!dadosManual.nome_cliente || !dadosManual.cpf_cliente || !dadosManual.nome_loja) {
+      toast({
+        title: "Campos obrigatórios",
+        description: "Preencha pelo menos nome do cliente, CPF e nome da loja.",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    setLoading(true);
+    try {
+      // Inserir o ganhador sem referências de cupom/cliente/lojista existentes
+      const { error: insertError } = await supabase
+        .from('ganhadores_sorteios')
+        .insert({
+          numero_cupom: novoGanhador.numero_cupom,
+          cupom_id: null,
+          cliente_id: null,
+          lojista_id: null,
+          premio: novoGanhador.premio,
+          valor_premio: novoGanhador.valor_premio,
+          tipo_sorteio: novoGanhador.tipo_sorteio,
+          observacoes: `Cadastro manual - Cliente: ${dadosManual.nome_cliente}, CPF: ${dadosManual.cpf_cliente}, Loja: ${dadosManual.nome_loja}${dadosManual.cidade_loja ? `, Cidade: ${dadosManual.cidade_loja}` : ''}`
+        });
+
+      if (insertError) throw insertError;
+
+      toast({
+        title: "Ganhador registrado manualmente",
+        description: `Prêmio "${novoGanhador.premio}" registrado com dados manuais.`,
+      });
+
+      resetForm();
+      setShowManualForm(false);
+      fetchGanhadores();
+
+    } catch (error) {
+      console.error('Erro ao registrar ganhador manual:', error);
+      toast({
+        title: "Erro ao registrar",
+        description: "Não foi possível registrar o ganhador manualmente.",
+        variant: "destructive",
+      });
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const resetForm = () => {
+    setNovoGanhador({
+      numero_cupom: '',
+      premio: '',
+      valor_premio: 0,
+      tipo_sorteio: 'semanal'
+    });
+    setDadosManual({
+      nome_cliente: '',
+      cpf_cliente: '',
+      nome_loja: '',
+      cidade_loja: ''
+    });
+  };
+
+  const handleConfirmarManual = () => {
+    setShowManualDialog(false);
+    setShowManualForm(true);
   };
 
   const getTipoSorteioBadge = (tipo: string) => {
@@ -483,6 +555,104 @@ const GestaoSorteios = () => {
           </div>
         </CardContent>
       </Card>
+
+      {/* AlertDialog para confirmar cadastro manual */}
+      <AlertDialog open={showManualDialog} onOpenChange={setShowManualDialog}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Cupom não encontrado</AlertDialogTitle>
+            <AlertDialogDescription>
+              O cupom "{novoGanhador.numero_cupom}" não foi encontrado no sistema. 
+              Deseja cadastrar os dados do ganhador manualmente?
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel onClick={() => setLoading(false)}>
+              Cancelar
+            </AlertDialogCancel>
+            <AlertDialogAction onClick={handleConfirmarManual}>
+              Cadastrar Manualmente
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
+
+      {/* Dialog para cadastro manual */}
+      <Dialog open={showManualForm} onOpenChange={setShowManualForm}>
+        <DialogContent className="sm:max-w-md">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <UserPlus className="h-5 w-5" />
+              Cadastro Manual do Ganhador
+            </DialogTitle>
+          </DialogHeader>
+          <div className="space-y-4">
+            <div className="grid grid-cols-2 gap-4">
+              <div>
+                <Label htmlFor="nome_cliente">Nome do Cliente *</Label>
+                <Input
+                  id="nome_cliente"
+                  value={dadosManual.nome_cliente}
+                  onChange={(e) => setDadosManual(prev => ({ ...prev, nome_cliente: e.target.value }))}
+                  placeholder="Nome completo"
+                />
+              </div>
+              <div>
+                <Label htmlFor="cpf_cliente">CPF *</Label>
+                <Input
+                  id="cpf_cliente"
+                  value={dadosManual.cpf_cliente}
+                  onChange={(e) => setDadosManual(prev => ({ ...prev, cpf_cliente: e.target.value }))}
+                  placeholder="000.000.000-00"
+                />
+              </div>
+            </div>
+            <div className="grid grid-cols-2 gap-4">
+              <div>
+                <Label htmlFor="nome_loja">Nome da Loja *</Label>
+                <Input
+                  id="nome_loja"
+                  value={dadosManual.nome_loja}
+                  onChange={(e) => setDadosManual(prev => ({ ...prev, nome_loja: e.target.value }))}
+                  placeholder="Nome da loja"
+                />
+              </div>
+              <div>
+                <Label htmlFor="cidade_loja">Cidade</Label>
+                <Input
+                  id="cidade_loja"
+                  value={dadosManual.cidade_loja}
+                  onChange={(e) => setDadosManual(prev => ({ ...prev, cidade_loja: e.target.value }))}
+                  placeholder="Cidade da loja"
+                />
+              </div>
+            </div>
+            <div className="p-3 bg-muted rounded-md">
+              <p className="text-sm text-muted-foreground">
+                <strong>Cupom:</strong> {novoGanhador.numero_cupom}<br/>
+                <strong>Prêmio:</strong> {novoGanhador.premio}<br/>
+                <strong>Valor:</strong> R$ {novoGanhador.valor_premio.toLocaleString('pt-BR')}
+              </p>
+            </div>
+            <div className="flex gap-2">
+              <Button 
+                variant="outline" 
+                onClick={() => setShowManualForm(false)}
+                className="flex-1"
+              >
+                Cancelar
+              </Button>
+              <Button 
+                onClick={handleRegistrarManual}
+                disabled={loading}
+                className="flex-1"
+              >
+                {loading ? 'Registrando...' : 'Registrar'}
+              </Button>
+            </div>
+          </div>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 };
