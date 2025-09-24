@@ -3,6 +3,7 @@ import AdminLayout from '@/components/admin/AdminLayout';
 import DashboardBlocos from '@/components/admin/DashboardBlocos';
 import GestaoPoolBlocos from '@/components/admin/GestaoPoolBlocos';
 import ConfiguracoesSistema from '@/components/admin/ConfiguracoesSistema';
+import GestaoLojistas from './GestaoLojistas';
 
 const Index = () => {
   const [currentPage, setCurrentPage] = useState('dashboard');
@@ -15,6 +16,8 @@ const Index = () => {
     switch (currentPage) {
       case 'dashboard':
         return <DashboardBlocos />;
+      case 'lojistas':
+        return <GestaoLojistas />;
       case 'blocos':
         return <GestaoPoolBlocos />;
       case 'configuracoes':

@@ -53,6 +53,53 @@ export type Database = {
         }
         Relationships: []
       }
+      blocos: {
+        Row: {
+          created_at: string
+          cupons_atribuidos: number
+          cupons_disponiveis: number
+          cupons_totais: number
+          data_venda: string | null
+          id: string
+          lojista_id: string | null
+          numero_bloco: number
+          status: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          cupons_atribuidos?: number
+          cupons_disponiveis?: number
+          cupons_totais?: number
+          data_venda?: string | null
+          id?: string
+          lojista_id?: string | null
+          numero_bloco: number
+          status?: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          cupons_atribuidos?: number
+          cupons_disponiveis?: number
+          cupons_totais?: number
+          data_venda?: string | null
+          id?: string
+          lojista_id?: string | null
+          numero_bloco?: number
+          status?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "blocos_lojista_id_fkey"
+            columns: ["lojista_id"]
+            isOneToOne: false
+            referencedRelation: "lojistas"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       caroline_veras_follow_up: {
         Row: {
           created_at: string
@@ -82,6 +129,94 @@ export type Database = {
           ultimaMensagem?: string | null
         }
         Relationships: []
+      }
+      clientes: {
+        Row: {
+          cpf: string
+          created_at: string
+          email: string | null
+          id: string
+          nome: string
+          telefone: string | null
+          updated_at: string
+        }
+        Insert: {
+          cpf: string
+          created_at?: string
+          email?: string | null
+          id?: string
+          nome: string
+          telefone?: string | null
+          updated_at?: string
+        }
+        Update: {
+          cpf?: string
+          created_at?: string
+          email?: string | null
+          id?: string
+          nome?: string
+          telefone?: string | null
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      cupons: {
+        Row: {
+          bloco_id: string
+          cliente_id: string | null
+          created_at: string
+          data_atribuicao: string | null
+          id: string
+          lojista_id: string
+          numero_cupom: string
+          status: string
+          valor_compra: number | null
+        }
+        Insert: {
+          bloco_id: string
+          cliente_id?: string | null
+          created_at?: string
+          data_atribuicao?: string | null
+          id?: string
+          lojista_id: string
+          numero_cupom: string
+          status?: string
+          valor_compra?: number | null
+        }
+        Update: {
+          bloco_id?: string
+          cliente_id?: string | null
+          created_at?: string
+          data_atribuicao?: string | null
+          id?: string
+          lojista_id?: string
+          numero_cupom?: string
+          status?: string
+          valor_compra?: number | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "cupons_bloco_id_fkey"
+            columns: ["bloco_id"]
+            isOneToOne: false
+            referencedRelation: "blocos"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "cupons_cliente_id_fkey"
+            columns: ["cliente_id"]
+            isOneToOne: false
+            referencedRelation: "clientes"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "cupons_lojista_id_fkey"
+            columns: ["lojista_id"]
+            isOneToOne: false
+            referencedRelation: "lojistas"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       delbo_sophia: {
         Row: {
@@ -242,6 +377,54 @@ export type Database = {
         }
         Relationships: []
       }
+      lojistas: {
+        Row: {
+          cidade: string
+          cnpj: string
+          created_at: string
+          cupons_nao_atribuidos: number
+          email: string | null
+          endereco: string | null
+          id: string
+          nome_loja: string
+          responsavel_nome: string | null
+          responsavel_telefone: string | null
+          status: string
+          telefone: string | null
+          updated_at: string
+        }
+        Insert: {
+          cidade: string
+          cnpj: string
+          created_at?: string
+          cupons_nao_atribuidos?: number
+          email?: string | null
+          endereco?: string | null
+          id?: string
+          nome_loja: string
+          responsavel_nome?: string | null
+          responsavel_telefone?: string | null
+          status?: string
+          telefone?: string | null
+          updated_at?: string
+        }
+        Update: {
+          cidade?: string
+          cnpj?: string
+          created_at?: string
+          cupons_nao_atribuidos?: number
+          email?: string | null
+          endereco?: string | null
+          id?: string
+          nome_loja?: string
+          responsavel_nome?: string | null
+          responsavel_telefone?: string | null
+          status?: string
+          telefone?: string | null
+          updated_at?: string
+        }
+        Relationships: []
+      }
       pereira_gouveia_roberta: {
         Row: {
           content: string | null
@@ -329,11 +512,62 @@ export type Database = {
         }
         Relationships: []
       }
+      vendas_blocos: {
+        Row: {
+          created_at: string
+          data_venda: string
+          forma_pagamento: string
+          id: string
+          lojista_id: string
+          quantidade_blocos: number
+          valor_por_bloco: number
+          valor_total: number
+        }
+        Insert: {
+          created_at?: string
+          data_venda?: string
+          forma_pagamento: string
+          id?: string
+          lojista_id: string
+          quantidade_blocos: number
+          valor_por_bloco: number
+          valor_total: number
+        }
+        Update: {
+          created_at?: string
+          data_venda?: string
+          forma_pagamento?: string
+          id?: string
+          lojista_id?: string
+          quantidade_blocos?: number
+          valor_por_bloco?: number
+          valor_total?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "vendas_blocos_lojista_id_fkey"
+            columns: ["lojista_id"]
+            isOneToOne: false
+            referencedRelation: "lojistas"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
     }
     Views: {
       [_ in never]: never
     }
     Functions: {
+      atribuir_cupons_para_cliente: {
+        Args: {
+          p_cliente_cpf: string
+          p_cliente_nome: string
+          p_cliente_telefone: string
+          p_lojista_id: string
+          p_valor_compra: number
+        }
+        Returns: Json
+      }
       binary_quantize: {
         Args: { "": string } | { "": unknown }
         Returns: unknown
@@ -510,6 +744,15 @@ export type Database = {
       vector_typmod_in: {
         Args: { "": unknown[] }
         Returns: number
+      }
+      vender_blocos_para_lojista: {
+        Args: {
+          p_forma_pagamento: string
+          p_lojista_id: string
+          p_quantidade_blocos: number
+          p_valor_total: number
+        }
+        Returns: Json
       }
     }
     Enums: {

@@ -33,18 +33,18 @@ const AdminLayout = ({ children, currentPage, onNavigate }: AdminLayoutProps) =>
       badge: null
     },
     { 
+      name: 'Gestão de Lojistas', 
+      href: '#lojistas', 
+      icon: Store, 
+      current: currentPage === 'lojistas',
+      badge: '3'
+    },
+    { 
       name: 'Gestão de Blocos', 
       href: '#blocos', 
       icon: Package, 
       current: currentPage === 'blocos',
       badge: null
-    },
-    { 
-      name: 'Lojistas', 
-      href: '#lojistas', 
-      icon: Store, 
-      current: currentPage === 'lojistas',
-      badge: '850'
     },
     { 
       name: 'Clientes', 
