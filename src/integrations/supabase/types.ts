@@ -101,6 +101,13 @@ export type Database = {
             referencedRelation: "lojistas"
             referencedColumns: ["id"]
           },
+          {
+            foreignKeyName: "blocos_lojista_id_fkey"
+            columns: ["lojista_id"]
+            isOneToOne: false
+            referencedRelation: "mv_ranking_lojistas"
+            referencedColumns: ["lojista_id"]
+          },
         ]
       }
       caroline_veras_follow_up: {
@@ -275,6 +282,13 @@ export type Database = {
             isOneToOne: false
             referencedRelation: "lojistas"
             referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "cupons_lojista_id_fkey"
+            columns: ["lojista_id"]
+            isOneToOne: false
+            referencedRelation: "mv_ranking_lojistas"
+            referencedColumns: ["lojista_id"]
           },
         ]
       }
@@ -605,6 +619,13 @@ export type Database = {
             referencedRelation: "lojistas"
             referencedColumns: ["id"]
           },
+          {
+            foreignKeyName: "pagamentos_lojista_id_fkey"
+            columns: ["lojista_id"]
+            isOneToOne: false
+            referencedRelation: "mv_ranking_lojistas"
+            referencedColumns: ["lojista_id"]
+          },
         ]
       }
       pereira_gouveia_roberta: {
@@ -745,6 +766,13 @@ export type Database = {
             referencedRelation: "lojistas"
             referencedColumns: ["id"]
           },
+          {
+            foreignKeyName: "transacoes_whatsapp_lojista_id_fkey"
+            columns: ["lojista_id"]
+            isOneToOne: false
+            referencedRelation: "mv_ranking_lojistas"
+            referencedColumns: ["lojista_id"]
+          },
         ]
       }
       user_roles: {
@@ -855,21 +883,83 @@ export type Database = {
             referencedRelation: "lojistas"
             referencedColumns: ["id"]
           },
+          {
+            foreignKeyName: "vendas_blocos_lojista_id_fkey"
+            columns: ["lojista_id"]
+            isOneToOne: false
+            referencedRelation: "mv_ranking_lojistas"
+            referencedColumns: ["lojista_id"]
+          },
         ]
       }
     }
     Views: {
-      [_ in never]: never
+      mv_dashboard_blocos: {
+        Row: {
+          blocos_com_lojistas: number | null
+          blocos_pool_geral: number | null
+          blocos_vendidos_hoje: number | null
+          cupons_atribuidos: number | null
+          cupons_atribuidos_hoje: number | null
+          cupons_nao_atribuidos: number | null
+          ultima_atualizacao: string | null
+        }
+        Relationships: []
+      }
+      mv_historico_cupons: {
+        Row: {
+          cidade_cliente: string | null
+          cidade_loja: string | null
+          cpf_cliente: string | null
+          data_atribuicao: string | null
+          data_criacao: string | null
+          id: string | null
+          mes_atribuicao: string | null
+          nome_cliente: string | null
+          nome_loja: string | null
+          numero_bloco: string | null
+          numero_cupom: string | null
+          semana_atribuicao: string | null
+          status: string | null
+          ultima_atualizacao: string | null
+          valor_compra: number | null
+        }
+        Relationships: []
+      }
+      mv_ranking_lojistas: {
+        Row: {
+          cidade: string | null
+          clientes_unicos_atendidos: number | null
+          cupons_disponiveis_lojista: number | null
+          lojista_id: string | null
+          nome_loja: string | null
+          ranking_cupons: number | null
+          ranking_vendas: number | null
+          total_cupons_atribuidos: number | null
+          ultima_atribuicao: string | null
+          ultima_atualizacao: string | null
+          volume_vendas_geradas: number | null
+        }
+        Relationships: []
+      }
     }
     Functions: {
       atribuir_cupons_para_cliente: {
-        Args: {
-          p_cliente_cpf: string
-          p_cliente_nome: string
-          p_cliente_telefone: string
-          p_lojista_id: string
-          p_valor_compra: number
-        }
+        Args:
+          | {
+              p_cliente_cpf: string
+              p_cliente_nome: string
+              p_cliente_telefone: string
+              p_lojista_id: string
+              p_valor_compra: number
+            }
+          | {
+              p_cliente_cpf: string
+              p_cliente_nome: string
+              p_cliente_telefone: string
+              p_lojista_id: string
+              p_valor_compra: number
+            }
         Returns: Json
       }
       binary_quantize: {
@@ -890,6 +980,10 @@ export type Database = {
           metadados: Json
           similaridade: number
         }[]
+      }
+      consultar_saldo_lojista: {
+        Args: { p_whatsapp_lojista: string }
+        Returns: Json
       }
       criar_blocos_pool: {
         Args: { p_quantidade_blocos: number }
@@ -1036,6 +1130,10 @@ export type Database = {
           metadata: Json
           similarity: number
         }[]
+      }
+      refresh_dashboard_views: {
+        Args: Record<PropertyKey, never>
+        Returns: undefined
       }
       sparsevec_out: {
         Args: { "": unknown }
