@@ -151,35 +151,37 @@ export const GraficoCidadesClientes = () => {
         </p>
       </CardHeader>
       <CardContent className="p-6">
-        <div className="h-80">
-          <ResponsiveContainer width="100%" height="100%">
-            <PieChart>
-              <Pie
-                data={dadosCidades}
-                cx="50%"
-                cy="50%"
-                labelLine={false}
-                label={({ cidade, percentual }) => 
-                  percentual > 5 ? `${cidade} (${percentual.toFixed(1)}%)` : ''
-                }
-                outerRadius={100}
-                fill="#8884d8"
-                dataKey="total_cupons"
-              >
-                {dadosCidades.map((_, index) => (
-                  <Cell key={`cell-${index}`} fill={CORES_GRAFICOS[index % CORES_GRAFICOS.length]} />
-                ))}
-              </Pie>
-              <Tooltip content={<CustomTooltip />} />
-              <Legend 
-                verticalAlign="bottom" 
-                height={36}
-                formatter={(value) => (
-                  <span>{value}</span>
-                )}
-              />
-            </PieChart>
-          </ResponsiveContainer>
+        <div className="flex justify-center items-center h-80">
+          <div className="w-80 h-80">
+            <ResponsiveContainer width="100%" height="100%">
+              <PieChart>
+                <Pie
+                  data={dadosCidades}
+                  cx="50%"
+                  cy="50%"
+                  labelLine={false}
+                  label={({ cidade, percentual }) => 
+                    percentual > 5 ? `${cidade} (${percentual.toFixed(1)}%)` : ''
+                  }
+                  outerRadius={120}
+                  fill="#8884d8"
+                  dataKey="total_cupons"
+                >
+                  {dadosCidades.map((_, index) => (
+                    <Cell key={`cell-${index}`} fill={CORES_GRAFICOS[index % CORES_GRAFICOS.length]} />
+                  ))}
+                </Pie>
+                <Tooltip content={<CustomTooltip />} />
+                <Legend 
+                  verticalAlign="bottom" 
+                  height={36}
+                  formatter={(value) => (
+                    <span>{value}</span>
+                  )}
+                />
+              </PieChart>
+            </ResponsiveContainer>
+          </div>
         </div>
       </CardContent>
     </Card>
