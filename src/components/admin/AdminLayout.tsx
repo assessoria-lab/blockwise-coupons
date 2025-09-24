@@ -259,8 +259,10 @@ const AdminLayout = ({ children, currentPage, onNavigate }: AdminLayoutProps) =>
         </div>
 
         {/* Page content */}
-        <main className="flex-1 bg-gray-50 overflow-auto">
-          {children}
+        <main className="flex-1 bg-gray-50 overflow-auto p-6">
+          <div className="max-w-7xl mx-auto">
+            {children}
+          </div>
         </main>
       </div>
     </div>

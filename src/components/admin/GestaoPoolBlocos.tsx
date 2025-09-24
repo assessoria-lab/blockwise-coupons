@@ -57,7 +57,7 @@ const GestaoPoolBlocos = () => {
   const estimatedId = `BL${new Date().toISOString().slice(0, 10).replace(/-/g, '')}_${String(Math.floor(Math.random() * 999999)).padStart(6, '0')}`;
 
   return (
-    <div className="space-y-6">
+    <div className="p-6 space-y-6">
       <div className="border-b border-border pb-4">
         <h2 className="text-2xl font-bold text-foreground flex items-center gap-2">
           <Package className="h-6 w-6" />

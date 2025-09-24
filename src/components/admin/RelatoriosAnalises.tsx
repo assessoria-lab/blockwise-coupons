@@ -215,7 +215,7 @@ export const RelatoriosAnalises = () => {
   const top5Cidades = analiseRegional.slice(0, 5);
 
   return (
-    <div className="space-y-6">
+    <div className="p-6 space-y-6">
       <div className="flex items-center justify-between">
         <div>
           <h2 className="text-2xl font-bold">Relatórios e Análises</h2>

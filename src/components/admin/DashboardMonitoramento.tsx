@@ -42,7 +42,7 @@ const DashboardMonitoramento = () => {
   };
 
   return (
-    <div className="space-y-6">
+    <div className="p-6 space-y-6">
       {/* Status da Conexão */}
       <div className="flex items-center justify-between">
         <h1 className="text-2xl font-bold">Monitoramento em Tempo Real</h1>
