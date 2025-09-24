@@ -82,8 +82,8 @@ export const generateCuponsPDF = async (
         <!-- Nome Completo - ajustado mais para cima e direita -->
         <div style="
           position: absolute;
-          top: 420px;
-          left: 250px;
+          top: 400px;
+          left: 280px;
           width: 1000px;
           height: 30px;
           display: flex;
