@@ -57,34 +57,34 @@ interface MetricCardProps {
 
 const MetricCard = ({ title, value, subtitle, badge, icon, variant }: MetricCardProps) => {
   const variantStyles = {
-    pool: 'bg-pool-available-bg/80 border-pool-available/30 backdrop-blur-sm glow-effect',
-    lojista: 'bg-lojista-blocks-bg/80 border-lojista-blocks/30 backdrop-blur-sm glow-effect', 
-    client: 'bg-client-assigned-bg/80 border-client-assigned/30 backdrop-blur-sm glow-effect'
+    pool: 'bg-pool-available text-pool-available-foreground border-pool-available/30',
+    lojista: 'bg-lojista-blocks text-lojista-blocks-foreground border-lojista-blocks/30', 
+    client: 'bg-client-assigned text-client-assigned-foreground border-client-assigned/30'
   };
 
   const iconStyles = {
-    pool: 'text-pool-available',
-    lojista: 'text-lojista-blocks',
-    client: 'text-client-assigned'
+    pool: 'text-pool-available-foreground',
+    lojista: 'text-lojista-blocks-foreground',
+    client: 'text-client-assigned-foreground'
   };
 
   return (
-    <Card className={`${variantStyles[variant]} border shadow-soft hover:shadow-medium transition-all duration-200`}>
+    <Card className={`${variantStyles[variant]} border shadow-soft hover:shadow-medium transition-all duration-200 glow-effect`}>
       <CardHeader className="pb-2">
         <div className="flex items-center justify-between">
-          <CardTitle className="text-sm font-medium text-muted-foreground">{title}</CardTitle>
+          <CardTitle className="text-sm font-medium">{title}</CardTitle>
           <div className={iconStyles[variant]}>{icon}</div>
         </div>
       </CardHeader>
       <CardContent>
-        <div className="text-3xl font-bold golden-text mb-1">
+        <div className="text-3xl font-bold mb-1">
           {value.toLocaleString('pt-BR')}
         </div>
         {subtitle && (
-          <p className="text-xs text-muted-foreground mb-2 font-medium">{subtitle}</p>
+          <p className="text-xs opacity-90 mb-2 font-medium">{subtitle}</p>
         )}
         {badge && (
-          <Badge variant="secondary" className="text-xs bg-gradient-golden text-foreground">
+          <Badge variant="secondary" className="text-xs bg-white/20 text-current border-white/30">
             {badge}
           </Badge>
         )}

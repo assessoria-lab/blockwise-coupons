@@ -2,88 +2,92 @@
 @tailwind components;
 @tailwind utilities;
 
-/* Show de Prêmios Design System - Festive and Professional */
+/* Show de Prêmios Design System - Paleta Oficial */
 @layer base {
   :root {
-    /* Base colors inspired by Show de Prêmios green theme */
-    --background: 240 253 244; /* green-50 */
-    --foreground: 20 83 45; /* green-800 */
+    /* Base colors - Fundo branco mantido */
+    --background: 0 0% 100%; /* white */
+    --foreground: 0 0% 0%; /* black for titles on white */
 
-    /* Card system */
-    --card: 255 255 255; /* white */
-    --card-foreground: 15 23 42; /* slate-800 */
+    /* Card system - Mantendo branco */
+    --card: 0 0% 100%; /* white */
+    --card-foreground: 0 0% 0%; /* black */
 
     /* Popover system */
-    --popover: 255 255 255;
-    --popover-foreground: 15 23 42;
+    --popover: 0 0% 100%; /* white */
+    --popover-foreground: 0 0% 0%; /* black */
 
-    /* Primary brand - Show de Prêmios Green */
-    --primary: 142 69% 38%; /* green-600 inspired by logo */
-    --primary-foreground: 248 250 252; /* slate-50 */
-    --primary-hover: 142 69% 32%; /* darker green */
+    /* Paleta oficial Show de Prêmios */
+    --primary: 120 100% 13%; /* #034001 - Verde escuro */
+    --primary-foreground: 0 0% 100%; /* white text on colored backgrounds */
+    --primary-hover: 120 100% 10%; /* darker version */
 
-    /* Secondary - Clean slate */
-    --secondary: 241 245 249; /* slate-100 */
-    --secondary-foreground: 51 65 85; /* slate-700 */
+    /* Secondary - Verde médio */
+    --secondary: 102 64% 40%; /* #42A626 - Verde médio */
+    --secondary-foreground: 0 0% 100%; /* white text */
 
     /* Muted elements */
-    --muted: 248 250 252; /* slate-50 */
-    --muted-foreground: 100 116 139; /* slate-500 */
+    --muted: 0 0% 96%; /* light gray */
+    --muted-foreground: 0 0% 45%; /* gray text */
 
-    /* Accent - Golden yellow from logo */
-    --accent: 45 93% 92%; /* yellow-50 */
-    --accent-foreground: 45 93% 25%; /* dark yellow */
+    /* Accent - Amarelo */
+    --accent: 50 96% 49%; /* #F2CB05 - Amarelo */
+    --accent-foreground: 0 0% 0%; /* black text on yellow */
 
-    /* Status colors for block states */
-    --pool-available: 219 95% 50%; /* blue-500 */
-    --pool-available-bg: 239 246 255; /* blue-50 */
+    /* Cores específicas dos blocos usando a paleta */
+    --pool-available: 120 100% 13%; /* Verde escuro #034001 */
+    --pool-available-bg: 120 100% 97%; /* Verde muito claro */
+    --pool-available-foreground: 0 0% 100%; /* white */
     
-    --lojista-blocks: 245 101% 50%; /* indigo-500 */
-    --lojista-blocks-bg: 238 242 255; /* indigo-50 */
+    --lojista-blocks: 102 64% 40%; /* Verde médio #42A626 */
+    --lojista-blocks-bg: 102 64% 95%; /* Verde claro */
+    --lojista-blocks-foreground: 0 0% 100%; /* white */
     
-    --client-assigned: 34 197% 94%; /* emerald-500 */
-    --client-assigned-bg: 236 253 245; /* emerald-50 */
+    --client-assigned: 50 96% 49%; /* Amarelo #F2CB05 */
+    --client-assigned-bg: 50 96% 95%; /* Amarelo muito claro */
+    --client-assigned-foreground: 0 0% 0%; /* black text */
 
-    /* Warning and success */
-    --warning: 38 92% 50%; /* amber-500 */
-    --warning-foreground: 23 83% 95%; /* amber-50 */
-    --warning-bg: 254 243 199; /* amber-100 */
+    /* Warning usando laranja */
+    --warning: 33 96% 44%; /* #D97904 - Laranja */
+    --warning-foreground: 0 0% 100%; /* white text */
+    --warning-bg: 33 96% 95%; /* Laranja muito claro */
 
-    --success: 142 76% 36%; /* green-600 */
-    --success-foreground: 220 142% 95%; /* green-50 */
-    --success-bg: 187 247 208; /* green-100 */
+    /* Success usando verde médio */
+    --success: 102 64% 40%; /* #42A626 */
+    --success-foreground: 0 0% 100%; /* white text */
+    --success-bg: 102 64% 95%; /* Verde claro */
 
     /* Destructive */
     --destructive: 0 84% 60%;
     --destructive-foreground: 248 113% 98%;
 
     /* Borders and inputs */
-    --border: 226 229 235; /* slate-200 */
-    --input: 248 250 252; /* slate-50 */
-    --ring: 219 78% 48%; /* blue-600 */
+    --border: 0 0% 89%; /* light gray borders */
+    --input: 0 0% 100%; /* white inputs */
+    --ring: 120 100% 13%; /* Verde escuro para focus */
 
     /* Sidebar specific */
-    --sidebar-background: 255 255 255; /* white */
-    --sidebar-foreground: 51 65 85; /* slate-700 */
-    --sidebar-primary: 219 78% 48%; /* blue-600 */
-    --sidebar-primary-foreground: 248 250 252; /* slate-50 */
-    --sidebar-accent: 241 245 249; /* slate-100 */
-    --sidebar-accent-foreground: 15 23 42; /* slate-800 */
-    --sidebar-border: 226 229 235; /* slate-200 */
-    --sidebar-ring: 219 78% 48%; /* blue-600 */
+    --sidebar-background: 0 0% 100%; /* white */
+    --sidebar-foreground: 0 0% 0%; /* black text */
+    --sidebar-primary: 120 100% 13%; /* Verde escuro */
+    --sidebar-primary-foreground: 0 0% 100%; /* white */
+    --sidebar-accent: 0 0% 96%; /* light gray */
+    --sidebar-accent-foreground: 0 0% 0%; /* black */
+    --sidebar-border: 0 0% 89%; /* light gray */
+    --sidebar-ring: 120 100% 13%; /* Verde escuro */
 
-    /* Show de Prêmios Gradients - Festive and Radiant */
-    --gradient-primary: radial-gradient(ellipse at center, hsl(142 69% 50%) 0%, hsl(142 69% 35%) 70%);
-    --gradient-radiant: radial-gradient(ellipse at center, hsl(142 80% 45%) 0%, hsl(142 70% 25%) 100%);
-    --gradient-golden: linear-gradient(135deg, hsl(45 100% 60%) 0%, hsl(38 100% 50%) 100%);
-    --gradient-success: linear-gradient(135deg, hsl(142 76% 36%) 0%, hsl(142 69% 45%) 100%);
-    --gradient-warning: linear-gradient(135deg, hsl(45 93% 47%) 0%, hsl(38 92% 50%) 100%);
+    /* Paleta de gradientes com as cores oficiais */
+    --gradient-primary: linear-gradient(135deg, hsl(120 100% 13%) 0%, hsl(102 64% 40%) 100%);
+    --gradient-radiant: radial-gradient(ellipse at center, hsl(102 64% 40%) 0%, hsl(120 100% 13%) 100%);
+    --gradient-golden: linear-gradient(135deg, hsl(50 96% 49%) 0%, hsl(33 96% 44%) 100%);
+    --gradient-success: linear-gradient(135deg, hsl(102 64% 40%) 0%, hsl(120 100% 13%) 100%);
+    --gradient-warning: linear-gradient(135deg, hsl(33 96% 44%) 0%, hsl(50 96% 49%) 100%);
     
-    /* Show de Prêmios Shadows with glow effects */
+    /* Show de Prêmios Shadows with colored glow */
     --shadow-soft: 0 1px 3px 0 rgb(0 0 0 / 0.1), 0 1px 2px -1px rgb(0 0 0 / 0.1);
     --shadow-medium: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);
     --shadow-large: 0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -4px rgb(0 0 0 / 0.1);
-    --shadow-glow: 0 0 20px hsl(142 69% 50% / 0.3), 0 0 40px hsl(142 69% 50% / 0.1);
+    --shadow-glow: 0 0 20px hsl(102 64% 40% / 0.3), 0 0 40px hsl(120 100% 13% / 0.1);
 
     --radius: 0.75rem;
   }
@@ -154,7 +158,7 @@
   body {
     @apply bg-background text-foreground;
     font-feature-settings: "rlig" 1, "calt" 1;
-    background: radial-gradient(ellipse at top, hsl(142 30% 97%) 0%, hsl(142 20% 99%) 100%);
+    background: hsl(0 0% 100%); /* Fundo branco puro */
     min-height: 100vh;
   }
   
@@ -196,6 +200,7 @@
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;
     background-clip: text;
+    font-weight: 700;
   }
   
   .pulse-glow {
@@ -204,10 +209,10 @@
   
   @keyframes pulse-glow {
     from {
-      box-shadow: 0 0 10px hsl(142 69% 50% / 0.2);
+      box-shadow: 0 0 10px hsl(102 64% 40% / 0.2);
     }
     to {
-      box-shadow: 0 0 20px hsl(142 69% 50% / 0.4), 0 0 30px hsl(142 69% 50% / 0.2);
+      box-shadow: 0 0 20px hsl(102 64% 40% / 0.4), 0 0 30px hsl(120 100% 13% / 0.2);
     }
   }
 }
