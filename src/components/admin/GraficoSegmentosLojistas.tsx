@@ -91,7 +91,7 @@ export const GraficoSegmentosLojistas = () => {
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
             <Store className="h-5 w-5" />
-            Segmentos dos Lojistas com Cupons Atribuídos
+            Segmentos
           </CardTitle>
         </CardHeader>
         <CardContent className="p-6">
@@ -109,7 +109,7 @@ export const GraficoSegmentosLojistas = () => {
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
             <Store className="h-5 w-5" />
-            Segmentos dos Lojistas com Cupons Atribuídos
+            Segmentos
           </CardTitle>
         </CardHeader>
         <CardContent className="p-6">
@@ -127,7 +127,7 @@ export const GraficoSegmentosLojistas = () => {
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
             <Store className="h-5 w-5" />
-            Segmentos dos Lojistas com Cupons Atribuídos
+            Segmentos
           </CardTitle>
         </CardHeader>
         <CardContent className="p-6">
@@ -142,10 +142,10 @@ export const GraficoSegmentosLojistas = () => {
   return (
     <Card className="shadow-sm bg-white border border-border">
       <CardHeader>
-        <CardTitle className="flex items-center gap-2">
-          <Store className="h-5 w-5" />
-          Segmentos dos Lojistas com Cupons Atribuídos
-        </CardTitle>
+          <CardTitle className="flex items-center gap-2">
+            <Store className="h-5 w-5" />
+            Segmentos
+          </CardTitle>
         <p className="text-sm text-muted-foreground">
           Distribuição dos {dadosSegmentos.reduce((acc, segmento) => acc + segmento.total_cupons, 0)} cupons atribuídos por segmento de loja
         </p>
