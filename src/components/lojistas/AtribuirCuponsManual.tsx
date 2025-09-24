@@ -17,6 +17,7 @@ interface FormData {
   cpf: string;
   nome: string;
   telefone: string;
+  cidade: string;
   valor: number;
 }
 
@@ -25,6 +26,7 @@ export const AtribuirCuponsManual = ({ lojistaId, onSuccess }: AtribuirCuponsMan
     cpf: '',
     nome: '',
     telefone: '',
+    cidade: '',
     valor: 0,
   });
   const { toast } = useToast();
@@ -36,6 +38,7 @@ export const AtribuirCuponsManual = ({ lojistaId, onSuccess }: AtribuirCuponsMan
         p_cliente_cpf: data.cpf,
         p_cliente_nome: data.nome,
         p_cliente_telefone: data.telefone,
+        p_cliente_cidade: data.cidade,
         p_valor_compra: data.valor,
       });
       
@@ -68,6 +71,7 @@ export const AtribuirCuponsManual = ({ lojistaId, onSuccess }: AtribuirCuponsMan
         cpf: '',
         nome: '',
         telefone: '',
+        cidade: '',
         valor: 0,
       });
       
@@ -99,6 +103,15 @@ export const AtribuirCuponsManual = ({ lojistaId, onSuccess }: AtribuirCuponsMan
       toast({
         title: "Nome Obrigatório",
         description: "Por favor, informe o nome do cliente.",
+        variant: "destructive",
+      });
+      return;
+    }
+    
+    if (!formData.cidade.trim()) {
+      toast({
+        title: "Cidade Obrigatória",
+        description: "Por favor, informe a cidade do cliente.",
         variant: "destructive",
       });
       return;
@@ -165,18 +178,29 @@ export const AtribuirCuponsManual = ({ lojistaId, onSuccess }: AtribuirCuponsMan
             </div>
             
             <div className="space-y-2">
-              <Label htmlFor="valor">Valor da Compra (R$)</Label>
+              <Label htmlFor="cidade">Cidade *</Label>
               <Input
-                id="valor"
-                type="number"
-                step="0.01"
-                value={formData.valor || ''}
-                onChange={(e) => setFormData(prev => ({ ...prev, valor: parseFloat(e.target.value) || 0 }))}
-                placeholder="0.00"
-                min="10"
+                id="cidade"
+                value={formData.cidade}
+                onChange={(e) => setFormData(prev => ({ ...prev, cidade: e.target.value }))}
+                placeholder="Ex: São Paulo, Brasília, Rio de Janeiro"
                 disabled={isPending}
               />
             </div>
+          </div>
+
+          <div className="space-y-2">
+            <Label htmlFor="valor">Valor da Compra (R$) *</Label>
+            <Input
+              id="valor"
+              type="number"
+              step="0.01"
+              value={formData.valor || ''}
+              onChange={(e) => setFormData(prev => ({ ...prev, valor: parseFloat(e.target.value) || 0 }))}
+              placeholder="0.00"
+              min="10"
+              disabled={isPending}
+            />
           </div>
 
           {formData.valor >= 10 && (
