@@ -5,6 +5,8 @@ import GestaoPoolBlocos from '@/components/admin/GestaoPoolBlocos';
 import ConfiguracoesSistema from '@/components/admin/ConfiguracoesSistema';
 import GestaoLojistas from './GestaoLojistas';
 import { RelatoriosAnalises } from '@/components/admin/RelatoriosAnalises';
+import GestaoClientes from '@/components/admin/GestaoClientes';
+import GestaoSorteios from '@/components/admin/GestaoSorteios';
 
 const Index = () => {
   const [currentPage, setCurrentPage] = useState('dashboard');
@@ -23,6 +25,10 @@ const Index = () => {
         return <GestaoPoolBlocos />;
       case 'relatorios':
         return <RelatoriosAnalises />;
+      case 'clientes':
+        return <GestaoClientes />;
+      case 'sorteios':
+        return <GestaoSorteios />;
       case 'configuracoes':
         return <ConfiguracoesSistema />;
       default:
