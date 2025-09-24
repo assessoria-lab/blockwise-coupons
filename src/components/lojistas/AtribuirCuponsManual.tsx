@@ -117,10 +117,10 @@ export const AtribuirCuponsManual = ({ lojistaId, onSuccess }: AtribuirCuponsMan
       return;
     }
     
-    if (formData.valor < 10) {
+    if (formData.valor < 100) {
       toast({
         title: "Valor Mínimo",
-        description: "O valor da compra deve ser de pelo menos R$ 10,00.",
+        description: "O valor da compra deve ser de pelo menos R$ 100,00.",
         variant: "destructive",
       });
       return;
@@ -129,7 +129,7 @@ export const AtribuirCuponsManual = ({ lojistaId, onSuccess }: AtribuirCuponsMan
     atribuirCupons(formData);
   };
 
-  const cuponsCalculados = Math.floor(formData.valor / 10);
+  const cuponsCalculados = Math.floor(formData.valor / 100);
 
   return (
     <Card>
@@ -198,23 +198,23 @@ export const AtribuirCuponsManual = ({ lojistaId, onSuccess }: AtribuirCuponsMan
               value={formData.valor || ''}
               onChange={(e) => setFormData(prev => ({ ...prev, valor: parseFloat(e.target.value) || 0 }))}
               placeholder="0.00"
-              min="10"
+              min="100"
               disabled={isPending}
             />
           </div>
 
-          {formData.valor >= 10 && (
+          {formData.valor >= 100 && (
             <div className="bg-muted/50 p-4 rounded-lg">
               <p className="text-sm font-medium">
                 Cupons a serem atribuídos: <span className="text-primary font-bold">{cuponsCalculados}</span>
               </p>
               <p className="text-xs text-muted-foreground mt-1">
-                1 cupom para cada R$ 10,00 de compra
+                1 cupom para cada R$ 100,00 de compra
               </p>
             </div>
           )}
 
-          <Button type="submit" disabled={isPending || formData.valor < 10} className="w-full">
+          <Button type="submit" disabled={isPending || formData.valor < 100} className="w-full">
             {isPending ? (
               <>
                 <Loader2 className="h-4 w-4 mr-2 animate-spin" />

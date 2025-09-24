@@ -24,7 +24,6 @@ import { ptBR } from 'date-fns/locale';
 interface RelatorioLojista {
   id: string;
   nome_loja: string;
-  cidade: string;
   blocos_comprados: number;
   valor_investido: number;
   cupons_atribuidos: number;
@@ -35,16 +34,15 @@ interface RelatorioLojista {
 
 interface AnaliseRegional {
   cidade: string;
-  lojistas_ativos: number;
-  blocos_vendidos: number;
-  faturamento: number;
+  clientes_ativos: number;
   cupons_emitidos: number;
+  valor_total_compras: number;
 }
 
 interface TendenciaTemporal {
   periodo: string;
   vendas: number;
-  faturamento: number;
+  valor_total: number;
   novos_lojistas: number;
 }
 
@@ -104,84 +102,45 @@ const fetchRelatorioLojistas = async () => {
   return relatorios.sort((a, b) => b.valor_investido - a.valor_investido);
 };
 
-const fetchAnaliseRegional = async () => {
-  const { data: lojistas } = await supabase
-    .from('lojistas')
-    .select('cidade');
-
-  const { data: blocos } = await supabase
-    .from('blocos')
-    .select(`
-      lojistas!inner(cidade),
-      status
-    `)
-    .eq('status', 'vendido');
-
-  const { data: vendas } = await supabase
-    .from('vendas_blocos')
-    .select(`
-      valor_total,
-      quantidade_blocos,
-      lojistas!inner(cidade)
-    `);
-
-  const { data: cupons } = await supabase
-    .from('cupons')
-    .select(`
-      lojistas!inner(cidade)
-    `)
-    .eq('status', 'atribuido');
+const fetchAnaliseRegional = async (): Promise<AnaliseRegional[]> => {
+  // Análise baseada nas cidades dos clientes, não dos lojistas
+  const { data: clientes } = await supabase
+    .from('clientes')
+    .select('cidade, total_cupons_recebidos, total_valor_compras, status')
+    .not('cidade', 'is', null);
 
   const analises = new Map<string, AnaliseRegional>();
-
-  // Inicializar com cidades dos lojistas
-  lojistas?.forEach(lojista => {
-    if (!analises.has(lojista.cidade)) {
-      analises.set(lojista.cidade, {
-        cidade: lojista.cidade,
-        lojistas_ativos: 0,
-        blocos_vendidos: 0,
-        faturamento: 0,
-        cupons_emitidos: 0
+  
+  clientes?.forEach(cliente => {
+    const cidade = cliente.cidade;
+    if (!cidade) return;
+    
+    if (!analises.has(cidade)) {
+      analises.set(cidade, {
+        cidade,
+        clientes_ativos: 0,
+        cupons_emitidos: 0,
+        valor_total_compras: 0
       });
     }
-    analises.get(lojista.cidade)!.lojistas_ativos += 1;
-  });
-
-  // Adicionar dados de blocos vendidos
-  blocos?.forEach(bloco => {
-    const cidade = (bloco.lojistas as any)?.cidade;
-    if (cidade && analises.has(cidade)) {
-      analises.get(cidade)!.blocos_vendidos += 1;
+    
+    const analise = analises.get(cidade)!;
+    if (cliente.status === 'ativo') {
+      analise.clientes_ativos += 1;
     }
+    analise.cupons_emitidos += cliente.total_cupons_recebidos || 0;
+    analise.valor_total_compras += Number(cliente.total_valor_compras) || 0;
   });
 
-  // Adicionar dados de faturamento
-  vendas?.forEach(venda => {
-    const cidade = (venda.lojistas as any)?.cidade;
-    if (cidade && analises.has(cidade)) {
-      analises.get(cidade)!.faturamento += venda.valor_total || 0;
-    }
-  });
-
-  // Adicionar dados de cupons
-  cupons?.forEach(cupom => {
-    const cidade = (cupom.lojistas as any)?.cidade;
-    if (cidade && analises.has(cidade)) {
-      analises.get(cidade)!.cupons_emitidos += 1;
-    }
-  });
-
-  return Array.from(analises.values()).sort((a, b) => b.faturamento - a.faturamento);
+  return Array.from(analises.values()).sort((a, b) => b.valor_total_compras - a.valor_total_compras);
 };
 
 const gerarRelatorioPDF = (dados: RelatorioLojista[], tipo: string) => {
   // Em uma implementação real, aqui usaríamos uma biblioteca como jsPDF
   const csvContent = [
-    ['Lojista', 'Cidade', 'Blocos', 'Investimento', 'Cupons Atribuídos', 'Cupons Disponíveis', 'Ticket Médio'],
+    ['Lojista', 'Blocos', 'Investimento', 'Cupons Atribuídos', 'Cupons Disponíveis', 'Ticket Médio'],
     ...dados.map(item => [
       item.nome_loja,
-      item.cidade,
       item.blocos_comprados.toString(),
       `R$ ${item.valor_investido.toFixed(2)}`,
       item.cupons_atribuidos.toString(),
@@ -374,45 +333,41 @@ export const RelatoriosAnalises = () => {
                 Análise Regional
               </CardTitle>
               <CardDescription>
-                Performance e distribuição por cidade
+                Análise por cidade dos clientes (origem das compras)
               </CardDescription>
             </CardHeader>
             <CardContent>
-              <div className="space-y-4">
-                {analiseRegional.map((regiao) => (
-                  <div key={regiao.cidade} className="border rounded-lg p-4">
-                    <div className="flex items-center justify-between mb-3">
-                      <h3 className="font-semibold text-lg">{regiao.cidade}</h3>
-                      <Badge variant="outline">
-                        {regiao.lojistas_ativos} lojista(s)
-                      </Badge>
-                    </div>
-                    
-                    <div className="grid grid-cols-1 md:grid-cols-4 gap-4 text-sm">
-                      <div className="text-center p-3 bg-blue-50 rounded">
-                        <div className="text-2xl font-bold text-blue-600">{regiao.blocos_vendidos}</div>
-                        <div className="text-muted-foreground">Blocos Vendidos</div>
+                <div className="space-y-4">
+                  {analiseRegional.map((regiao) => (
+                    <div key={regiao.cidade} className="border rounded-lg p-4">
+                      <div className="flex items-center justify-between mb-3">
+                        <h3 className="font-semibold text-lg">{regiao.cidade}</h3>
+                        <Badge variant="outline">
+                          {regiao.clientes_ativos} cliente(s) ativo(s)
+                        </Badge>
                       </div>
-                      <div className="text-center p-3 bg-green-50 rounded">
-                        <div className="text-2xl font-bold text-green-600">
-                          R$ {regiao.faturamento.toLocaleString('pt-BR', { maximumFractionDigits: 0 })}
+                      
+                      <div className="grid grid-cols-1 md:grid-cols-3 gap-4 text-sm">
+                        <div className="text-center p-3 bg-blue-50 rounded">
+                          <div className="text-2xl font-bold text-blue-600">{regiao.cupons_emitidos}</div>
+                          <div className="text-muted-foreground">Cupons Emitidos</div>
                         </div>
-                        <div className="text-muted-foreground">Faturamento</div>
-                      </div>
-                      <div className="text-center p-3 bg-purple-50 rounded">
-                        <div className="text-2xl font-bold text-purple-600">{regiao.cupons_emitidos}</div>
-                        <div className="text-muted-foreground">Cupons Emitidos</div>
-                      </div>
-                      <div className="text-center p-3 bg-orange-50 rounded">
-                        <div className="text-2xl font-bold text-orange-600">
-                          R$ {regiao.lojistas_ativos > 0 ? (regiao.faturamento / regiao.lojistas_ativos).toFixed(0) : '0'}
+                        <div className="text-center p-3 bg-green-50 rounded">
+                          <div className="text-2xl font-bold text-green-600">
+                            R$ {regiao.valor_total_compras.toLocaleString('pt-BR', { maximumFractionDigits: 0 })}
+                          </div>
+                          <div className="text-muted-foreground">Volume Total de Compras</div>
                         </div>
-                        <div className="text-muted-foreground">Faturamento/Lojista</div>
+                        <div className="text-center p-3 bg-purple-50 rounded">
+                          <div className="text-2xl font-bold text-purple-600">
+                            R$ {regiao.clientes_ativos > 0 ? (regiao.valor_total_compras / regiao.clientes_ativos).toFixed(0) : '0'}
+                          </div>
+                          <div className="text-muted-foreground">Média por Cliente</div>
+                        </div>
                       </div>
                     </div>
-                  </div>
-                ))}
-              </div>
+                  ))}
+                </div>
             </CardContent>
           </Card>
         </TabsContent>
