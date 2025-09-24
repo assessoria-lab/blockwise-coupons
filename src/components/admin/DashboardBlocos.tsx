@@ -15,7 +15,7 @@ import {
 // Mock data - will be replaced with Supabase queries
 const useDashboardMetrics = () => {
   const [metrics, setMetrics] = useState({
-    blocos_pool_geral: 1250,
+    blocos_disponiveis: 1250,
     blocos_com_lojistas: 850,
     cupons_nao_atribuidos: 42300,
     cupons_atribuidos: 67200,
@@ -115,9 +115,9 @@ const DashboardBlocos = () => {
       <section>
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
           <MetricCard
-            title="Blocos no Pool Geral"
-            value={metrics.blocos_pool_geral}
-            subtitle={`≈ ${(metrics.blocos_pool_geral * 100).toLocaleString('pt-BR')} cupons disponíveis`}
+            title="Blocos Disponíveis"
+            value={metrics.blocos_disponiveis}
+            subtitle={`≈ ${(metrics.blocos_disponiveis * 100).toLocaleString('pt-BR')} cupons disponíveis`}
             badge="Aguardando compra por lojistas"
             icon={<Package className="h-5 w-5" />}
             variant="pool"

@@ -124,7 +124,7 @@ const DashboardMonitoramento = () => {
                 <div className="mt-4 pt-4 border-t border-border">
                   <div className="grid grid-cols-2 md:grid-cols-3 gap-4 text-sm">
                     <div className="flex justify-between">
-                      <span className="text-muted-foreground">Blocos no Pool:</span>
+                      <span className="text-muted-foreground">Blocos Disponíveis:</span>
                       <span className="font-medium">{metricas.blocos_pool}</span>
                     </div>
                     <div className="flex justify-between">

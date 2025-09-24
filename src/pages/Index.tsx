@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import AdminLayout from '@/components/admin/AdminLayout';
 import DashboardBlocos from '@/components/admin/DashboardBlocos';
-import GestaoPoolBlocos from '@/components/admin/GestaoPoolBlocos';
+import GestaoEstoqueBlocos from '@/components/admin/GestaoEstoqueBlocos';
 import ConfiguracoesSistema from '@/components/admin/ConfiguracoesSistema';
 import GestaoLojistas from './GestaoLojistas';
 import { RelatoriosAnalises } from '@/components/admin/RelatoriosAnalises';
@@ -25,7 +25,7 @@ const Index = () => {
       case 'lojistas':
         return <GestaoLojistas />;
       case 'blocos':
-        return <GestaoPoolBlocos />;
+        return <GestaoEstoqueBlocos />;
       case 'relatorios':
         return <RelatoriosAnalises />;
       case 'clientes':

@@ -44,7 +44,7 @@ export interface Cliente {
 
 // Dashboard Metrics Types
 export interface DashboardMetrics {
-  blocos_pool_geral: number;
+  blocos_disponiveis: number;
   blocos_com_lojistas: number;
   cupons_nao_atribuidos: number;
   cupons_atribuidos: number;

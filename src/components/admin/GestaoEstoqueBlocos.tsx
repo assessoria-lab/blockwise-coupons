@@ -14,7 +14,7 @@ import {
   AlertTriangle
 } from 'lucide-react';
 
-const GestaoPoolBlocos = () => {
+const GestaoEstoqueBlocos = () => {
   const [quantidadeBlocos, setQuantidadeBlocos] = useState(100);
   const [isLoading, setIsLoading] = useState(false);
   const { toast } = useToast();
@@ -62,7 +62,7 @@ const GestaoPoolBlocos = () => {
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
             <Plus className="h-5 w-5" />
-            Criar Novos Blocos no Pool
+            Criar Novos Blocos
           </CardTitle>
         </CardHeader>
         <CardContent className="space-y-6">
@@ -148,7 +148,7 @@ const GestaoPoolBlocos = () => {
               <Package className="h-4 w-4" />
               <AlertDescription>
                 <strong>Estrutura do Bloco:</strong> Cada bloco contém exatamente 100 cupons sequenciais. 
-                Após a criação, os blocos ficam no "Pool Geral" aguardando compra por lojistas.
+                Após a criação, os blocos ficam disponíveis para compra por lojistas.
               </AlertDescription>
             </Alert>
             
@@ -198,7 +198,7 @@ const GestaoPoolBlocos = () => {
       {/* Statistics Card */}
       <Card className="shadow-soft">
         <CardHeader>
-          <CardTitle>Estatísticas do Pool</CardTitle>
+          <CardTitle>Estatísticas do Estoque</CardTitle>
         </CardHeader>
         <CardContent>
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
@@ -221,4 +221,4 @@ const GestaoPoolBlocos = () => {
   );
 };
 
-export default GestaoPoolBlocos;
+export default GestaoEstoqueBlocos;

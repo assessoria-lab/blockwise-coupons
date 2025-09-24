@@ -105,7 +105,7 @@ const ConfiguracoesSistema = () => {
     onSuccess: (data: any) => {
       toast({
         title: "Blocos criados!",
-        description: `${data.blocos_criados} blocos foram criados no pool com sucesso.`,
+        description: `${data.blocos_criados} blocos foram criados no estoque com sucesso.`,
       });
       queryClient.invalidateQueries({ queryKey: ['dashboard-metrics'] });
     },
@@ -159,7 +159,7 @@ const ConfiguracoesSistema = () => {
           <TabsTrigger value="configurations">Configurações</TabsTrigger>
           <TabsTrigger value="users">Usuários</TabsTrigger>
           <TabsTrigger value="logs">Logs do Sistema</TabsTrigger>
-          <TabsTrigger value="blocks">Pool de Blocos</TabsTrigger>
+          <TabsTrigger value="blocks">Estoque de Blocos</TabsTrigger>
         </TabsList>
 
         <TabsContent value="configurations" className="space-y-6">
@@ -384,10 +384,10 @@ const ConfiguracoesSistema = () => {
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
                 <Database className="h-5 w-5" />
-                Gestão do Pool de Blocos
+                Gestão de Estoque de Blocos
               </CardTitle>
               <CardDescription>
-                Crie novos blocos de cupons para o pool geral
+                Crie novos blocos de cupons para o estoque geral
               </CardDescription>
             </CardHeader>
             <CardContent className="space-y-4">
@@ -417,7 +417,7 @@ const ConfiguracoesSistema = () => {
               <div className="text-sm text-muted-foreground">
                 <p>• Cada bloco contém 100 cupons únicos</p>
                 <p>• Total de cupons que serão criados: {(blocosToCreate * 100).toLocaleString()}</p>
-                <p>• Os blocos ficam disponíveis no pool para venda aos lojistas</p>
+                <p>• Os blocos ficam disponíveis no estoque para venda aos lojistas</p>
               </div>
             </CardContent>
           </Card>
