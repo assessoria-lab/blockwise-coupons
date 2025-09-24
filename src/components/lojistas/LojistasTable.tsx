@@ -21,7 +21,7 @@ interface Lojista {
   id: string;
   nome_loja: string;
   cnpj: string;
-  cidade: string;
+  shopping?: string;
   status: string;
   cupons_nao_atribuidos: number;
   blocos_comprados?: number;
@@ -34,12 +34,12 @@ const fetchLojistas = async (filters: { search?: string; status?: string }) => {
   let query = supabase
     .from('lojistas')
     .select(`
-      id, nome_loja, cnpj, cidade, status, cupons_nao_atribuidos,
+      id, nome_loja, cnpj, shopping, status, cupons_nao_atribuidos,
       telefone, email, responsavel_nome
     `);
 
   if (filters.search) {
-    query = query.or(`nome_loja.ilike.%${filters.search}%,cnpj.ilike.%${filters.search}%,cidade.ilike.%${filters.search}%`);
+    query = query.or(`nome_loja.ilike.%${filters.search}%,cnpj.ilike.%${filters.search}%,shopping.ilike.%${filters.search}%`);
   }
 
   if (filters.status && filters.status !== 'todos') {
@@ -101,8 +101,11 @@ export const LojistasTable = () => {
       ),
     },
     {
-      accessorKey: 'cidade',
-      header: 'Cidade',
+      accessorKey: 'shopping',
+      header: 'Shopping',
+      cell: ({ row }: any) => (
+        <div>{row.getValue('shopping') || 'Não informado'}</div>
+      ),
     },
     {
       accessorKey: 'responsavel_nome',

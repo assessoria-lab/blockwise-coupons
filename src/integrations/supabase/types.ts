@@ -509,6 +509,7 @@ export type Database = {
           observacoes: string | null
           responsavel_nome: string | null
           responsavel_telefone: string | null
+          shopping: string | null
           status: string
           telefone: string | null
           updated_at: string
@@ -532,6 +533,7 @@ export type Database = {
           observacoes?: string | null
           responsavel_nome?: string | null
           responsavel_telefone?: string | null
+          shopping?: string | null
           status?: string
           telefone?: string | null
           updated_at?: string
@@ -555,6 +557,7 @@ export type Database = {
           observacoes?: string | null
           responsavel_nome?: string | null
           responsavel_telefone?: string | null
+          shopping?: string | null
           status?: string
           telefone?: string | null
           updated_at?: string

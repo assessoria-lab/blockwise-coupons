@@ -24,6 +24,7 @@ import { ptBR } from 'date-fns/locale';
 interface RelatorioLojista {
   id: string;
   nome_loja: string;
+  shopping: string;
   blocos_comprados: number;
   valor_investido: number;
   cupons_atribuidos: number;
@@ -33,10 +34,10 @@ interface RelatorioLojista {
 }
 
 interface AnaliseRegional {
-  cidade: string;
-  clientes_ativos: number;
-  cupons_emitidos: number;
-  valor_total_compras: number;
+  shopping: string;
+  lojistas_ativos: number;
+  cupons_atribuidos: number;
+  valor_total_vendas: number;
 }
 
 interface TendenciaTemporal {
@@ -88,7 +89,7 @@ const fetchRelatorioLojistas = async () => {
       return {
         id: lojista.id,
         nome_loja: lojista.nome_loja,
-        cidade: lojista.cidade,
+        shopping: lojista.shopping,
         blocos_comprados,
         valor_investido,
         cupons_atribuidos,
@@ -103,36 +104,51 @@ const fetchRelatorioLojistas = async () => {
 };
 
 const fetchAnaliseRegional = async (): Promise<AnaliseRegional[]> => {
-  // Análise baseada nas cidades dos clientes, não dos lojistas
-  const { data: clientes } = await supabase
-    .from('clientes')
-    .select('cidade, total_cupons_recebidos, total_valor_compras, status')
-    .not('cidade', 'is', null);
+  // Análise baseada nos shoppings dos lojistas
+  const { data: lojistas } = await supabase
+    .from('lojistas')
+    .select('id, shopping, status')
+    .not('shopping', 'is', null);
 
   const analises = new Map<string, AnaliseRegional>();
   
-  clientes?.forEach(cliente => {
-    const cidade = cliente.cidade;
-    if (!cidade) return;
+  await Promise.all(lojistas?.map(async (lojista) => {
+    const shopping = lojista.shopping;
+    if (!shopping) return;
     
-    if (!analises.has(cidade)) {
-      analises.set(cidade, {
-        cidade,
-        clientes_ativos: 0,
-        cupons_emitidos: 0,
-        valor_total_compras: 0
+    if (!analises.has(shopping)) {
+      analises.set(shopping, {
+        shopping,
+        lojistas_ativos: 0,
+        cupons_atribuidos: 0,
+        valor_total_vendas: 0
       });
     }
     
-    const analise = analises.get(cidade)!;
-    if (cliente.status === 'ativo') {
-      analise.clientes_ativos += 1;
+    const analise = analises.get(shopping)!;
+    
+    // Conta lojistas ativos
+    if (lojista.status === 'ativo') {
+      analise.lojistas_ativos += 1;
     }
-    analise.cupons_emitidos += cliente.total_cupons_recebidos || 0;
-    analise.valor_total_compras += Number(cliente.total_valor_compras) || 0;
-  });
+    
+    // Busca dados de cupons e vendas para este lojista
+    const { data: cupons } = await supabase
+      .from('cupons')
+      .select('valor_compra')
+      .eq('lojista_id', lojista.id)
+      .eq('status', 'atribuido');
+      
+    const { data: vendas } = await supabase
+      .from('vendas_blocos')
+      .select('valor_total')
+      .eq('lojista_id', lojista.id);
+    
+    analise.cupons_atribuidos += cupons?.length || 0;
+    analise.valor_total_vendas += vendas?.reduce((sum, v) => sum + (v.valor_total || 0), 0) || 0;
+  }) || []);
 
-  return Array.from(analises.values()).sort((a, b) => b.valor_total_compras - a.valor_total_compras);
+  return Array.from(analises.values()).sort((a, b) => b.valor_total_vendas - a.valor_total_vendas);
 };
 
 const gerarRelatorioPDF = (dados: RelatorioLojista[], tipo: string) => {
@@ -171,7 +187,7 @@ export const RelatoriosAnalises = () => {
   });
 
   const top5Lojistas = relatorioLojistas.slice(0, 5);
-  const top5Cidades = analiseRegional.slice(0, 5);
+  const top5Shoppings = analiseRegional.slice(0, 5);
 
   return (
     <div className="p-6 space-y-6">
@@ -188,7 +204,7 @@ export const RelatoriosAnalises = () => {
       <Tabs defaultValue="performance" className="space-y-6">
         <TabsList className="grid w-full grid-cols-4">
           <TabsTrigger value="performance">Performance</TabsTrigger>
-          <TabsTrigger value="regional">Análise Regional</TabsTrigger>
+          <TabsTrigger value="regional">Análise por Shopping</TabsTrigger>
           <TabsTrigger value="tendencias">Tendências</TabsTrigger>
           <TabsTrigger value="executivo">Resumo Executivo</TabsTrigger>
         </TabsList>
@@ -214,7 +230,7 @@ export const RelatoriosAnalises = () => {
                       </Badge>
                       <div>
                         <div className="font-medium">{lojista.nome_loja}</div>
-                        <div className="text-sm text-muted-foreground">{lojista.cidade}</div>
+                        <div className="text-sm text-muted-foreground">{lojista.shopping || 'Shopping não informado'}</div>
                       </div>
                     </div>
                     <div className="text-right">
@@ -285,7 +301,7 @@ export const RelatoriosAnalises = () => {
                     <div className="flex items-center justify-between mb-3">
                       <div>
                         <h3 className="font-semibold text-lg">{lojista.nome_loja}</h3>
-                        <p className="text-muted-foreground">{lojista.cidade}</p>
+                        <p className="text-muted-foreground">{lojista.shopping || 'Shopping não informado'}</p>
                       </div>
                       <Badge variant={lojista.cupons_atribuidos > 0 ? 'default' : 'secondary'}>
                         {lojista.cupons_atribuidos > 0 ? 'Ativo' : 'Inativo'}
@@ -328,46 +344,46 @@ export const RelatoriosAnalises = () => {
         <TabsContent value="regional" className="space-y-6">
           <Card>
             <CardHeader>
-              <CardTitle className="flex items-center gap-2">
-                <MapPin className="h-5 w-5" />
-                Análise Regional
-              </CardTitle>
-              <CardDescription>
-                Análise por cidade dos clientes (origem das compras)
-              </CardDescription>
+               <CardTitle className="flex items-center gap-2">
+                 <MapPin className="h-5 w-5" />
+                 Análise por Shopping
+               </CardTitle>
+               <CardDescription>
+                 Análise por shopping dos lojistas
+               </CardDescription>
             </CardHeader>
             <CardContent>
-                <div className="space-y-4">
-                  {analiseRegional.map((regiao) => (
-                    <div key={regiao.cidade} className="border rounded-lg p-4">
-                      <div className="flex items-center justify-between mb-3">
-                        <h3 className="font-semibold text-lg">{regiao.cidade}</h3>
-                        <Badge variant="outline">
-                          {regiao.clientes_ativos} cliente(s) ativo(s)
-                        </Badge>
-                      </div>
-                      
-                      <div className="grid grid-cols-1 md:grid-cols-3 gap-4 text-sm">
-                        <div className="text-center p-3 bg-blue-50 rounded">
-                          <div className="text-2xl font-bold text-blue-600">{regiao.cupons_emitidos}</div>
-                          <div className="text-muted-foreground">Cupons Emitidos</div>
-                        </div>
-                        <div className="text-center p-3 bg-green-50 rounded">
-                          <div className="text-2xl font-bold text-green-600">
-                            R$ {regiao.valor_total_compras.toLocaleString('pt-BR', { maximumFractionDigits: 0 })}
-                          </div>
-                          <div className="text-muted-foreground">Volume Total de Compras</div>
-                        </div>
-                        <div className="text-center p-3 bg-purple-50 rounded">
-                          <div className="text-2xl font-bold text-purple-600">
-                            R$ {regiao.clientes_ativos > 0 ? (regiao.valor_total_compras / regiao.clientes_ativos).toFixed(0) : '0'}
-                          </div>
-                          <div className="text-muted-foreground">Média por Cliente</div>
-                        </div>
-                      </div>
-                    </div>
-                  ))}
-                </div>
+                 <div className="space-y-4">
+                   {analiseRegional.map((regiao) => (
+                     <div key={regiao.shopping} className="border rounded-lg p-4">
+                       <div className="flex items-center justify-between mb-3">
+                         <h3 className="font-semibold text-lg">{regiao.shopping}</h3>
+                         <Badge variant="outline">
+                           {regiao.lojistas_ativos} lojista(s) ativo(s)
+                         </Badge>
+                       </div>
+                       
+                       <div className="grid grid-cols-1 md:grid-cols-3 gap-4 text-sm">
+                         <div className="text-center p-3 bg-blue-50 rounded">
+                           <div className="text-2xl font-bold text-blue-600">{regiao.cupons_atribuidos}</div>
+                           <div className="text-muted-foreground">Cupons Atribuídos</div>
+                         </div>
+                         <div className="text-center p-3 bg-green-50 rounded">
+                           <div className="text-2xl font-bold text-green-600">
+                             R$ {regiao.valor_total_vendas.toLocaleString('pt-BR', { maximumFractionDigits: 0 })}
+                           </div>
+                           <div className="text-muted-foreground">Volume Total de Vendas</div>
+                         </div>
+                         <div className="text-center p-3 bg-purple-50 rounded">
+                           <div className="text-2xl font-bold text-purple-600">
+                             R$ {regiao.lojistas_ativos > 0 ? (regiao.valor_total_vendas / regiao.lojistas_ativos).toFixed(0) : '0'}
+                           </div>
+                           <div className="text-muted-foreground">Média por Lojista</div>
+                         </div>
+                       </div>
+                     </div>
+                   ))}
+                 </div>
             </CardContent>
           </Card>
         </TabsContent>
@@ -447,7 +463,7 @@ export const RelatoriosAnalises = () => {
                     <div>
                       <div className="font-medium">Distribuição Regional</div>
                       <div className="text-sm text-muted-foreground">
-                        Presença em {analiseRegional.length} cidades, com maior concentração em {top5Cidades[0]?.cidade || 'N/A'}.
+                        Presença em {analiseRegional.length} shoppings, com maior concentração em {top5Shoppings[0]?.shopping || 'N/A'}.
                       </div>
                     </div>
                   </div>
