@@ -4,8 +4,8 @@ import { supabase } from '@/integrations/supabase/client';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { useToast } from '@/hooks/use-toast';
 import { Loader2, Gift } from 'lucide-react';
 
@@ -61,7 +61,7 @@ export const AtribuirCuponsManual = ({ lojistaId, onSuccess }: AtribuirCuponsMan
       if (typeof data === 'object' && data !== null) {
         toast({
           title: "Cupons Atribuídos",
-          description: `${(data as any).cupons_atribuidos || 0} cupons atribuídos para ${(data as any).cliente_nome || formData.nome}!`,
+          description: `${(data as any).cupons_atribuidos || 0} cupons ${formData.tipoCliente} atribuídos para ${(data as any).cliente_nome || formData.nome}!`,
         });
       } else {
         toast({
@@ -194,7 +194,7 @@ export const AtribuirCuponsManual = ({ lojistaId, onSuccess }: AtribuirCuponsMan
             </div>
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div className="space-y-2">
               <Label htmlFor="valor">Valor da Compra (R$) *</Label>
               <Input
@@ -208,7 +208,7 @@ export const AtribuirCuponsManual = ({ lojistaId, onSuccess }: AtribuirCuponsMan
                 disabled={isPending}
               />
             </div>
-            
+
             <div className="space-y-2">
               <Label htmlFor="tipoCliente">Tipo de Cliente *</Label>
               <Select 
@@ -233,7 +233,7 @@ export const AtribuirCuponsManual = ({ lojistaId, onSuccess }: AtribuirCuponsMan
                 Cupons a serem atribuídos: <span className="text-primary font-bold">{cuponsCalculados}</span>
               </p>
               <p className="text-xs text-muted-foreground mt-1">
-                1 cupom para cada R$ 100,00 de compra • Tipo: <span className="font-medium">{formData.tipoCliente === 'varejo' ? 'Cliente Varejo' : 'Cliente Atacado'}</span>
+                1 cupom para cada R$ 100,00 de compra • Tipo: <span className="font-semibold capitalize">{formData.tipoCliente}</span>
               </p>
             </div>
           )}

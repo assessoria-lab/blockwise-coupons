@@ -114,7 +114,16 @@ const GestaoSorteios = () => {
         }
       }
 
-      const { data: cupons, error } = await query.order('data_atribuicao', { ascending: true });
+      const { data: cupons, error } = await query
+        .select(`
+          numero_formatado,
+          data_atribuicao,
+          valor_compra,
+          tipo_cliente,
+          clientes(nome, cpf, cidade),
+          lojistas(nome_loja, shopping)
+        `)
+        .order('data_atribuicao', { ascending: true });
 
       if (error) throw error;
 
