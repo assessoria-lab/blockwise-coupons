@@ -99,6 +99,7 @@ const GestaoSorteios = () => {
           numero_formatado,
           data_atribuicao,
           valor_compra,
+          tipo_cliente,
           clientes(nome, cpf, cidade),
           lojistas(nome_loja, shopping)
         `)
@@ -134,7 +135,8 @@ const GestaoSorteios = () => {
         nome_loja: cupom.lojistas?.nome_loja || 'N/A',
         shopping: cupom.lojistas?.shopping || 'N/A',
         data_atribuicao: cupom.data_atribuicao,
-        valor_compra: cupom.valor_compra || 0
+        valor_compra: cupom.valor_compra || 0,
+        tipo_cliente: (cupom.tipo_cliente as 'varejo' | 'atacado') || 'varejo'
       }));
 
       // Gerar PDF com arte

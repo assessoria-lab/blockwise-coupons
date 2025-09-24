@@ -4,6 +4,7 @@ import { supabase } from '@/integrations/supabase/client';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card';
 import { useToast } from '@/hooks/use-toast';
 import { Loader2, Gift } from 'lucide-react';
@@ -19,6 +20,7 @@ interface FormData {
   telefone: string;
   cidade: string;
   valor: number;
+  tipoCliente: 'varejo' | 'atacado';
 }
 
 export const AtribuirCuponsManual = ({ lojistaId, onSuccess }: AtribuirCuponsManualProps) => {
@@ -28,6 +30,7 @@ export const AtribuirCuponsManual = ({ lojistaId, onSuccess }: AtribuirCuponsMan
     telefone: '',
     cidade: '',
     valor: 0,
+    tipoCliente: 'varejo',
   });
   const { toast } = useToast();
 
@@ -40,6 +43,7 @@ export const AtribuirCuponsManual = ({ lojistaId, onSuccess }: AtribuirCuponsMan
         p_cliente_telefone: data.telefone,
         p_cliente_cidade: data.cidade,
         p_valor_compra: data.valor,
+        p_tipo_cliente: data.tipoCliente,
       });
       
       if (error) throw new Error(error.message);
@@ -73,6 +77,7 @@ export const AtribuirCuponsManual = ({ lojistaId, onSuccess }: AtribuirCuponsMan
         telefone: '',
         cidade: '',
         valor: 0,
+        tipoCliente: 'varejo',
       });
       
       onSuccess?.();
@@ -189,18 +194,37 @@ export const AtribuirCuponsManual = ({ lojistaId, onSuccess }: AtribuirCuponsMan
             </div>
           </div>
 
-          <div className="space-y-2">
-            <Label htmlFor="valor">Valor da Compra (R$) *</Label>
-            <Input
-              id="valor"
-              type="number"
-              step="0.01"
-              value={formData.valor || ''}
-              onChange={(e) => setFormData(prev => ({ ...prev, valor: parseFloat(e.target.value) || 0 }))}
-              placeholder="0.00"
-              min="100"
-              disabled={isPending}
-            />
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+            <div className="space-y-2">
+              <Label htmlFor="valor">Valor da Compra (R$) *</Label>
+              <Input
+                id="valor"
+                type="number"
+                step="0.01"
+                value={formData.valor || ''}
+                onChange={(e) => setFormData(prev => ({ ...prev, valor: parseFloat(e.target.value) || 0 }))}
+                placeholder="0.00"
+                min="100"
+                disabled={isPending}
+              />
+            </div>
+            
+            <div className="space-y-2">
+              <Label htmlFor="tipoCliente">Tipo de Cliente *</Label>
+              <Select 
+                value={formData.tipoCliente} 
+                onValueChange={(value: 'varejo' | 'atacado') => setFormData(prev => ({ ...prev, tipoCliente: value }))}
+                disabled={isPending}
+              >
+                <SelectTrigger>
+                  <SelectValue placeholder="Selecione o tipo" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="varejo">Cliente Varejo</SelectItem>
+                  <SelectItem value="atacado">Cliente Atacado</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
           </div>
 
           {formData.valor >= 100 && (
@@ -209,7 +233,7 @@ export const AtribuirCuponsManual = ({ lojistaId, onSuccess }: AtribuirCuponsMan
                 Cupons a serem atribuídos: <span className="text-primary font-bold">{cuponsCalculados}</span>
               </p>
               <p className="text-xs text-muted-foreground mt-1">
-                1 cupom para cada R$ 100,00 de compra
+                1 cupom para cada R$ 100,00 de compra • Tipo: <span className="font-medium">{formData.tipoCliente === 'varejo' ? 'Cliente Varejo' : 'Cliente Atacado'}</span>
               </p>
             </div>
           )}

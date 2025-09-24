@@ -1047,6 +1047,15 @@ export type Database = {
               p_cliente_nome: string
               p_cliente_telefone: string
               p_lojista_id: string
+              p_tipo_cliente?: string
+              p_valor_compra: number
+            }
+          | {
+              p_cliente_cidade: string
+              p_cliente_cpf: string
+              p_cliente_nome: string
+              p_cliente_telefone: string
+              p_lojista_id: string
               p_valor_compra: number
             }
           | {

@@ -9,6 +9,7 @@ interface CupomData {
   shopping: string;
   data_atribuicao: string;
   valor_compra: number;
+  tipo_cliente: 'varejo' | 'atacado';
 }
 
 export const generateCuponsPDF = async (
@@ -142,11 +143,11 @@ export const generateCuponsPDF = async (
           ${cupom.shopping}
         </div>
 
-        <!-- Marcar X dentro da bolinha correta (Varejo para valores <= 150, Atacado para > 150) -->
+        <!-- Marcar X dentro da bolinha correta baseado no tipo_cliente salvo -->
         <div style="
           position: absolute;
           top: 590px;
-          left: ${cupom.valor_compra <= 150 ? '940' : '1150'}px;
+          left: ${cupom.tipo_cliente === 'varejo' ? '940' : '1150'}px;
           width: 20px;
           height: 20px;
           display: flex;
