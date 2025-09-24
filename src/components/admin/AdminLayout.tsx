@@ -45,12 +45,6 @@ const AdminLayout = ({
     current: currentPage === 'rastreamento',
     badge: null
   }, {
-    name: 'Performance de Blocos',
-    href: '/admin/performance',
-    icon: TrendingUp,
-    current: currentPage === 'performance',
-    badge: null
-  }, {
     name: 'Clientes',
     href: '#clientes',
     icon: Users,

@@ -10,7 +10,6 @@ import { HistoricoCupons } from "./components/admin/HistoricoCupons";
 import { DashboardFinanceiro } from "./components/admin/DashboardFinanceiro";
 import { RelatoriosAnalises } from "./components/admin/RelatoriosAnalises";
 import RastreamentoPorBloco from "./components/admin/RastreamentoPorBloco";
-import RelatorioPerformanceBlocos from "./components/admin/RelatorioPerformanceBlocos";
 import DashboardMonitoramento from "./components/admin/DashboardMonitoramento";
 import BusinessIntelligence from "./components/admin/BusinessIntelligence";
 import AuditoriaCompliance from "./components/admin/AuditoriaCompliance";
@@ -31,7 +30,6 @@ const App = () => (
           <Route path="/admin/financeiro" element={<DashboardFinanceiro />} />
           <Route path="/admin/lojistas" element={<GestaoLojistas />} />
           <Route path="/admin/rastreamento" element={<RastreamentoPorBloco />} />
-          <Route path="/admin/performance" element={<RelatorioPerformanceBlocos />} />
           <Route path="/admin/monitoramento" element={<DashboardMonitoramento />} />
           <Route path="/admin/business-intelligence" element={<BusinessIntelligence />} />
           <Route path="/admin/auditoria" element={<AuditoriaCompliance />} />
