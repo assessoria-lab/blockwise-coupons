@@ -93,18 +93,11 @@ const AdminLayout = ({
       `}>
         <div className="flex flex-col h-full">
           {/* Logo/Header */}
-          <div className={`flex items-center ${sidebarCollapsed ? 'justify-center px-2' : 'justify-between px-4'} h-16 border-b border-primary-foreground/20`}>
-            {!sidebarCollapsed && <div className="flex items-center space-x-3">
-                <img src="/lovable-uploads/30762c46-4536-4a6c-bd54-a016f6a4ff1c.png" alt="Show de Prêmios - Vem Pra 44" className="h-8 w-auto" />
-                
+          <div className={`flex items-center ${sidebarCollapsed ? 'justify-center px-2' : 'justify-center px-4'} h-16 border-b border-primary-foreground/20`}>
+            {!sidebarCollapsed && <div className="flex items-center justify-center w-full">
+                <img src="/lovable-uploads/30762c46-4536-4a6c-bd54-a016f6a4ff1c.png" alt="Show de Prêmios - Vem Pra 44" className="h-16 w-auto" />
               </div>}
-            {sidebarCollapsed && <img src="/lovable-uploads/30762c46-4536-4a6c-bd54-a016f6a4ff1c.png" alt="Show de Prêmios" className="h-6 w-auto" />}
-            <Button variant="ghost" size="sm" className="text-primary-foreground hover:bg-primary-foreground/10 lg:flex hidden" onClick={() => setSidebarCollapsed(!sidebarCollapsed)}>
-              <ChevronLeft className={`h-4 w-4 transition-transform ${sidebarCollapsed ? 'rotate-180' : ''}`} />
-            </Button>
-            <Button variant="ghost" size="sm" className="lg:hidden text-primary-foreground hover:bg-primary-foreground/10" onClick={() => setSidebarOpen(false)}>
-              <X className="h-4 w-4" />
-            </Button>
+            {sidebarCollapsed && <img src="/lovable-uploads/30762c46-4536-4a6c-bd54-a016f6a4ff1c.png" alt="Show de Prêmios" className="h-12 w-auto" />}
           </div>
 
           {/* Navigation */}
