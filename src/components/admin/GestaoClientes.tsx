@@ -1,13 +1,17 @@
 import { useState } from 'react';
-import { useQuery } from '@tanstack/react-query';
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import { Users, Search, Filter, Eye, Phone, Mail, Store, Receipt } from 'lucide-react';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { Label } from '@/components/ui/label';
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
+import { Users, Search, Filter, Eye, Phone, Mail, Store, Receipt, Plus, UserPlus } from 'lucide-react';
 import { format } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
+import { useToast } from '@/hooks/use-toast';
 
 interface Cliente {
   id: string;
@@ -24,10 +28,62 @@ interface Cliente {
 }
 
 const GestaoClientes = () => {
+  const { toast } = useToast();
+  const queryClient = useQueryClient();
+  
   const [filtros, setFiltros] = useState({
     busca: '',
     cidade: '',
     status: ''
+  });
+
+  const [showAddDialog, setShowAddDialog] = useState(false);
+  const [formData, setFormData] = useState({
+    nome: '',
+    cpf: '',
+    telefone: '',
+    cidade: '',
+    valor_compra: '',
+    lojista_id: '',
+    tipo_cliente: 'varejo'
+  });
+
+  // Buscar lojas disponíveis
+  const { data: lojistas } = useQuery({
+    queryKey: ['lojistas-ativas'],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from('lojistas')
+        .select(`
+          id,
+          nome_loja,
+          cidade,
+          shopping
+        `)
+        .eq('status', 'ativo');
+
+      if (error) throw error;
+
+      // Buscar cupons disponíveis para cada lojista
+      const lojistasComCupons = await Promise.all(
+        (data || []).map(async (lojista) => {
+          const { data: blocos } = await supabase
+            .from('blocos')
+            .select('cupons_disponiveis')
+            .eq('lojista_id', lojista.id)
+            .eq('status', 'vendido');
+
+          const cupons_disponiveis = blocos?.reduce((acc, bloco) => acc + (bloco.cupons_disponiveis || 0), 0) || 0;
+
+          return {
+            ...lojista,
+            cupons_disponiveis
+          };
+        })
+      );
+
+      return lojistasComCupons.filter(l => l.cupons_disponiveis > 0);
+    }
   });
 
   const { data: clientes, isLoading } = useQuery({
@@ -116,6 +172,85 @@ const GestaoClientes = () => {
       };
     }
   });
+
+  // Mutation para atribuir cupons
+  const atribuirCuponsMutation = useMutation({
+    mutationFn: async (dados: typeof formData) => {
+      const { data, error } = await supabase.rpc('atribuir_cupons_para_cliente', {
+        p_lojista_id: dados.lojista_id,
+        p_cliente_cpf: dados.cpf.replace(/\D/g, ''),
+        p_cliente_nome: dados.nome,
+        p_cliente_telefone: dados.telefone,
+        p_valor_compra: parseFloat(dados.valor_compra),
+        p_tipo_cliente: dados.tipo_cliente
+      });
+
+      if (error) throw error;
+
+      const result = data as any;
+      if (!result.sucesso) {
+        throw new Error(result.mensagem);
+      }
+
+      return result;
+    },
+    onSuccess: (data) => {
+      toast({
+        title: "Cupons atribuídos com sucesso!",
+        description: data.mensagem,
+      });
+      
+      setFormData({
+        nome: '',
+        cpf: '',
+        telefone: '',
+        cidade: '',
+        valor_compra: '',
+        lojista_id: '',
+        tipo_cliente: 'varejo'
+      });
+      
+      setShowAddDialog(false);
+      queryClient.invalidateQueries({ queryKey: ['clientes'] });
+      queryClient.invalidateQueries({ queryKey: ['estatisticas-clientes'] });
+      queryClient.invalidateQueries({ queryKey: ['lojistas-ativas'] });
+    },
+    onError: (error: any) => {
+      toast({
+        title: "Erro ao atribuir cupons",
+        description: error.message,
+        variant: "destructive",
+      });
+    }
+  });
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    
+    if (!formData.nome || !formData.cpf || !formData.valor_compra || !formData.lojista_id) {
+      toast({
+        title: "Campos obrigatórios",
+        description: "Preencha nome, CPF, valor da compra e selecione uma loja.",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    const valorCompra = parseFloat(formData.valor_compra);
+    if (valorCompra < 100) {
+      toast({
+        title: "Valor insuficiente",
+        description: "O valor mínimo para gerar cupom é R$ 100,00.",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    atribuirCuponsMutation.mutate(formData);
+  };
+
+  const cuponsCalculados = formData.valor_compra ? Math.floor(parseFloat(formData.valor_compra) / 100) : 0;
+  const lojistaSelecionada = lojistas?.find(l => l.id === formData.lojista_id);
 
   const formatCPF = (cpf: string) => {
     return cpf?.replace(/(\d{3})(\d{3})(\d{3})(\d{2})/, '$1.$2.$3-$4') || '';
@@ -213,6 +348,151 @@ const GestaoClientes = () => {
             </div>
           </CardContent>
         </Card>
+      </div>
+
+      {/* Botão Adicionar Cliente/Compra */}
+      <div className="flex justify-end">
+        <Dialog open={showAddDialog} onOpenChange={setShowAddDialog}>
+          <DialogTrigger asChild>
+            <Button className="gap-2">
+              <Plus className="h-4 w-4" />
+              Adicionar Cliente/Compra
+            </Button>
+          </DialogTrigger>
+          <DialogContent className="sm:max-w-md">
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-2">
+                <UserPlus className="h-5 w-5" />
+                Adicionar Cliente/Compra Manual
+              </DialogTitle>
+            </DialogHeader>
+            <form onSubmit={handleSubmit} className="space-y-4">
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <Label htmlFor="nome">Nome do Cliente *</Label>
+                  <Input
+                    id="nome"
+                    value={formData.nome}
+                    onChange={(e) => setFormData(prev => ({ ...prev, nome: e.target.value }))}
+                    placeholder="Nome completo"
+                    required
+                  />
+                </div>
+                <div>
+                  <Label htmlFor="cpf">CPF *</Label>
+                  <Input
+                    id="cpf"
+                    value={formData.cpf}
+                    onChange={(e) => setFormData(prev => ({ ...prev, cpf: e.target.value }))}
+                    placeholder="000.000.000-00"
+                    required
+                  />
+                </div>
+              </div>
+
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <Label htmlFor="telefone">Telefone</Label>
+                  <Input
+                    id="telefone"
+                    value={formData.telefone}
+                    onChange={(e) => setFormData(prev => ({ ...prev, telefone: e.target.value }))}
+                    placeholder="(62) 99999-9999"
+                  />
+                </div>
+                <div>
+                  <Label htmlFor="cidade">Cidade</Label>
+                  <Input
+                    id="cidade"
+                    value={formData.cidade}
+                    onChange={(e) => setFormData(prev => ({ ...prev, cidade: e.target.value }))}
+                    placeholder="Cidade do cliente"
+                  />
+                </div>
+              </div>
+
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <Label htmlFor="valor_compra">Valor da Compra (R$) *</Label>
+                  <Input
+                    id="valor_compra"
+                    type="number"
+                    step="0.01"
+                    min="100"
+                    value={formData.valor_compra}
+                    onChange={(e) => setFormData(prev => ({ ...prev, valor_compra: e.target.value }))}
+                    placeholder="100.00"
+                    required
+                  />
+                </div>
+                <div>
+                  <Label htmlFor="tipo_cliente">Tipo de Cliente</Label>
+                  <Select value={formData.tipo_cliente} onValueChange={(value) => setFormData(prev => ({ ...prev, tipo_cliente: value }))}>
+                    <SelectTrigger>
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="varejo">Varejo</SelectItem>
+                      <SelectItem value="atacado">Atacado</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+              </div>
+
+              <div>
+                <Label htmlFor="lojista">Loja *</Label>
+                <Select value={formData.lojista_id} onValueChange={(value) => setFormData(prev => ({ ...prev, lojista_id: value }))}>
+                  <SelectTrigger>
+                    <SelectValue placeholder="Selecione uma loja" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {lojistas?.map((lojista) => (
+                      <SelectItem key={lojista.id} value={lojista.id}>
+                        {lojista.nome_loja} - {lojista.cidade} ({lojista.cupons_disponiveis} cupons)
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+
+              {cuponsCalculados > 0 && lojistaSelecionada && (
+                <div className="bg-muted/50 p-4 rounded-lg">
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <p className="text-sm font-medium">
+                        Cupons a serem gerados: <span className="text-primary font-bold">{cuponsCalculados}</span>
+                      </p>
+                      <p className="text-xs text-muted-foreground mt-1">
+                        Loja selecionada tem {lojistaSelecionada.cupons_disponiveis} cupons disponíveis
+                      </p>
+                    </div>
+                    {cuponsCalculados > lojistaSelecionada.cupons_disponiveis && (
+                      <Badge variant="destructive">Saldo Insuficiente</Badge>
+                    )}
+                  </div>
+                </div>
+              )}
+
+              <div className="flex gap-2">
+                <Button 
+                  type="button" 
+                  variant="outline" 
+                  onClick={() => setShowAddDialog(false)}
+                  className="flex-1"
+                >
+                  Cancelar
+                </Button>
+                <Button 
+                  type="submit"
+                  disabled={atribuirCuponsMutation.isPending || cuponsCalculados === 0 || (lojistaSelecionada && cuponsCalculados > lojistaSelecionada.cupons_disponiveis)}
+                  className="flex-1"
+                >
+                  {atribuirCuponsMutation.isPending ? 'Processando...' : 'Atribuir Cupons'}
+                </Button>
+              </div>
+            </form>
+          </DialogContent>
+        </Dialog>
       </div>
 
       {/* Filtros */}
