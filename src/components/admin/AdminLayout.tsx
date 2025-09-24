@@ -13,7 +13,6 @@ import {
   Search,
   TrendingUp,
   Activity,
-  Brain,
   Shield
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
@@ -71,13 +70,6 @@ const AdminLayout = ({ children, currentPage, onNavigate }: AdminLayoutProps) =>
       icon: TrendingUp, 
       current: currentPage === 'performance',
       badge: null
-    },
-    { 
-      name: 'Business Intelligence', 
-      href: '/admin/business-intelligence', 
-      icon: Brain, 
-      current: currentPage === 'business-intelligence',
-      badge: 'IA'
     },
     { 
       name: 'Clientes', 
