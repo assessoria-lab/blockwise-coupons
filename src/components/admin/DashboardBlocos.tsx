@@ -7,6 +7,8 @@ import { Progress } from '@/components/ui/progress';
 import { Button } from '@/components/ui/button';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { GraficoVolumesCupons } from './GraficoVolumesCupons';
+import { GraficoCidadesClientes } from './GraficoCidadesClientes';
+import { GraficoSegmentosLojistas } from './GraficoSegmentosLojistas';
 import { RankingLojistas } from './RankingLojistas';
 import { RankingShopping } from './RankingShopping';
 import { 
@@ -287,6 +289,12 @@ const DashboardBlocos = () => {
       {/* Gráfico Volumes Cupons */}
       <section>
         <GraficoVolumesCupons />
+      </section>
+
+      {/* Gráficos de Pizza */}
+      <section className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        <GraficoCidadesClientes />
+        <GraficoSegmentosLojistas />
       </section>
 
       {/* Ranking de Lojistas */}
