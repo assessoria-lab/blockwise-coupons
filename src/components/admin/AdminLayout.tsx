@@ -11,7 +11,9 @@ import {
   BarChart3,
   ChevronLeft,
   Search,
-  TrendingUp
+  TrendingUp,
+  Activity,
+  Brain
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -35,6 +37,13 @@ const AdminLayout = ({ children, currentPage, onNavigate }: AdminLayoutProps) =>
       badge: null
     },
     { 
+      name: 'Monitoramento', 
+      href: '/admin/monitoramento', 
+      icon: Activity, 
+      current: currentPage === 'monitoramento',
+      badge: 'Tempo Real'
+    },
+    { 
       name: 'Gestão de Lojistas', 
       href: '#lojistas', 
       icon: Store, 
@@ -53,7 +62,7 @@ const AdminLayout = ({ children, currentPage, onNavigate }: AdminLayoutProps) =>
       href: '/admin/rastreamento', 
       icon: Search, 
       current: currentPage === 'rastreamento',
-      badge: 'Novo'
+      badge: null
     },
     { 
       name: 'Performance de Blocos', 
@@ -61,6 +70,13 @@ const AdminLayout = ({ children, currentPage, onNavigate }: AdminLayoutProps) =>
       icon: TrendingUp, 
       current: currentPage === 'performance',
       badge: null
+    },
+    { 
+      name: 'Business Intelligence', 
+      href: '/admin/business-intelligence', 
+      icon: Brain, 
+      current: currentPage === 'business-intelligence',
+      badge: 'IA'
     },
     { 
       name: 'Clientes', 

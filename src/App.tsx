@@ -11,6 +11,8 @@ import { DashboardFinanceiro } from "./components/admin/DashboardFinanceiro";
 import { RelatoriosAnalises } from "./components/admin/RelatoriosAnalises";
 import RastreamentoPorBloco from "./components/admin/RastreamentoPorBloco";
 import RelatorioPerformanceBlocos from "./components/admin/RelatorioPerformanceBlocos";
+import DashboardMonitoramento from "./components/admin/DashboardMonitoramento";
+import BusinessIntelligence from "./components/admin/BusinessIntelligence";
 
 const queryClient = new QueryClient();
 
@@ -28,6 +30,8 @@ const App = () => (
           <Route path="/admin/lojistas" element={<GestaoLojistas />} />
           <Route path="/admin/rastreamento" element={<RastreamentoPorBloco />} />
           <Route path="/admin/performance" element={<RelatorioPerformanceBlocos />} />
+          <Route path="/admin/monitoramento" element={<DashboardMonitoramento />} />
+          <Route path="/admin/business-intelligence" element={<BusinessIntelligence />} />
           {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
           <Route path="*" element={<NotFound />} />
         </Routes>

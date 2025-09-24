@@ -944,6 +944,14 @@ export type Database = {
       }
     }
     Functions: {
+      analise_demanda_cupons: {
+        Args: { p_lojista_id?: string }
+        Returns: Json
+      }
+      analise_padroes_temporais: {
+        Args: Record<PropertyKey, never>
+        Returns: Json
+      }
       atribuir_cupons_para_cliente: {
         Args:
           | {
@@ -1198,6 +1206,10 @@ export type Database = {
           metadata: Json
           similarity: number
         }[]
+      }
+      metricas_tempo_real: {
+        Args: Record<PropertyKey, never>
+        Returns: Json
       }
       refresh_dashboard_views: {
         Args: Record<PropertyKey, never>
