@@ -120,14 +120,14 @@ const MetricCard = ({ title, value, subtitle, badge, icon, variant }: MetricCard
 
 const DashboardBlocos = () => {
   const { metrics, isLoading } = useDashboardMetrics();
-  const [lojistaFiltro, setLojistaFiltro] = useState<string>('');
+  const [lojistaFiltro, setLojistaFiltro] = useState<string>('all');
 
   // Query para performance dos blocos
   const { data: utilizacaoBlocos, isLoading: loadingPerformance } = useQuery<UtilizacaoBloco[]>({
     queryKey: ['utilizacao-blocos', lojistaFiltro],
     queryFn: async () => {
       const { data, error } = await supabase.rpc('relatorio_utilizacao_blocos', {
-        p_lojista_id: lojistaFiltro || null
+        p_lojista_id: (lojistaFiltro && lojistaFiltro !== 'all') ? lojistaFiltro : null
       });
       if (error) throw new Error(error.message);
       return data || [];
@@ -300,7 +300,7 @@ const DashboardBlocos = () => {
                   <SelectValue placeholder="Filtrar por lojista" />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="">Todos os lojistas</SelectItem>
+                  <SelectItem value="all">Todos os lojistas</SelectItem>
                   {lojistas?.map((lojista) => (
                     <SelectItem key={lojista.id} value={lojista.id}>
                       {lojista.nome_loja}
@@ -308,8 +308,8 @@ const DashboardBlocos = () => {
                   ))}
                 </SelectContent>
               </Select>
-              {lojistaFiltro && (
-                <Button variant="outline" onClick={() => setLojistaFiltro('')}>
+              {lojistaFiltro && lojistaFiltro !== 'all' && (
+                <Button variant="outline" onClick={() => setLojistaFiltro('all')}>
                   Limpar filtro
                 </Button>
               )}

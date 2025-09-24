@@ -28,8 +28,8 @@ const AuditoriaCompliance = () => {
   const [filtros, setFiltros] = useState({
     dataInicio: format(subDays(new Date(), 7), 'yyyy-MM-dd'),
     dataFim: format(new Date(), 'yyyy-MM-dd'),
-    tabela: '',
-    nivel: '',
+    tabela: 'all',
+    nivel: 'all',
     busca: ''
   });
 
@@ -41,7 +41,7 @@ const AuditoriaCompliance = () => {
       const { data, error } = await supabase.rpc('consultar_logs_auditoria', {
         p_data_inicio: filtros.dataInicio || null,
         p_data_fim: filtros.dataFim || null,
-        p_tabela: filtros.tabela || null,
+        p_tabela: (filtros.tabela && filtros.tabela !== 'all') ? filtros.tabela : null,
         p_limite: 100
       });
 
@@ -138,7 +138,7 @@ const AuditoriaCompliance = () => {
   };
 
   const filteredLogs = logsAuditoria?.filter(log => 
-    !filtros.nivel || log.nivel === filtros.nivel
+    (!filtros.nivel || filtros.nivel === 'all') || log.nivel === filtros.nivel
   ).filter(log =>
     !filtros.busca || 
     log.evento.toLowerCase().includes(filtros.busca.toLowerCase()) ||
@@ -239,7 +239,7 @@ const AuditoriaCompliance = () => {
                   <SelectValue placeholder="Todas" />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="">Todas</SelectItem>
+                  <SelectItem value="all">Todas</SelectItem>
                   <SelectItem value="lojistas">Lojistas</SelectItem>
                   <SelectItem value="blocos">Blocos</SelectItem>
                   <SelectItem value="cupons">Cupons</SelectItem>
@@ -254,7 +254,7 @@ const AuditoriaCompliance = () => {
                   <SelectValue placeholder="Todos" />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="">Todos</SelectItem>
+                  <SelectItem value="all">Todos</SelectItem>
                   <SelectItem value="info">Info</SelectItem>
                   <SelectItem value="warning">Warning</SelectItem>
                   <SelectItem value="error">Error</SelectItem>
