@@ -4,6 +4,7 @@ import DashboardBlocos from '@/components/admin/DashboardBlocos';
 import GestaoPoolBlocos from '@/components/admin/GestaoPoolBlocos';
 import ConfiguracoesSistema from '@/components/admin/ConfiguracoesSistema';
 import GestaoLojistas from './GestaoLojistas';
+import { RelatoriosAnalises } from '@/components/admin/RelatoriosAnalises';
 
 const Index = () => {
   const [currentPage, setCurrentPage] = useState('dashboard');
@@ -20,6 +21,8 @@ const Index = () => {
         return <GestaoLojistas />;
       case 'blocos':
         return <GestaoPoolBlocos />;
+      case 'relatorios':
+        return <RelatoriosAnalises />;
       case 'configuracoes':
         return <ConfiguracoesSistema />;
       default:
