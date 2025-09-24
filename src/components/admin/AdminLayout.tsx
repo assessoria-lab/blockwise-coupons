@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { LayoutDashboard, Package, Store, Users, Settings, Menu, X, Trophy, BarChart3, ChevronLeft, ChevronRight, Search, TrendingUp, Activity, Shield } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
+import { useMonitoramentoRealTime } from '@/hooks/useMonitoramentoRealTime';
 interface AdminLayoutProps {
   children: React.ReactNode;
   currentPage: string;
@@ -14,6 +15,7 @@ const AdminLayout = ({
 }: AdminLayoutProps) => {
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
+  const { metricas } = useMonitoramentoRealTime();
   const navigation = [{
     name: 'Dashboard',
     href: '#dashboard',
@@ -154,9 +156,11 @@ const AdminLayout = ({
 
           <div className="flex flex-1 gap-x-4 self-stretch lg:gap-x-6">
             <div className="flex items-center gap-x-4 lg:gap-x-6 ml-auto">
-              <Badge variant="outline" className="bg-success text-success-foreground border-success/20 px-3 py-1">
-                <div className="w-2 h-2 bg-success rounded-full mr-2"></div>
-                Sistema Online
+              <Badge variant="outline" className="bg-primary text-primary-foreground border-primary/20 px-3 py-1">
+                <div className="text-xs font-medium">
+                  {metricas ? `${metricas.cupons_atribuidos_total.toLocaleString()}/${metricas.cupons_disponiveis.toLocaleString()}` : '--/--'}
+                </div>
+                <span className="text-xs ml-1">Atribuídos/Disponíveis</span>
               </Badge>
             </div>
           </div>
