@@ -7,6 +7,7 @@ import GestaoLojistas from './GestaoLojistas';
 import { RelatoriosAnalises } from '@/components/admin/RelatoriosAnalises';
 import GestaoClientes from '@/components/admin/GestaoClientes';
 import GestaoSorteios from '@/components/admin/GestaoSorteios';
+import DashboardMonitoramento from '@/components/admin/DashboardMonitoramento';
 
 const Index = () => {
   const [currentPage, setCurrentPage] = useState('dashboard');
@@ -19,6 +20,8 @@ const Index = () => {
     switch (currentPage) {
       case 'dashboard':
         return <DashboardBlocos />;
+      case 'monitoramento':
+        return <DashboardMonitoramento />;
       case 'lojistas':
         return <GestaoLojistas />;
       case 'blocos':

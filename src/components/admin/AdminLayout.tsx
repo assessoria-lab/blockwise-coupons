@@ -38,7 +38,7 @@ const AdminLayout = ({ children, currentPage, onNavigate }: AdminLayoutProps) =>
     },
     { 
       name: 'Monitoramento', 
-      href: '/admin/monitoramento', 
+      href: '#monitoramento', 
       icon: Activity, 
       current: currentPage === 'monitoramento',
       badge: 'Tempo Real'
