@@ -107,7 +107,6 @@ const AdminLayout = ({
                             {item.badge}
                           </Badge>}
                       </>}
-                    {sidebarCollapsed && item.badge && <div className="absolute -top-1 -right-1 w-2 h-2 bg-accent rounded-full"></div>}
                   </a>
                 </div>;
           })}
