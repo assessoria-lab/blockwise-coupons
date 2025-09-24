@@ -409,6 +409,87 @@ export type Database = {
         }
         Relationships: []
       }
+      ganhadores_sorteios: {
+        Row: {
+          cliente_id: string | null
+          created_at: string
+          cupom_id: string | null
+          data_sorteio: string
+          id: string
+          lojista_id: string | null
+          numero_cupom: string
+          observacoes: string | null
+          premio: string
+          tipo_sorteio: string
+          updated_at: string
+          valor_premio: number
+        }
+        Insert: {
+          cliente_id?: string | null
+          created_at?: string
+          cupom_id?: string | null
+          data_sorteio?: string
+          id?: string
+          lojista_id?: string | null
+          numero_cupom: string
+          observacoes?: string | null
+          premio: string
+          tipo_sorteio?: string
+          updated_at?: string
+          valor_premio?: number
+        }
+        Update: {
+          cliente_id?: string | null
+          created_at?: string
+          cupom_id?: string | null
+          data_sorteio?: string
+          id?: string
+          lojista_id?: string | null
+          numero_cupom?: string
+          observacoes?: string | null
+          premio?: string
+          tipo_sorteio?: string
+          updated_at?: string
+          valor_premio?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "ganhadores_sorteios_cliente_id_fkey"
+            columns: ["cliente_id"]
+            isOneToOne: false
+            referencedRelation: "clientes"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "ganhadores_sorteios_cupom_id_fkey"
+            columns: ["cupom_id"]
+            isOneToOne: false
+            referencedRelation: "cupons"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "ganhadores_sorteios_cupom_id_fkey"
+            columns: ["cupom_id"]
+            isOneToOne: false
+            referencedRelation: "mv_historico_cupons"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "ganhadores_sorteios_lojista_id_fkey"
+            columns: ["lojista_id"]
+            isOneToOne: false
+            referencedRelation: "lojistas"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "ganhadores_sorteios_lojista_id_fkey"
+            columns: ["lojista_id"]
+            isOneToOne: false
+            referencedRelation: "mv_ranking_lojistas"
+            referencedColumns: ["lojista_id"]
+          },
+        ]
+      }
       h_hospedagem: {
         Row: {
           content: string | null
