@@ -21,45 +21,44 @@ interface RankingLojista {
 }
 
 const fetchRankingLojistas = async (): Promise<RankingLojista[]> => {
-  const { data, error } = await supabase
+  // Buscar lojistas ativos
+  const { data: lojistas, error: errorLojistas } = await supabase
     .from('lojistas')
-    .select(`
-      id,
-      nome_loja,
-      cidade,
-      data_ultima_compra,
-      blocos!lojistas_id_fkey (
-        id,
-        status,
-        cupons_atribuidos,
-        cupons_disponiveis
-      ),
-      cupons!cupons_lojista_id_fkey (
-        id,
-        status,
-        valor_compra,
-        data_atribuicao,
-        cliente_id
-      )
-    `)
+    .select('id, nome_loja, cidade, data_ultima_compra')
     .eq('status', 'ativo')
     .order('nome_loja');
 
-  if (error) throw error;
+  if (errorLojistas) throw errorLojistas;
+
+  // Buscar todos os blocos vendidos
+  const { data: blocos, error: errorBlocos } = await supabase
+    .from('blocos')
+    .select('id, lojista_id, status, cupons_atribuidos, cupons_disponiveis')
+    .eq('status', 'vendido')
+    .not('lojista_id', 'is', null);
+
+  if (errorBlocos) throw errorBlocos;
+
+  // Buscar todos os cupons atribuídos
+  const { data: cupons, error: errorCupons } = await supabase
+    .from('cupons')
+    .select('id, lojista_id, status, valor_compra, data_atribuicao, cliente_id')
+    .eq('status', 'atribuido')
+    .not('lojista_id', 'is', null);
+
+  if (errorCupons) throw errorCupons;
 
   // Processar dados para criar o ranking
-  const rankingData: RankingLojista[] = (data || []).map(lojista => {
-    const blocos = lojista.blocos || [];
-    const cupons = lojista.cupons || [];
+  const rankingData: RankingLojista[] = (lojistas || []).map(lojista => {
+    const blocosLojista = (blocos || []).filter(b => b.lojista_id === lojista.id);
+    const cuponsLojista = (cupons || []).filter(c => c.lojista_id === lojista.id);
     
-    const blocosVendidos = blocos.filter(b => b.status === 'vendido');
-    const cuponsAtribuidos = cupons.filter(c => c.status === 'atribuido');
-    const cuponsDisponiveis = blocos.reduce((acc, b) => acc + (b.cupons_disponiveis || 0), 0);
-    const valorTotalGerado = cuponsAtribuidos.reduce((acc, c) => acc + (c.valor_compra || 0), 0);
-    const clientesUnicos = new Set(cuponsAtribuidos.map(c => c.cliente_id)).size;
+    const cuponsDisponiveis = blocosLojista.reduce((acc, b) => acc + (b.cupons_disponiveis || 0), 0);
+    const valorTotalGerado = cuponsLojista.reduce((acc, c) => acc + (c.valor_compra || 0), 0);
+    const clientesUnicos = new Set(cuponsLojista.map(c => c.cliente_id)).size;
     
     // Data da última atribuição
-    const datasAtribuicao = cuponsAtribuidos
+    const datasAtribuicao = cuponsLojista
       .map(c => c.data_atribuicao)
       .filter(d => d)
       .sort()
@@ -67,17 +66,17 @@ const fetchRankingLojistas = async (): Promise<RankingLojista[]> => {
     const ultimaAtribuicao = datasAtribuicao[0] || null;
     
     // Percentual de utilização
-    const totalCuponsComprados = blocosVendidos.length * 100;
+    const totalCuponsComprados = blocosLojista.length * 100;
     const percentualUtilizacao = totalCuponsComprados > 0 
-      ? (cuponsAtribuidos.length / totalCuponsComprados) * 100 
+      ? (cuponsLojista.length / totalCuponsComprados) * 100 
       : 0;
 
     return {
       lojista_id: lojista.id,
       nome_loja: lojista.nome_loja,
       cidade: lojista.cidade,
-      total_blocos_comprados: blocosVendidos.length,
-      total_cupons_atribuidos: cuponsAtribuidos.length,
+      total_blocos_comprados: blocosLojista.length,
+      total_cupons_atribuidos: cuponsLojista.length,
       cupons_disponiveis: cuponsDisponiveis,
       valor_total_gerado: valorTotalGerado,
       clientes_unicos: clientesUnicos,
