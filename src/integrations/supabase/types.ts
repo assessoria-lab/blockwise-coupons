@@ -55,40 +55,43 @@ export type Database = {
       }
       blocos: {
         Row: {
-          created_at: string
-          cupons_atribuidos: number
-          cupons_disponiveis: number
-          cupons_totais: number
+          created_at: string | null
+          cupons_atribuidos: number | null
+          cupons_disponiveis: number | null
+          cupons_no_bloco: number | null
           data_venda: string | null
           id: string
           lojista_id: string | null
-          numero_bloco: number
-          status: string
-          updated_at: string
+          lote_id: string | null
+          numero_bloco: string
+          status: string | null
+          updated_at: string | null
         }
         Insert: {
-          created_at?: string
-          cupons_atribuidos?: number
-          cupons_disponiveis?: number
-          cupons_totais?: number
+          created_at?: string | null
+          cupons_atribuidos?: number | null
+          cupons_disponiveis?: number | null
+          cupons_no_bloco?: number | null
           data_venda?: string | null
           id?: string
           lojista_id?: string | null
-          numero_bloco: number
-          status?: string
-          updated_at?: string
+          lote_id?: string | null
+          numero_bloco: string
+          status?: string | null
+          updated_at?: string | null
         }
         Update: {
-          created_at?: string
-          cupons_atribuidos?: number
-          cupons_disponiveis?: number
-          cupons_totais?: number
+          created_at?: string | null
+          cupons_atribuidos?: number | null
+          cupons_disponiveis?: number | null
+          cupons_no_bloco?: number | null
           data_venda?: string | null
           id?: string
           lojista_id?: string | null
-          numero_bloco?: number
-          status?: string
-          updated_at?: string
+          lote_id?: string | null
+          numero_bloco?: string
+          status?: string | null
+          updated_at?: string | null
         }
         Relationships: [
           {
@@ -160,38 +163,77 @@ export type Database = {
         }
         Relationships: []
       }
+      configuracoes_sistema: {
+        Row: {
+          categoria: string | null
+          chave: string
+          created_at: string | null
+          descricao: string | null
+          id: string
+          tipo: string | null
+          updated_at: string | null
+          valor: string
+        }
+        Insert: {
+          categoria?: string | null
+          chave: string
+          created_at?: string | null
+          descricao?: string | null
+          id?: string
+          tipo?: string | null
+          updated_at?: string | null
+          valor: string
+        }
+        Update: {
+          categoria?: string | null
+          chave?: string
+          created_at?: string | null
+          descricao?: string | null
+          id?: string
+          tipo?: string | null
+          updated_at?: string | null
+          valor?: string
+        }
+        Relationships: []
+      }
       cupons: {
         Row: {
           bloco_id: string
           cliente_id: string | null
-          created_at: string
+          created_at: string | null
           data_atribuicao: string | null
+          data_uso: string | null
           id: string
-          lojista_id: string
-          numero_cupom: string
-          status: string
+          lojista_id: string | null
+          numero_cupom: number
+          numero_formatado: string | null
+          status: string | null
           valor_compra: number | null
         }
         Insert: {
           bloco_id: string
           cliente_id?: string | null
-          created_at?: string
+          created_at?: string | null
           data_atribuicao?: string | null
+          data_uso?: string | null
           id?: string
-          lojista_id: string
-          numero_cupom: string
-          status?: string
+          lojista_id?: string | null
+          numero_cupom?: number
+          numero_formatado?: string | null
+          status?: string | null
           valor_compra?: number | null
         }
         Update: {
           bloco_id?: string
           cliente_id?: string | null
-          created_at?: string
+          created_at?: string | null
           data_atribuicao?: string | null
+          data_uso?: string | null
           id?: string
-          lojista_id?: string
-          numero_cupom?: string
-          status?: string
+          lojista_id?: string | null
+          numero_cupom?: number
+          numero_formatado?: string | null
+          status?: string | null
           valor_compra?: number | null
         }
         Relationships: [
@@ -377,6 +419,45 @@ export type Database = {
         }
         Relationships: []
       }
+      logs_sistema: {
+        Row: {
+          created_at: string | null
+          dados_contexto: Json | null
+          descricao: string | null
+          evento: string
+          id: string
+          ip_address: unknown | null
+          nivel: string | null
+          user_agent: string | null
+          usuario_email: string | null
+          usuario_id: string | null
+        }
+        Insert: {
+          created_at?: string | null
+          dados_contexto?: Json | null
+          descricao?: string | null
+          evento: string
+          id?: string
+          ip_address?: unknown | null
+          nivel?: string | null
+          user_agent?: string | null
+          usuario_email?: string | null
+          usuario_id?: string | null
+        }
+        Update: {
+          created_at?: string | null
+          dados_contexto?: Json | null
+          descricao?: string | null
+          evento?: string
+          id?: string
+          ip_address?: unknown | null
+          nivel?: string | null
+          user_agent?: string | null
+          usuario_email?: string | null
+          usuario_id?: string | null
+        }
+        Relationships: []
+      }
       lojistas: {
         Row: {
           cidade: string
@@ -512,6 +593,30 @@ export type Database = {
         }
         Relationships: []
       }
+      user_roles: {
+        Row: {
+          created_at: string | null
+          id: string
+          role: Database["public"]["Enums"]["app_role"]
+          updated_at: string | null
+          user_id: string
+        }
+        Insert: {
+          created_at?: string | null
+          id?: string
+          role: Database["public"]["Enums"]["app_role"]
+          updated_at?: string | null
+          user_id: string
+        }
+        Update: {
+          created_at?: string | null
+          id?: string
+          role?: Database["public"]["Enums"]["app_role"]
+          updated_at?: string | null
+          user_id?: string
+        }
+        Relationships: []
+      }
       vendas_blocos: {
         Row: {
           created_at: string
@@ -587,6 +692,10 @@ export type Database = {
           similaridade: number
         }[]
       }
+      criar_blocos_pool: {
+        Args: { p_quantidade_blocos: number }
+        Returns: Json
+      }
       halfvec_avg: {
         Args: { "": number[] }
         Returns: unknown
@@ -602,6 +711,13 @@ export type Database = {
       halfvec_typmod_in: {
         Args: { "": unknown[] }
         Returns: number
+      }
+      has_role: {
+        Args: {
+          _role: Database["public"]["Enums"]["app_role"]
+          _user_id: string
+        }
+        Returns: boolean
       }
       hnsw_bit_support: {
         Args: { "": unknown }
@@ -653,6 +769,19 @@ export type Database = {
       }
       l2_normalize: {
         Args: { "": string } | { "": unknown } | { "": unknown }
+        Returns: string
+      }
+      log_sistema_evento: {
+        Args: {
+          p_dados_contexto?: Json
+          p_descricao?: string
+          p_evento: string
+          p_ip_address?: unknown
+          p_nivel?: string
+          p_user_agent?: string
+          p_usuario_email?: string
+          p_usuario_id?: string
+        }
         Returns: string
       }
       match_documents: {
@@ -756,7 +885,7 @@ export type Database = {
       }
     }
     Enums: {
-      [_ in never]: never
+      app_role: "super_admin" | "admin" | "gerente" | "operador" | "auditor"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -883,6 +1012,8 @@ export type CompositeTypes<
 
 export const Constants = {
   public: {
-    Enums: {},
+    Enums: {
+      app_role: ["super_admin", "admin", "gerente", "operador", "auditor"],
+    },
   },
 } as const
