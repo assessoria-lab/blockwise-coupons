@@ -91,7 +91,7 @@ export const GraficoCidadesClientes = () => {
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
             <MapPin className="h-5 w-5" />
-            Cidades dos Clientes com Cupons
+            Cidade Cliente
           </CardTitle>
         </CardHeader>
         <CardContent className="p-6">
@@ -109,7 +109,7 @@ export const GraficoCidadesClientes = () => {
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
             <MapPin className="h-5 w-5" />
-            Cidades dos Clientes com Cupons
+            Cidade Cliente
           </CardTitle>
         </CardHeader>
         <CardContent className="p-6">
@@ -127,7 +127,7 @@ export const GraficoCidadesClientes = () => {
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
             <MapPin className="h-5 w-5" />
-            Cidades dos Clientes com Cupons
+            Cidade Cliente
           </CardTitle>
         </CardHeader>
         <CardContent className="p-6">
@@ -142,10 +142,10 @@ export const GraficoCidadesClientes = () => {
   return (
     <Card className="shadow-sm bg-white border border-border">
       <CardHeader>
-        <CardTitle className="flex items-center gap-2">
-          <MapPin className="h-5 w-5" />
-          Cidades dos Clientes com Cupons
-        </CardTitle>
+          <CardTitle className="flex items-center gap-2">
+            <MapPin className="h-5 w-5" />
+            Cidade Cliente
+          </CardTitle>
         <p className="text-sm text-muted-foreground">
           Distribuição dos {dadosCidades.reduce((acc, cidade) => acc + cidade.total_cupons, 0)} cupons atribuídos por cidade
         </p>
