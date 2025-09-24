@@ -82,8 +82,8 @@ export const generateCuponsPDF = async (
         <!-- Nome Completo - ajustado mais para cima e direita -->
         <div style="
           position: absolute;
-          top: 440px;
-          left: 220px;
+          top: 420px;
+          left: 250px;
           width: 1000px;
           height: 30px;
           display: flex;
@@ -98,7 +98,7 @@ export const generateCuponsPDF = async (
         <!-- CPF - ajustado mais para cima e direita -->
         <div style="
           position: absolute;
-          top: 515px;
+          top: 495px;
           left: 120px;
           width: 520px;
           height: 30px;
@@ -114,7 +114,7 @@ export const generateCuponsPDF = async (
         <!-- Telefone - dados corretos (telefone do cliente) ajustado mais para cima e direita -->
         <div style="
           position: absolute;
-          top: 515px;
+          top: 495px;
           left: 820px;
           width: 420px;
           height: 30px;
