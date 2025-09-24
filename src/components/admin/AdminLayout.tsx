@@ -109,7 +109,7 @@ const AdminLayout = ({
                     <Icon className="h-5 w-5 flex-shrink-0" />
                     {!sidebarCollapsed && <>
                         <span className="ml-3 flex-1">{item.name}</span>
-                        {item.badge && <Badge variant="secondary" className="ml-2 text-xs bg-accent text-accent-foreground border-none">
+                        {item.badge && <Badge variant="secondary" className="ml-2 text-xs bg-accent text-accent-foreground border-none hover:bg-accent hover:text-accent-foreground">
                             {item.badge}
                           </Badge>}
                       </>}
