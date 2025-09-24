@@ -95,7 +95,7 @@ const AdminLayout = ({
           {/* Logo/Header */}
           <div className={`flex items-center ${sidebarCollapsed ? 'justify-center px-2' : 'justify-center px-4'} h-24 border-b border-primary-foreground/20`}>
             {!sidebarCollapsed && <div className="flex items-center justify-center w-full">
-                <img src="/lovable-uploads/30762c46-4536-4a6c-bd54-a016f6a4ff1c.png" alt="Show de Prêmios - Vem Pra 44" className="h-32 w-auto mb-4" />
+                <img src="/lovable-uploads/30762c46-4536-4a6c-bd54-a016f6a4ff1c.png" alt="Show de Prêmios - Vem Pra 44" className="h-32 w-auto my-6" />
               </div>}
             {sidebarCollapsed && <img src="/lovable-uploads/30762c46-4536-4a6c-bd54-a016f6a4ff1c.png" alt="Show de Prêmios" className="h-12 w-auto" />}
           </div>
