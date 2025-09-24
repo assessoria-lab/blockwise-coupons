@@ -13,7 +13,6 @@ import {
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import HeroBackground from './HeroBackground';
 
 interface AdminLayoutProps {
   children: React.ReactNode;
@@ -78,7 +77,7 @@ const AdminLayout = ({ children, currentPage, onNavigate }: AdminLayoutProps) =>
   ];
 
   return (
-    <div className="min-h-screen bg-background relative">
+    <div className="flex min-h-screen bg-gray-50">
       {/* Mobile sidebar backdrop */}
       {sidebarOpen && (
         <div 
@@ -89,7 +88,7 @@ const AdminLayout = ({ children, currentPage, onNavigate }: AdminLayoutProps) =>
 
       {/* Sidebar */}
       <div className={`
-        fixed inset-y-0 left-0 z-50 bg-primary text-primary-foreground transform transition-all duration-300 ease-in-out lg:translate-x-0 lg:static lg:inset-0
+        fixed inset-y-0 left-0 z-50 bg-primary text-primary-foreground transform transition-all duration-300 ease-in-out lg:relative lg:transform-none
         ${sidebarOpen ? 'translate-x-0' : '-translate-x-full lg:translate-x-0'}
         ${sidebarCollapsed ? 'w-16' : 'w-64'}
       `}>
@@ -200,9 +199,9 @@ const AdminLayout = ({ children, currentPage, onNavigate }: AdminLayoutProps) =>
       </div>
 
       {/* Main content */}
-      <div className={`transition-all duration-300 ${sidebarCollapsed ? 'lg:pl-16' : 'lg:pl-64'}`}>
+      <div className="flex-1 flex flex-col min-w-0">
         {/* Top bar */}
-        <div className="sticky top-0 z-30 flex h-14 items-center gap-x-4 bg-white border-b border-border px-4 shadow-sm lg:px-6">
+        <div className="flex h-14 items-center gap-x-4 bg-white border-b border-border px-4 shadow-sm lg:px-6 flex-shrink-0">
           <Button
             variant="ghost"
             size="sm"
@@ -228,7 +227,7 @@ const AdminLayout = ({ children, currentPage, onNavigate }: AdminLayoutProps) =>
         </div>
 
         {/* Page content */}
-        <main className="bg-gray-50 min-h-screen">
+        <main className="flex-1 bg-gray-50 overflow-auto">
           {children}
         </main>
       </div>
