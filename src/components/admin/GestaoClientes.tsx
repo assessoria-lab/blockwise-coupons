@@ -189,7 +189,7 @@ const GestaoClientes = () => {
 
       if (clienteError) throw clienteError;
 
-      // Buscar cupons do cliente com dados da loja e bloco
+      // Buscar cupons do cliente com dados da loja
       const { data: cupons, error: cuponsError } = await supabase
         .from('cupons')
         .select(`
@@ -202,9 +202,6 @@ const GestaoClientes = () => {
             nome_loja,
             cidade,
             shopping
-          ),
-          blocos!inner(
-            numero_bloco
           )
         `)
         .eq('cliente_id', selectedClientId)
@@ -773,9 +770,6 @@ const GestaoClientes = () => {
                               <p className="text-sm">
                                 <strong>Cidade:</strong> {cupom.lojistas?.cidade}
                                 {cupom.lojistas?.shopping && ` - ${cupom.lojistas.shopping}`}
-                              </p>
-                              <p className="text-sm">
-                                <strong>Bloco:</strong> {cupom.blocos?.numero_bloco}
                               </p>
                             </div>
                             <div className="text-right text-sm">
