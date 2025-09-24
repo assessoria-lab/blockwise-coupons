@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { LayoutDashboard, Package, Store, Users, Settings, Menu, X, Trophy, BarChart3, ChevronLeft, Search, TrendingUp, Activity, Shield } from 'lucide-react';
+import { LayoutDashboard, Package, Store, Users, Settings, Menu, X, Trophy, BarChart3, ChevronLeft, ChevronRight, Search, TrendingUp, Activity, Shield } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 interface AdminLayoutProps {
@@ -81,11 +81,32 @@ const AdminLayout = ({
       `}>
         <div className="flex flex-col h-full">
           {/* Logo/Header */}
-          <div className={`flex items-center ${sidebarCollapsed ? 'justify-center px-2' : 'justify-center px-4'} h-32 border-b border-primary-foreground/20`}>
-            {!sidebarCollapsed && <div className="flex items-center justify-center w-full">
-                <img src="/lovable-uploads/30762c46-4536-4a6c-bd54-a016f6a4ff1c.png" alt="Show de Prêmios - Vem Pra 44" className="h-32 w-auto my-8" />
-              </div>}
-            {sidebarCollapsed && <img src="/lovable-uploads/30762c46-4536-4a6c-bd54-a016f6a4ff1c.png" alt="Show de Prêmios" className="h-12 w-auto" />}
+          <div className={`relative flex items-center ${sidebarCollapsed ? 'justify-center px-2' : 'justify-between px-4'} h-32 border-b border-primary-foreground/20`}>
+            {!sidebarCollapsed && (
+              <>
+                <div className="flex items-center justify-center flex-1">
+                  <img src="/lovable-uploads/30762c46-4536-4a6c-bd54-a016f6a4ff1c.png" alt="Show de Prêmios - Vem Pra 44" className="h-32 w-auto my-8" />
+                </div>
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={() => setSidebarCollapsed(true)}
+                  className="text-primary-foreground hover:bg-primary-foreground/10 p-2"
+                >
+                  <ChevronLeft className="h-4 w-4" />
+                </Button>
+              </>
+            )}
+            {sidebarCollapsed && (
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={() => setSidebarCollapsed(false)}
+                className="text-primary-foreground hover:bg-primary-foreground/10 p-2"
+              >
+                <ChevronRight className="h-4 w-4" />
+              </Button>
+            )}
           </div>
 
           {/* Navigation */}
