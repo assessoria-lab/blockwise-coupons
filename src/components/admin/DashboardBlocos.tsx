@@ -7,6 +7,7 @@ import { Progress } from '@/components/ui/progress';
 import { Button } from '@/components/ui/button';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { GraficoVolumesCupons } from './GraficoVolumesCupons';
+import { RankingLojistas } from './RankingLojistas';
 import { 
   Package, 
   Store, 
@@ -285,6 +286,11 @@ const DashboardBlocos = () => {
       {/* Gráfico Volumes Cupons */}
       <section>
         <GraficoVolumesCupons />
+      </section>
+
+      {/* Ranking de Lojistas */}
+      <section>
+        <RankingLojistas />
       </section>
 
       {/* Performance de Blocos */}
