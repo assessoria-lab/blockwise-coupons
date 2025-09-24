@@ -33,12 +33,6 @@ const AdminLayout = ({
     current: currentPage === 'lojistas',
     badge: '3'
   }, {
-    name: 'Gestão de Blocos',
-    href: '#blocos',
-    icon: Package,
-    current: currentPage === 'blocos',
-    badge: null
-  }, {
     name: 'Rastreamento de Blocos',
     href: '/admin/rastreamento',
     icon: Search,
