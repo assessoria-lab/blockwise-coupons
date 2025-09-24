@@ -12,12 +12,14 @@ import {
   Award,
   Plus,
   FileText,
-  Target
+  Target,
+  Upload
 } from 'lucide-react';
 import { format } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
 import { useToast } from '@/hooks/use-toast';
 import { supabase } from '@/integrations/supabase/client';
+import { generateCuponsPDF } from '@/utils/pdfGenerator';
 
 interface Ganhador {
   id: string;
@@ -35,6 +37,7 @@ const GestaoSorteios = () => {
   const { toast } = useToast();
   const [loading, setLoading] = useState(false);
   const [ganhadores, setGanhadores] = useState<Ganhador[]>([]);
+  const [backgroundImage, setBackgroundImage] = useState<string>('');
   const [filtroData, setFiltroData] = useState({
     data_inicio: '',
     data_fim: '',
@@ -116,22 +119,58 @@ const GestaoSorteios = () => {
 
       if (error) throw error;
 
-      // Aqui implementaria a geração do PDF com os cupons
-      // Por enquanto, apenas mostra quantos cupons serão baixados
+      if (!cupons || cupons.length === 0) {
+        toast({
+          title: "Nenhum cupom encontrado",
+          description: "Não há cupons para gerar PDF no período selecionado.",
+          variant: "destructive",
+        });
+        return;
+      }
+
+      // Formatar dados para o PDF
+      const cuponsFormatados = cupons.map(cupom => ({
+        numero_formatado: cupom.numero_formatado,
+        nome_cliente: cupom.clientes?.nome || 'N/A',
+        cpf_cliente: cupom.clientes?.cpf || 'N/A',
+        nome_loja: cupom.lojistas?.nome_loja || 'N/A',
+        shopping: cupom.lojistas?.shopping || 'N/A',
+        data_atribuicao: cupom.data_atribuicao,
+        valor_compra: cupom.valor_compra || 0
+      }));
+
+      // Gerar PDF com arte
+      await generateCuponsPDF(cuponsFormatados, backgroundImage || undefined);
+
       toast({
-        title: "Download preparado",
-        description: `${cupons?.length || 0} cupons prontos para download em PDF.`,
+        title: "PDF gerado com sucesso",
+        description: `${cupons.length} cupons foram baixados em PDF.`,
       });
 
     } catch (error) {
-      console.error('Erro ao preparar download:', error);
+      console.error('Erro ao gerar PDF:', error);
       toast({
-        title: "Erro no download",
-        description: "Não foi possível preparar os cupons para download.",
+        title: "Erro ao gerar PDF",
+        description: "Não foi possível gerar o PDF dos cupons.",
         variant: "destructive",
       });
     } finally {
       setLoading(false);
+    }
+  };
+
+  const handleBackgroundImageUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0];
+    if (file) {
+      const reader = new FileReader();
+      reader.onload = (e) => {
+        setBackgroundImage(e.target?.result as string);
+        toast({
+          title: "Imagem carregada",
+          description: "A imagem de fundo foi carregada com sucesso.",
+        });
+      };
+      reader.readAsDataURL(file);
     }
   };
 
@@ -289,6 +328,46 @@ const GestaoSorteios = () => {
           </CardTitle>
         </CardHeader>
         <CardContent>
+          {/* Upload de imagem de fundo */}
+          <div className="mb-6 p-4 bg-muted/50 rounded-lg">
+            <label className="text-sm font-medium mb-2 block">Imagem de Fundo (Opcional)</label>
+            <div className="flex items-center gap-4">
+              <input
+                type="file"
+                id="background-upload"
+                accept="image/*"
+                onChange={handleBackgroundImageUpload}
+                className="hidden"
+              />
+              <Button
+                variant="outline"
+                onClick={() => document.getElementById('background-upload')?.click()}
+                className="flex items-center gap-2"
+              >
+                <Upload className="h-4 w-4" />
+                Escolher Imagem
+              </Button>
+              {backgroundImage && (
+                <div className="flex items-center gap-2">
+                  <div className="w-8 h-8 bg-cover bg-center rounded border" 
+                       style={{ backgroundImage: `url(${backgroundImage})` }}></div>
+                  <span className="text-sm text-green-600">Imagem carregada</span>
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    onClick={() => setBackgroundImage('')}
+                    className="text-red-500 hover:text-red-700"
+                  >
+                    Remover
+                  </Button>
+                </div>
+              )}
+            </div>
+            <p className="text-xs text-muted-foreground mt-2">
+              Envie uma imagem para usar como fundo dos cupons. Formatos aceitos: JPG, PNG, WebP.
+            </p>
+          </div>
+
           <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-4">
             <div>
               <label className="text-sm font-medium">Tipo de Download</label>
@@ -330,12 +409,12 @@ const GestaoSorteios = () => {
             <div className="flex items-end">
               <Button onClick={handleDownloadCupons} disabled={loading} className="w-full">
                 <FileText className="h-4 w-4 mr-2" />
-                {loading ? 'Preparando...' : 'Gerar PDF'}
+                {loading ? 'Gerando PDF...' : 'Gerar PDF'}
               </Button>
             </div>
           </div>
           <p className="text-sm text-muted-foreground">
-            Os cupons serão baixados em formato PDF para impressão e inserção na urna do sorteio presencial.
+            Os cupons serão baixados em formato PDF com arte personalizada para impressão e inserção na urna do sorteio presencial.
           </p>
         </CardContent>
       </Card>
