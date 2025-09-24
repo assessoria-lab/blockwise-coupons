@@ -25,6 +25,7 @@ export const VendaBlocosModal = ({ lojista, onClose, onSuccess }: VendaBlocosMod
   const [quantidade, setQuantidade] = useState(1);
   const [valor, setValor] = useState(100);
   const [formaPagamento, setFormaPagamento] = useState('pix');
+  const [vendedorNome, setVendedorNome] = useState('');
   const { toast } = useToast();
 
   const { mutate: venderBlocos, isPending } = useMutation({
@@ -34,6 +35,7 @@ export const VendaBlocosModal = ({ lojista, onClose, onSuccess }: VendaBlocosMod
         p_quantidade_blocos: quantidade,
         p_valor_total: valor * quantidade,
         p_forma_pagamento: formaPagamento,
+        p_vendedor_nome: vendedorNome.trim() || null,
       });
       
       if (error) throw new Error(error.message);
@@ -137,6 +139,21 @@ export const VendaBlocosModal = ({ lojista, onClose, onSuccess }: VendaBlocosMod
                 <SelectItem value="transferencia">Transferência</SelectItem>
               </SelectContent>
             </Select>
+          </div>
+
+          <div className="space-y-2">
+            <Label htmlFor="vendedor">Nome do Vendedor (Opcional)</Label>
+            <Input
+              id="vendedor"
+              type="text"
+              value={vendedorNome}
+              onChange={(e) => setVendedorNome(e.target.value)}
+              placeholder="Digite o nome do vendedor"
+              disabled={isPending}
+            />
+            <p className="text-xs text-muted-foreground">
+              Informe quem realizou esta venda física
+            </p>
           </div>
 
           <Card className="bg-muted/50">
