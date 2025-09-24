@@ -78,16 +78,15 @@ export const generateCuponsPDF = async (
           ID: ${cupom.numero_formatado}
         </div>
 
-        <!-- Nome Completo -->
+        <!-- Nome Completo - dados na mesma linha -->
         <div style="
           position: absolute;
-          top: 445px;
-          left: 50px;
-          width: 1160px;
-          height: 45px;
+          top: 453px;
+          left: 200px;
+          width: 1000px;
+          height: 30px;
           display: flex;
           align-items: center;
-          padding-left: 15px;
           font-size: 22px;
           font-weight: 600;
           color: #1f2937;
@@ -95,16 +94,15 @@ export const generateCuponsPDF = async (
           ${cupom.nome_cliente}
         </div>
 
-        <!-- CPF -->
+        <!-- CPF - dados na mesma linha -->
         <div style="
           position: absolute;
-          top: 520px;
-          left: 50px;
-          width: 575px;
-          height: 45px;
+          top: 528px;
+          left: 100px;
+          width: 520px;
+          height: 30px;
           display: flex;
           align-items: center;
-          padding-left: 15px;
           font-size: 20px;
           font-weight: 600;
           color: #1f2937;
@@ -112,33 +110,31 @@ export const generateCuponsPDF = async (
           ${cupom.cpf_cliente}
         </div>
 
-        <!-- Telefone -->
+        <!-- Telefone - dados na mesma linha -->
         <div style="
           position: absolute;
-          top: 520px;
-          right: 50px;
-          width: 575px;
-          height: 45px;
+          top: 528px;
+          left: 790px;
+          width: 420px;
+          height: 30px;
           display: flex;
           align-items: center;
-          padding-left: 15px;
           font-size: 20px;
           font-weight: 600;
           color: #1f2937;
         ">
-          ${cupom.nome_cliente.split(' ')[0]} - ${new Date(cupom.data_atribuicao).toLocaleDateString('pt-BR')}
+          ${new Date(cupom.data_atribuicao).toLocaleDateString('pt-BR')}
         </div>
 
-        <!-- Shopping/Galeria -->
+        <!-- Shopping/Galeria - dados na mesma linha -->
         <div style="
           position: absolute;
-          top: 595px;
-          left: 50px;
-          width: 810px;
-          height: 45px;
+          top: 603px;
+          left: 190px;
+          width: 680px;
+          height: 30px;
           display: flex;
           align-items: center;
-          padding-left: 15px;
           font-size: 20px;
           font-weight: 600;
           color: #1f2937;
@@ -146,16 +142,32 @@ export const generateCuponsPDF = async (
           ${cupom.shopping}
         </div>
 
-        <!-- Email (usando loja como referência) -->
+        <!-- Marcar X no Cliente Varejo (padrão) -->
         <div style="
           position: absolute;
-          top: 670px;
-          left: 50px;
-          width: 1160px;
-          height: 45px;
+          top: 603px;
+          left: 940px;
+          width: 30px;
+          height: 30px;
           display: flex;
           align-items: center;
-          padding-left: 15px;
+          justify-content: center;
+          font-size: 24px;
+          font-weight: bold;
+          color: #1f2937;
+        ">
+          ✗
+        </div>
+
+        <!-- Email - dados na mesma linha -->
+        <div style="
+          position: absolute;
+          top: 678px;
+          left: 100px;
+          width: 1100px;
+          height: 30px;
+          display: flex;
+          align-items: center;
           font-size: 20px;
           font-weight: 600;
           color: #1f2937;
@@ -163,16 +175,15 @@ export const generateCuponsPDF = async (
           ${cupom.nome_loja} - Valor: R$ ${cupom.valor_compra.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}
         </div>
 
-        <!-- Loja -->
+        <!-- Loja - dados na mesma linha -->
         <div style="
           position: absolute;
-          top: 745px;
-          left: 50px;
-          width: 576px;
-          height: 45px;
+          top: 753px;
+          left: 100px;
+          width: 520px;
+          height: 30px;
           display: flex;
           align-items: center;
-          padding-left: 15px;
           font-size: 20px;
           font-weight: 600;
           color: #1f2937;
@@ -180,21 +191,20 @@ export const generateCuponsPDF = async (
           ${cupom.nome_loja}
         </div>
 
-        <!-- Vendedor (usando data da atribuição) -->
+        <!-- Vendedor/Data - dados na mesma linha -->
         <div style="
           position: absolute;
-          top: 745px;
-          right: 50px;
-          width: 576px;
-          height: 45px;
+          top: 753px;
+          left: 790px;
+          width: 420px;
+          height: 30px;
           display: flex;
           align-items: center;
-          padding-left: 15px;
           font-size: 20px;
           font-weight: 600;
           color: #1f2937;
         ">
-          Data: ${new Date(cupom.data_atribuicao).toLocaleDateString('pt-BR')}
+          ${new Date(cupom.data_atribuicao).toLocaleDateString('pt-BR')}
         </div>
 
       </div>
