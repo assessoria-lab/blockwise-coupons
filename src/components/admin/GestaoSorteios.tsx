@@ -12,8 +12,7 @@ import {
   Award,
   Plus,
   FileText,
-  Target,
-  Upload
+  Target
 } from 'lucide-react';
 import { format } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
@@ -37,7 +36,6 @@ const GestaoSorteios = () => {
   const { toast } = useToast();
   const [loading, setLoading] = useState(false);
   const [ganhadores, setGanhadores] = useState<Ganhador[]>([]);
-  const [backgroundImage, setBackgroundImage] = useState<string>('');
   const [filtroData, setFiltroData] = useState({
     data_inicio: '',
     data_fim: '',
@@ -140,7 +138,7 @@ const GestaoSorteios = () => {
       }));
 
       // Gerar PDF com arte
-      await generateCuponsPDF(cuponsFormatados, backgroundImage || undefined);
+      await generateCuponsPDF(cuponsFormatados);
 
       toast({
         title: "PDF gerado com sucesso",
@@ -156,21 +154,6 @@ const GestaoSorteios = () => {
       });
     } finally {
       setLoading(false);
-    }
-  };
-
-  const handleBackgroundImageUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
-    const file = event.target.files?.[0];
-    if (file) {
-      const reader = new FileReader();
-      reader.onload = (e) => {
-        setBackgroundImage(e.target?.result as string);
-        toast({
-          title: "Imagem carregada",
-          description: "A imagem de fundo foi carregada com sucesso.",
-        });
-      };
-      reader.readAsDataURL(file);
     }
   };
 
@@ -328,46 +311,6 @@ const GestaoSorteios = () => {
           </CardTitle>
         </CardHeader>
         <CardContent>
-          {/* Upload de imagem de fundo */}
-          <div className="mb-6 p-4 bg-muted/50 rounded-lg">
-            <label className="text-sm font-medium mb-2 block">Imagem de Fundo (Opcional)</label>
-            <div className="flex items-center gap-4">
-              <input
-                type="file"
-                id="background-upload"
-                accept="image/*"
-                onChange={handleBackgroundImageUpload}
-                className="hidden"
-              />
-              <Button
-                variant="outline"
-                onClick={() => document.getElementById('background-upload')?.click()}
-                className="flex items-center gap-2"
-              >
-                <Upload className="h-4 w-4" />
-                Escolher Imagem
-              </Button>
-              {backgroundImage && (
-                <div className="flex items-center gap-2">
-                  <div className="w-8 h-8 bg-cover bg-center rounded border" 
-                       style={{ backgroundImage: `url(${backgroundImage})` }}></div>
-                  <span className="text-sm text-green-600">Imagem carregada</span>
-                  <Button
-                    variant="ghost"
-                    size="sm"
-                    onClick={() => setBackgroundImage('')}
-                    className="text-red-500 hover:text-red-700"
-                  >
-                    Remover
-                  </Button>
-                </div>
-              )}
-            </div>
-            <p className="text-xs text-muted-foreground mt-2">
-              Envie uma imagem para usar como fundo dos cupons. Formatos aceitos: JPG, PNG, WebP.
-            </p>
-          </div>
-
           <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-4">
             <div>
               <label className="text-sm font-medium">Tipo de Download</label>
@@ -414,7 +357,7 @@ const GestaoSorteios = () => {
             </div>
           </div>
           <p className="text-sm text-muted-foreground">
-            Os cupons serão baixados em formato PDF com arte personalizada para impressão e inserção na urna do sorteio presencial.
+            Os cupons serão impressos usando a arte oficial do Show de Prêmios com os dados dos clientes posicionados corretamente sobre o template.
           </p>
         </CardContent>
       </Card>
