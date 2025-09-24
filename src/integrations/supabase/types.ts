@@ -989,6 +989,58 @@ export type Database = {
         Args: { p_quantidade_blocos: number }
         Returns: Json
       }
+      get_dashboard_metrics: {
+        Args: Record<PropertyKey, never>
+        Returns: {
+          blocos_com_lojistas: number
+          blocos_pool_geral: number
+          blocos_vendidos_hoje: number
+          cupons_atribuidos: number
+          cupons_atribuidos_hoje: number
+          cupons_nao_atribuidos: number
+          ultima_atualizacao: string
+        }[]
+      }
+      get_historico_cupons: {
+        Args: {
+          p_data_fim?: string
+          p_data_inicio?: string
+          p_limite?: number
+          p_lojista_id?: string
+        }
+        Returns: {
+          cidade_cliente: string
+          cidade_loja: string
+          cpf_cliente: string
+          data_atribuicao: string
+          data_criacao: string
+          id: string
+          mes_atribuicao: string
+          nome_cliente: string
+          nome_loja: string
+          numero_bloco: string
+          numero_cupom: string
+          semana_atribuicao: string
+          status: string
+          valor_compra: number
+        }[]
+      }
+      get_ranking_lojistas: {
+        Args: Record<PropertyKey, never>
+        Returns: {
+          cidade: string
+          clientes_unicos_atendidos: number
+          cupons_disponiveis_lojista: number
+          lojista_id: string
+          nome_loja: string
+          ranking_cupons: number
+          ranking_vendas: number
+          total_cupons_atribuidos: number
+          ultima_atribuicao: string
+          ultima_atualizacao: string
+          volume_vendas_geradas: number
+        }[]
+      }
       halfvec_avg: {
         Args: { "": number[] }
         Returns: unknown
