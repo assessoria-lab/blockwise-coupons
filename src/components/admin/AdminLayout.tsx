@@ -81,32 +81,11 @@ const AdminLayout = ({
       `}>
         <div className="flex flex-col h-full">
           {/* Logo/Header */}
-          <div className={`relative flex items-center ${sidebarCollapsed ? 'justify-center px-2' : 'justify-between px-4'} h-32 border-b border-primary-foreground/20`}>
-            {!sidebarCollapsed && (
-              <>
-                <div className="flex items-center justify-center flex-1">
-                  <img src="/lovable-uploads/30762c46-4536-4a6c-bd54-a016f6a4ff1c.png" alt="Show de Prêmios - Vem Pra 44" className="h-32 w-auto my-8" />
-                </div>
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  onClick={() => setSidebarCollapsed(true)}
-                  className="text-primary-foreground hover:bg-primary-foreground/10 p-2"
-                >
-                  <ChevronLeft className="h-4 w-4" />
-                </Button>
-              </>
-            )}
-            {sidebarCollapsed && (
-              <Button
-                variant="ghost"
-                size="sm"
-                onClick={() => setSidebarCollapsed(false)}
-                className="text-primary-foreground hover:bg-primary-foreground/10 p-2"
-              >
-                <ChevronRight className="h-4 w-4" />
-              </Button>
-            )}
+          <div className={`flex items-center ${sidebarCollapsed ? 'justify-center px-2' : 'justify-center px-4'} h-32 border-b border-primary-foreground/20`}>
+            {!sidebarCollapsed && <div className="flex items-center justify-center w-full">
+                <img src="/lovable-uploads/30762c46-4536-4a6c-bd54-a016f6a4ff1c.png" alt="Show de Prêmios - Vem Pra 44" className="h-32 w-auto my-8" />
+              </div>}
+            {sidebarCollapsed && <img src="/lovable-uploads/30762c46-4536-4a6c-bd54-a016f6a4ff1c.png" alt="Show de Prêmios" className="h-12 w-auto" />}
           </div>
 
           {/* Navigation */}
@@ -157,6 +136,17 @@ const AdminLayout = ({
       <div className="flex-1 flex flex-col min-w-0">
         {/* Top bar */}
         <div className="flex h-14 items-center gap-x-4 bg-white border-b border-border px-4 shadow-sm lg:px-6 flex-shrink-0">
+          {/* Menu collapse button - outside sidebar */}
+          <Button
+            variant="ghost"
+            size="sm"
+            onClick={() => setSidebarCollapsed(!sidebarCollapsed)}
+            className="hidden lg:flex hover:bg-gray-100 p-2"
+            title={sidebarCollapsed ? 'Expandir menu' : 'Recolher menu'}
+          >
+            {sidebarCollapsed ? <ChevronRight className="h-4 w-4" /> : <ChevronLeft className="h-4 w-4" />}
+          </Button>
+          
           <Button variant="ghost" size="sm" className="lg:hidden" onClick={() => setSidebarOpen(true)}>
             <Menu className="h-5 w-5" />
           </Button>
