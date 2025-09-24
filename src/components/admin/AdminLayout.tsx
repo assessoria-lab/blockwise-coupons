@@ -244,12 +244,7 @@ const AdminLayout = ({ children, currentPage, onNavigate }: AdminLayoutProps) =>
           </Button>
 
           <div className="flex flex-1 gap-x-4 self-stretch lg:gap-x-6">
-            <div className="flex flex-1 items-center">
-              <h1 className="text-lg font-semibold text-foreground">
-                {navigation.find(item => item.current)?.name || 'Painel Administrativo'}
-              </h1>
-            </div>
-            <div className="flex items-center gap-x-4 lg:gap-x-6">
+            <div className="flex items-center gap-x-4 lg:gap-x-6 ml-auto">
               <Badge variant="outline" className="bg-success text-success-foreground border-success/20 px-3 py-1">
                 <div className="w-2 h-2 bg-success rounded-full mr-2"></div>
                 Sistema Online
