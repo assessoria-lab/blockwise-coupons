@@ -233,6 +233,7 @@ export type Database = {
           numero_cupom: number
           numero_formatado: string | null
           status: string | null
+          tipo_cliente: string | null
           valor_compra: number | null
         }
         Insert: {
@@ -246,6 +247,7 @@ export type Database = {
           numero_cupom?: number
           numero_formatado?: string | null
           status?: string | null
+          tipo_cliente?: string | null
           valor_compra?: number | null
         }
         Update: {
@@ -259,6 +261,7 @@ export type Database = {
           numero_cupom?: number
           numero_formatado?: string | null
           status?: string | null
+          tipo_cliente?: string | null
           valor_compra?: number | null
         }
         Relationships: [
