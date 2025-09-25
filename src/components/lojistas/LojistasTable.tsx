@@ -1,4 +1,4 @@
-import { useMemo, useState } from 'react';
+import { useMemo, useState, useEffect } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import {
   flexRender,
@@ -39,10 +39,10 @@ const fetchLojistas = async (filters: { search?: string; status?: string }) => {
     .from('lojistas')
     .select(`
       id, nome_loja, cnpj, shopping, segmento, status, cupons_nao_atribuidos,
-      telefone, email, responsavel_nome, cidade, endereco
+      telefone, email, responsavel_nome, cidade, endereco, created_at
     `);
 
-  if (filters.search) {
+  if (filters.search && filters.search.length >= 2) {
     query = query.or(`nome_loja.ilike.%${filters.search}%,cnpj.ilike.%${filters.search}%,shopping.ilike.%${filters.search}%`);
   }
 
@@ -50,7 +50,7 @@ const fetchLojistas = async (filters: { search?: string; status?: string }) => {
     query = query.eq('status', filters.status);
   }
 
-  const { data, error } = await query.order('nome_loja');
+  const { data, error } = await query.order('created_at', { ascending: false });
   if (error) throw new Error(error.message);
   
   // Buscar quantidade de blocos comprados para cada lojista
@@ -74,17 +74,27 @@ const fetchLojistas = async (filters: { search?: string; status?: string }) => {
 export const LojistasTable = () => {
   const [sorting, setSorting] = useState<SortingState>([]);
   const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>([]);
-  const [globalFilter, setGlobalFilter] = useState('');
+  const [searchInput, setSearchInput] = useState('');
+  const [debouncedSearch, setDebouncedSearch] = useState('');
   const [statusFilter, setStatusFilter] = useState('todos');
   const [selectedLojista, setSelectedLojista] = useState<Lojista | null>(null);
   const [showVendaModal, setShowVendaModal] = useState(false);
   const [showLojistaModal, setShowLojistaModal] = useState(false);
   const [editingLojista, setEditingLojista] = useState<Lojista | null>(null);
 
+  // Debounce search input
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      setDebouncedSearch(searchInput);
+    }, 300);
+
+    return () => clearTimeout(timer);
+  }, [searchInput]);
+
   const filters = useMemo(() => ({
-    search: globalFilter,
+    search: debouncedSearch,
     status: statusFilter
-  }), [globalFilter, statusFilter]);
+  }), [debouncedSearch, statusFilter]);
 
   const { data: lojistas = [], isLoading, refetch } = useQuery({
     queryKey: ['lojistas', filters],
@@ -201,15 +211,11 @@ export const LojistasTable = () => {
     columns,
     getCoreRowModel: getCoreRowModel(),
     getSortedRowModel: getSortedRowModel(),
-    getFilteredRowModel: getFilteredRowModel(),
     onSortingChange: setSorting,
     onColumnFiltersChange: setColumnFilters,
-    onGlobalFilterChange: setGlobalFilter,
-    globalFilterFn: 'includesString',
     state: {
       sorting,
       columnFilters,
-      globalFilter,
     },
   });
 
@@ -229,8 +235,8 @@ export const LojistasTable = () => {
             <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
             <Input
               placeholder="Buscar lojistas..."
-              value={globalFilter}
-              onChange={(e) => setGlobalFilter(e.target.value)}
+              value={searchInput}
+              onChange={(e) => setSearchInput(e.target.value)}
               className="pl-10 w-64"
             />
           </div>
