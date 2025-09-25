@@ -213,7 +213,7 @@ export default function CadastroLojista() {
   };
 
   return (
-    <div className="min-h-screen bg-primary/10 flex flex-col">
+    <div className="min-h-screen bg-gray-50 flex flex-col">
       {/* Header otimizado para mobile */}
       <header className="flex h-16 sm:h-14 items-center gap-x-2 sm:gap-x-4 bg-white border-b border-border px-3 sm:px-4 lg:px-6 shadow-sm flex-shrink-0">
         <Button
