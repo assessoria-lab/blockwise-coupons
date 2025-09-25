@@ -418,7 +418,7 @@ export default function CadastroLojista() {
                   
                   <Button type="button" className="w-full h-12 text-base font-medium bg-primary hover:bg-primary/90 text-primary-foreground" onClick={handleSubmit} disabled={salvarLojistaMutation.isPending}>
                     {salvarLojistaMutation.isPending && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-                    {salvarLojistaMutation.isPending ? 'Cadastrando...' : 'Cadastrar Lojista'}
+                    {salvarLojistaMutation.isPending ? 'Cadastrando...' : 'CADASTRAR LOJA'}
                   </Button>
                 </div>
               </div>
