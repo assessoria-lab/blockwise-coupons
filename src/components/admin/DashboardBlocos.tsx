@@ -39,34 +39,47 @@ interface UtilizacaoBloco {
 
 // Mock data - will be replaced with Supabase queries
 const useDashboardMetrics = () => {
-  const [metrics, setMetrics] = useState({
-    blocos_disponiveis: 1250,
-    blocos_com_lojistas: 850,
-    cupons_nao_atribuidos: 42300,
-    cupons_atribuidos: 67200,
-    blocos_vendidos_hoje: 15,
-    cupons_atribuidos_hoje: 890,
-    // Sequence stats
-    primeiro_numero: 1000001,
-    ultimo_numero: 1219500,
-    total_unicos: 219500,
-    proximo_disponivel: 1219501,
-    integridade_ok: true,
-    capacidade_maxima: {
-      cupons_suportados: 998999999999
-    }
+  const { data: metrics, isLoading } = useQuery({
+    queryKey: ['dashboard-metrics'],
+    queryFn: async () => {
+      const { data, error } = await supabase.rpc('get_dashboard_metrics');
+      if (error) throw error;
+      
+      const metricsData = data?.[0]; // RPC returns an array, take first element
+      
+      // Buscar dados de sequência de cupons
+      const { data: sequenceData, error: seqError } = await supabase
+        .from('cupons')
+        .select('numero_cupom')
+        .order('numero_cupom', { ascending: true });
+      
+      if (seqError) throw seqError;
+      
+      const numeros = sequenceData?.map(c => c.numero_cupom) || [];
+      const primeiro_numero = numeros.length > 0 ? Math.min(...numeros) : 1000001;
+      const ultimo_numero = numeros.length > 0 ? Math.max(...numeros) : 1000001;
+      const total_unicos = numeros.length;
+      const proximo_disponivel = ultimo_numero + 1;
+      
+      return {
+        blocos_disponiveis: metricsData?.blocos_pool_geral || 0,
+        blocos_com_lojistas: metricsData?.blocos_com_lojistas || 0,
+        cupons_nao_atribuidos: metricsData?.cupons_nao_atribuidos || 0,
+        cupons_atribuidos: metricsData?.cupons_atribuidos || 0,
+        blocos_vendidos_hoje: metricsData?.blocos_vendidos_hoje || 0,
+        cupons_atribuidos_hoje: metricsData?.cupons_atribuidos_hoje || 0,
+        primeiro_numero,
+        ultimo_numero,
+        total_unicos,
+        proximo_disponivel,
+        integridade_ok: true,
+        capacidade_maxima: {
+          cupons_suportados: 998999999999
+        }
+      };
+    },
+    refetchInterval: 30000
   });
-
-  const [isLoading, setIsLoading] = useState(false);
-
-  // Simulate data fetching
-  useEffect(() => {
-    setIsLoading(true);
-    const timer = setTimeout(() => {
-      setIsLoading(false);
-    }, 1000);
-    return () => clearTimeout(timer);
-  }, []);
 
   return { metrics, isLoading };
 };
