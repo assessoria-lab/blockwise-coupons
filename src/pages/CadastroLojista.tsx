@@ -226,7 +226,10 @@ export default function CadastroLojista() {
       
 
       {/* Conteúdo principal otimizado para mobile */}
-      <main className="flex-1 overflow-auto px-3 sm:px-4 lg:px-6 py-4 sm:py-6">
+      <main 
+        className="flex-1 overflow-auto px-3 sm:px-4 lg:px-6 py-4 sm:py-6 bg-cover bg-center bg-no-repeat"
+        style={{ backgroundImage: 'url(/assets/background-green.jpg)' }}
+      >
         <div className="max-w-2xl mx-auto">
           <Card className="bg-card shadow-sm border-border">
             <CardHeader className="border-b border-border bg-card px-4 sm:px-6 py-4 sm:py-6">
