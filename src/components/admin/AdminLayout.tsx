@@ -72,7 +72,7 @@ const AdminLayout = ({
       {/* Sidebar */}
       <div className={`
         fixed inset-y-0 left-0 z-50 bg-primary text-primary-foreground transform transition-all duration-300 ease-in-out
-        ${sidebarOpen ? 'translate-x-0' : '-translate-x-full lg:translate-x-0'}
+        translate-x-0
         ${sidebarCollapsed ? 'w-16' : 'w-64'}
       `}>
         <div className="flex flex-col h-full">
@@ -129,7 +129,7 @@ const AdminLayout = ({
 
       {/* Main content */}
       <div className={`flex-1 flex flex-col min-w-0 transition-all duration-300 ${
-        sidebarCollapsed ? 'lg:ml-16' : 'lg:ml-64'
+        sidebarCollapsed ? 'ml-16' : 'ml-64'
       }`}>
         {/* Top bar */}
         <div className="flex h-14 items-center gap-x-4 bg-white border-b border-border px-4 shadow-sm lg:px-6 flex-shrink-0">
@@ -138,14 +138,10 @@ const AdminLayout = ({
             variant="ghost"
             size="sm"
             onClick={() => setSidebarCollapsed(!sidebarCollapsed)}
-            className="hidden lg:flex hover:bg-gray-100 p-2"
+            className="flex hover:bg-gray-100 p-2"
             title={sidebarCollapsed ? 'Expandir menu' : 'Recolher menu'}
           >
             {sidebarCollapsed ? <ChevronRight className="h-4 w-4" /> : <ChevronLeft className="h-4 w-4" />}
-          </Button>
-          
-          <Button variant="ghost" size="sm" className="lg:hidden" onClick={() => setSidebarOpen(true)}>
-            <Menu className="h-5 w-5" />
           </Button>
 
           <div className="flex flex-1 gap-x-4 self-stretch lg:gap-x-6">
