@@ -221,7 +221,7 @@ export default function CadastroLojista() {
     const digits = cnpj.replace(/\D/g, '');
     return digits.slice(0, 14);
   };
-  return <div className="min-h-screen bg-gray-50 flex flex-col">
+  return <div className="min-h-screen bg-primary flex flex-col">
       {/* Header otimizado para mobile */}
       <header className="flex h-16 sm:h-14 items-center gap-x-2 sm:gap-x-4 bg-white border-b border-border px-3 sm:px-4 lg:px-6 shadow-sm flex-shrink-0">
         <Button variant="ghost" size="sm" onClick={() => navigate(-1)} className="flex items-center gap-1 sm:gap-2 hover:bg-gray-100 p-2 min-w-0">
