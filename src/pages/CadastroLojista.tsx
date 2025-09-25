@@ -1,528 +1,525 @@
-import { useState } from 'react';
-import { useForm } from 'react-hook-form';
-import { zodResolver } from '@hookform/resolvers/zod';
-import { z } from 'zod';
+import { useState, useEffect } from 'react';
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
 import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Textarea } from '@/components/ui/textarea';
-import { Loader2, Store, ArrowLeft } from 'lucide-react';
+import { Loader2, Store, ChevronLeft, Plus, X } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
+import { z } from 'zod';
 
-// Schema de validação
+interface Lojista {
+  id?: string;
+  nome_loja: string;
+  cnpj: string;
+  shopping?: string;
+  segmento?: string;
+  status: string;
+  telefone?: string;
+  email?: string;
+  responsavel_nome?: string;
+  cidade: string;
+  endereco?: string;
+  cupons_nao_atribuidos?: number;
+  blocos_comprados?: number;
+}
+
+interface Segmento {
+  id: string;
+  nome: string;
+  categoria: string;
+}
+
 const lojistaSchema = z.object({
-  nome_loja: z.string()
-    .trim()
-    .min(2, { message: "Nome da loja deve ter pelo menos 2 caracteres" })
-    .max(100, { message: "Nome da loja deve ter no máximo 100 caracteres" }),
-  
-  cnpj: z.string()
-    .trim()
-    .min(14, { message: "CNPJ deve ter 14 dígitos" })
-    .max(18, { message: "CNPJ inválido" })
-    .regex(/^\d{2}\.?\d{3}\.?\d{3}\/?\d{4}-?\d{2}$|^\d{14}$/, { message: "CNPJ deve estar no formato válido" }),
-  
-  cidade: z.string()
-    .trim()
-    .min(2, { message: "Cidade deve ter pelo menos 2 caracteres" })
-    .max(100, { message: "Cidade deve ter no máximo 100 caracteres" }),
-  
-  estado: z.string()
-    .trim()
-    .length(2, { message: "Estado deve ter 2 caracteres (ex: GO)" })
-    .regex(/^[A-Z]{2}$/, { message: "Estado deve estar em maiúsculas (ex: GO)" }),
-  
-  endereco: z.string()
-    .trim()
-    .max(255, { message: "Endereço deve ter no máximo 255 caracteres" })
-    .optional(),
-  
-  telefone: z.string()
-    .trim()
-    .regex(/^\(\d{2}\)\s\d{4,5}-\d{4}$|^\d{10,11}$/, { message: "Telefone deve estar no formato (XX) XXXX-XXXX ou (XX) XXXXX-XXXX" })
-    .optional(),
-  
-  whatsapp: z.string()
-    .trim()
-    .regex(/^\(\d{2}\)\s\d{5}-\d{4}$|^\d{11}$/, { message: "WhatsApp deve estar no formato (XX) XXXXX-XXXX" })
-    .optional(),
-  
-  email: z.string()
-    .trim()
-    .email({ message: "Email deve ter formato válido" })
-    .max(255, { message: "Email deve ter no máximo 255 caracteres" })
-    .optional(),
-  
-  nome_responsavel: z.string()
-    .trim()
-    .max(100, { message: "Nome do responsável deve ter no máximo 100 caracteres" })
-    .optional(),
-  
-  segmento: z.string()
-    .trim()
-    .max(100, { message: "Segmento deve ter no máximo 100 caracteres" })
-    .optional(),
-  
-  shopping: z.string()
-    .trim()
-    .max(100, { message: "Shopping deve ter no máximo 100 caracteres" })
-    .optional(),
-  
-  observacoes: z.string()
-    .trim()
-    .max(500, { message: "Observações devem ter no máximo 500 caracteres" })
-    .optional(),
+  nome_loja: z.string().trim().nonempty({ message: "Nome da loja é obrigatório" }).max(100),
+  cnpj: z.string().trim().nonempty({ message: "CNPJ é obrigatório" }).length(14, { message: "CNPJ deve ter 14 dígitos" }),
+  cidade: z.string().trim().nonempty({ message: "Cidade é obrigatória" }).max(50),
+  shopping: z.string().max(100).optional(),
+  segmento: z.string().max(100).optional(),
+  telefone: z.string().max(15).optional(),
+  email: z.string().email({ message: "Email inválido" }).max(255).optional().or(z.literal('')),
+  responsavel_nome: z.string().max(100).optional(),
+  endereco: z.string().max(255).optional(),
 });
 
-type LojistaFormData = z.infer<typeof lojistaSchema>;
-
 export default function CadastroLojista() {
-  const [isLoading, setIsLoading] = useState(false);
   const { toast } = useToast();
   const navigate = useNavigate();
+  const queryClient = useQueryClient();
+  const [novoSegmento, setNovoSegmento] = useState('');
+  const [mostrarNovoSegmento, setMostrarNovoSegmento] = useState(false);
+  
+  const [formData, setFormData] = useState<Lojista>({
+    nome_loja: '',
+    cnpj: '',
+    cidade: '',
+    shopping: '',
+    segmento: '',
+    status: 'ativo',
+    telefone: '',
+    email: '',
+    responsavel_nome: '',
+    endereco: '',
+  });
 
-  const form = useForm<LojistaFormData>({
-    resolver: zodResolver(lojistaSchema),
-    defaultValues: {
-      nome_loja: '',
-      cnpj: '',
-      cidade: '',
-      estado: 'GO',
-      endereco: '',
-      telefone: '',
-      whatsapp: '',
-      email: '',
-      nome_responsavel: '',
-      segmento: '',
-      shopping: '',
-      observacoes: '',
+  const [errors, setErrors] = useState<Record<string, string>>({});
+
+  // Carregar segmentos disponíveis
+  const { data: segmentos = [] } = useQuery({
+    queryKey: ['segmentos'],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from('segmentos')
+        .select('id, nome, categoria')
+        .eq('ativo', true)
+        .order('nome');
+      
+      if (error) throw error;
+      return data as Segmento[];
     },
   });
 
-  const onSubmit = async (data: LojistaFormData) => {
-    setIsLoading(true);
-    
-    try {
-      // Limpar e formatar CNPJ (remover pontos, barras e traços)
-      const cnpjLimpo = data.cnpj.replace(/[^\d]/g, '');
+  // Mutation para criar novo segmento
+  const criarNovoSegmentoMutation = useMutation({
+    mutationFn: async (nomeSegmento: string) => {
+      const { data, error } = await supabase
+        .from('segmentos')
+        .insert([{
+          nome: nomeSegmento,
+          categoria: 'moda_vestuario'
+        }])
+        .select()
+        .single();
       
-      const lojistaData = {
-        nome_loja: data.nome_loja,
-        cnpj: cnpjLimpo,
-        cidade: data.cidade,
-        estado: data.estado.toUpperCase(),
-        endereco: data.endereco || null,
-        telefone: data.telefone || null,
-        whatsapp: data.whatsapp || null,
-        email: data.email || null,
-        nome_responsavel: data.nome_responsavel || null,
-        segmento: data.segmento || null,
-        shopping: data.shopping || null,
-        observacoes: data.observacoes || null,
-        status: 'ativo',
-      };
+      if (error) throw error;
+      return data;
+    },
+    onSuccess: (novoSegmentoData) => {
+      queryClient.invalidateQueries({ queryKey: ['segmentos'] });
+      setFormData(prev => ({ ...prev, segmento: novoSegmentoData.nome }));
+      setNovoSegmento('');
+      setMostrarNovoSegmento(false);
+      toast({
+        title: "Segmento criado!",
+        description: `Segmento "${novoSegmentoData.nome}" foi adicionado com sucesso.`,
+      });
+    },
+    onError: (error: any) => {
+      toast({
+        title: "Erro ao criar segmento",
+        description: error.message,
+        variant: "destructive",
+      });
+    }
+  });
 
+  // Mutation para salvar lojista
+  const salvarLojistaMutation = useMutation({
+    mutationFn: async (data: Lojista) => {
       const { error } = await supabase
         .from('lojistas')
-        .insert([lojistaData]);
-
-      if (error) {
-        if (error.code === '23505') { // Unique violation
-          toast({
-            title: "Erro no cadastro",
-            description: "Já existe um lojista cadastrado com este CNPJ.",
-            variant: "destructive",
-          });
-        } else {
-          throw error;
-        }
-        return;
-      }
-
+        .insert([data]);
+      
+      if (error) throw error;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['lojistas'] });
       toast({
-        title: "✅ Lojista cadastrado com sucesso!",
-        description: `${data.nome_loja} foi cadastrado no sistema.`,
-        variant: "default",
+        title: "✅ Lojista cadastrado!",
+        description: `${formData.nome_loja} foi cadastrado com sucesso.`,
       });
-
+      
       // Reset form
-      form.reset();
+      setFormData({
+        nome_loja: '',
+        cnpj: '',
+        cidade: '',
+        shopping: '',
+        segmento: '',
+        status: 'ativo',
+        telefone: '',
+        email: '',
+        responsavel_nome: '',
+        endereco: '',
+      });
+      setErrors({});
       
       // Redirect to admin after 2 seconds
       setTimeout(() => {
         navigate('/admin/lojistas');
       }, 2000);
+    },
+    onError: (error: any) => {
+      if (error.code === '23505') { // Unique violation
+        toast({
+          title: "Erro no cadastro",
+          description: "Já existe um lojista cadastrado com este CNPJ.",
+          variant: "destructive",
+        });
+      } else {
+        toast({
+          title: "Erro ao cadastrar lojista",
+          description: error.message,
+          variant: "destructive",
+        });
+      }
+    }
+  });
 
-    } catch (error) {
-      console.error('Erro ao cadastrar lojista:', error);
-      toast({
-        title: "Erro no cadastro",
-        description: "Ocorreu um erro ao cadastrar o lojista. Tente novamente.",
-        variant: "destructive",
+  const handleSubmit = () => {
+    try {
+      // Validar dados
+      const validatedData = lojistaSchema.parse({
+        ...formData,
+        email: formData.email || undefined
       });
-    } finally {
-      setIsLoading(false);
+
+      setErrors({});
+      salvarLojistaMutation.mutate({
+        ...validatedData,
+        status: formData.status
+      } as Lojista);
+    } catch (error) {
+      if (error instanceof z.ZodError) {
+        const newErrors: Record<string, string> = {};
+        error.errors.forEach((err) => {
+          if (err.path[0]) {
+            newErrors[err.path[0] as string] = err.message;
+          }
+        });
+        setErrors(newErrors);
+        
+        // Scroll to first error on mobile
+        const firstErrorField = document.getElementById(Object.keys(newErrors)[0]);
+        if (firstErrorField) {
+          firstErrorField.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        }
+      }
     }
   };
 
+  const handleNovoSegmento = () => {
+    if (novoSegmento.trim()) {
+      criarNovoSegmentoMutation.mutate(novoSegmento.trim());
+    }
+  };
+
+  const formatCNPJ = (cnpj: string) => {
+    const digits = cnpj.replace(/\D/g, '');
+    return digits.slice(0, 14);
+  };
+
   return (
-    <div className="min-h-screen bg-gradient-to-br from-primary/5 via-background to-secondary/5 flex flex-col">
-      {/* Header com logo */}
-      <header className="bg-white border-b shadow-sm">
-        <div className="container mx-auto px-4 py-4 flex items-center justify-between">
-          <div className="flex items-center gap-4">
-            <Button
-              variant="ghost"
-              size="sm"
-              onClick={() => navigate(-1)}
-              className="flex items-center gap-2"
-            >
-              <ArrowLeft className="h-4 w-4" />
-              Voltar
-            </Button>
-            
-            <div className="flex items-center gap-3">
-              <div className="p-3 bg-primary/10 rounded-lg">
-                <Store className="h-8 w-8 text-primary" />
-              </div>
-              <div>
-                <h1 className="text-2xl font-bold text-gray-900">
-                  Sistema de Cupons
-                </h1>
-                <p className="text-sm text-gray-600">
-                  Cadastro de Novo Lojista
-                </p>
-              </div>
-            </div>
+    <div className="min-h-screen bg-gray-50 flex flex-col">
+      {/* Header otimizado para mobile */}
+      <header className="flex h-16 sm:h-14 items-center gap-x-2 sm:gap-x-4 bg-white border-b border-border px-3 sm:px-4 lg:px-6 shadow-sm flex-shrink-0">
+        <Button
+          variant="ghost"
+          size="sm"
+          onClick={() => navigate(-1)}
+          className="flex items-center gap-1 sm:gap-2 hover:bg-gray-100 p-2 min-w-0"
+        >
+          <ChevronLeft className="h-4 w-4 flex-shrink-0" />
+          <span className="hidden xs:inline text-sm">Voltar</span>
+        </Button>
+        
+        <div className="flex items-center gap-2 sm:gap-3 min-w-0 flex-1">
+          <img 
+            src="/lovable-uploads/30762c46-4536-4a6c-bd54-a016f6a4ff1c.png" 
+            alt="Show de Prêmios - Vem Pra 44" 
+            className="h-6 sm:h-8 w-auto flex-shrink-0"
+          />
+          <div className="hidden sm:block min-w-0">
+            <h1 className="text-base sm:text-lg font-semibold text-foreground truncate">
+              Cadastro de Lojista
+            </h1>
           </div>
+        </div>
+
+        <div className="flex items-center gap-x-2 sm:gap-x-4">
+          <Button 
+            variant="outline" 
+            size="sm"
+            onClick={() => navigate('/admin/lojistas')}
+            className="flex items-center gap-1 sm:gap-2 text-xs sm:text-sm px-2 sm:px-3"
+          >
+            <Store className="h-3 w-3 sm:h-4 sm:w-4 flex-shrink-0" />
+            <span className="hidden sm:inline">Gerenciar</span>
+          </Button>
         </div>
       </header>
 
-      {/* Formulário */}
-      <main className="flex-1 container mx-auto px-4 py-8 max-w-2xl">
-        <Card className="shadow-lg border-0 bg-white/80 backdrop-blur-sm">
-          <CardHeader className="text-center pb-6">
-            <CardTitle className="text-3xl font-bold text-gray-900 flex items-center justify-center gap-3">
-              <Store className="h-8 w-8 text-primary" />
-              Cadastro de Lojista
-            </CardTitle>
-            <CardDescription className="text-lg text-gray-600">
-              Preencha os dados para cadastrar um novo lojista no sistema
-            </CardDescription>
-          </CardHeader>
+      {/* Conteúdo principal otimizado para mobile */}
+      <main className="flex-1 overflow-auto px-3 sm:px-4 lg:px-6 py-4 sm:py-6">
+        <div className="max-w-2xl mx-auto">
+          <Card className="bg-card shadow-sm border-border">
+            <CardHeader className="border-b border-border bg-card px-4 sm:px-6 py-4 sm:py-6">
+              <div className="flex items-start gap-3">
+                <div className="p-2 sm:p-3 bg-primary/10 rounded-lg flex-shrink-0">
+                  <Store className="h-5 w-5 sm:h-6 sm:w-6 text-primary" />
+                </div>
+                <div className="min-w-0 flex-1">
+                  <CardTitle className="text-xl sm:text-2xl font-bold text-card-foreground">
+                    Novo Lojista
+                  </CardTitle>
+                  <CardDescription className="text-sm sm:text-base text-muted-foreground mt-1">
+                    Cadastre um novo lojista no sistema
+                  </CardDescription>
+                </div>
+              </div>
+            </CardHeader>
 
-          <CardContent className="space-y-6">
-            <Form {...form}>
-              <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
-                {/* Dados básicos */}
+            <CardContent className="p-4 sm:p-6">
+              <div className="space-y-6 sm:space-y-8">
+                {/* Campos obrigatórios primeiro */}
                 <div className="space-y-4">
-                  <h3 className="text-lg font-semibold text-gray-900 border-b pb-2">
-                    Dados da Loja
-                  </h3>
-                  
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    <FormField
-                      control={form.control}
-                      name="nome_loja"
-                      render={({ field }) => (
-                        <FormItem className="md:col-span-2">
-                          <FormLabel>Nome da Loja *</FormLabel>
-                          <FormControl>
-                            <Input
-                              placeholder="Ex: Loja da Moda"
-                              {...field}
-                              className="bg-white"
-                            />
-                          </FormControl>
-                          <FormMessage />
-                        </FormItem>
-                      )}
+                  <div className="space-y-3">
+                    <Label htmlFor="nome_loja" className="text-sm font-medium">
+                      Nome da Loja *
+                    </Label>
+                    <Input
+                      id="nome_loja"
+                      value={formData.nome_loja}
+                      onChange={(e) => setFormData(prev => ({ ...prev, nome_loja: e.target.value }))}
+                      className={`h-12 text-base ${errors.nome_loja ? 'border-destructive' : ''}`}
+                      placeholder="Ex: Loja da Moda"
                     />
+                    {errors.nome_loja && (
+                      <p className="text-sm text-destructive flex items-center gap-1">
+                        {errors.nome_loja}
+                      </p>
+                    )}
+                  </div>
 
-                    <FormField
-                      control={form.control}
-                      name="cnpj"
-                      render={({ field }) => (
-                        <FormItem>
-                          <FormLabel>CNPJ *</FormLabel>
-                          <FormControl>
-                            <Input
-                              placeholder="00.000.000/0000-00"
-                              {...field}
-                              className="bg-white"
-                            />
-                          </FormControl>
-                          <FormMessage />
-                        </FormItem>
-                      )}
-                    />
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                    <div className="space-y-3">
+                      <Label htmlFor="cnpj" className="text-sm font-medium">
+                        CNPJ *
+                      </Label>
+                      <Input
+                        id="cnpj"
+                        value={formData.cnpj}
+                        onChange={(e) => setFormData(prev => ({ ...prev, cnpj: formatCNPJ(e.target.value) }))}
+                        placeholder="00000000000000"
+                        maxLength={14}
+                        inputMode="numeric"
+                        className={`h-12 text-base ${errors.cnpj ? 'border-destructive' : ''}`}
+                      />
+                      {errors.cnpj && <p className="text-sm text-destructive">{errors.cnpj}</p>}
+                    </div>
 
-                    <FormField
-                      control={form.control}
-                      name="segmento"
-                      render={({ field }) => (
-                        <FormItem>
-                          <FormLabel>Segmento</FormLabel>
-                          <FormControl>
-                            <Input
-                              placeholder="Ex: Moda, Alimentação"
-                              {...field}
-                              className="bg-white"
-                            />
-                          </FormControl>
-                          <FormMessage />
-                        </FormItem>
-                      )}
-                    />
+                    <div className="space-y-3">
+                      <Label htmlFor="cidade" className="text-sm font-medium">
+                        Cidade *
+                      </Label>
+                      <Input
+                        id="cidade"
+                        value={formData.cidade}
+                        onChange={(e) => setFormData(prev => ({ ...prev, cidade: e.target.value }))}
+                        className={`h-12 text-base ${errors.cidade ? 'border-destructive' : ''}`}
+                        placeholder="Ex: Goiânia"
+                      />
+                      {errors.cidade && <p className="text-sm text-destructive">{errors.cidade}</p>}
+                    </div>
                   </div>
                 </div>
 
                 {/* Localização */}
                 <div className="space-y-4">
-                  <h3 className="text-lg font-semibold text-gray-900 border-b pb-2">
-                    Localização
-                  </h3>
+                  <div className="pb-2 border-b border-border">
+                    <h3 className="text-base font-semibold text-card-foreground flex items-center gap-2">
+                      <div className="w-2 h-2 bg-secondary rounded-full"></div>
+                      Localização
+                    </h3>
+                  </div>
                   
-                  <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                    <FormField
-                      control={form.control}
-                      name="cidade"
-                      render={({ field }) => (
-                        <FormItem className="md:col-span-2">
-                          <FormLabel>Cidade *</FormLabel>
-                          <FormControl>
-                            <Input
-                              placeholder="Ex: Goiânia"
-                              {...field}
-                              className="bg-white"
-                            />
-                          </FormControl>
-                          <FormMessage />
-                        </FormItem>
-                      )}
-                    />
+                  <div className="space-y-4">
+                    <div className="space-y-3">
+                      <Label htmlFor="shopping" className="text-sm font-medium">
+                        Shopping/Galeria
+                      </Label>
+                      <Input
+                        id="shopping"
+                        value={formData.shopping}
+                        onChange={(e) => setFormData(prev => ({ ...prev, shopping: e.target.value }))}
+                        className="h-12 text-base"
+                        placeholder="Ex: Flamboyant Shopping"
+                      />
+                    </div>
 
-                    <FormField
-                      control={form.control}
-                      name="estado"
-                      render={({ field }) => (
-                        <FormItem>
-                          <FormLabel>Estado *</FormLabel>
-                          <Select onValueChange={field.onChange} defaultValue={field.value}>
-                            <FormControl>
-                              <SelectTrigger className="bg-white">
-                                <SelectValue placeholder="UF" />
-                              </SelectTrigger>
-                            </FormControl>
-                            <SelectContent>
-                              <SelectItem value="GO">GO</SelectItem>
-                              <SelectItem value="SP">SP</SelectItem>
-                              <SelectItem value="RJ">RJ</SelectItem>
-                              <SelectItem value="MG">MG</SelectItem>
-                              <SelectItem value="BA">BA</SelectItem>
-                              <SelectItem value="PR">PR</SelectItem>
-                              <SelectItem value="RS">RS</SelectItem>
-                              <SelectItem value="PE">PE</SelectItem>
-                              <SelectItem value="CE">CE</SelectItem>
-                              <SelectItem value="PA">PA</SelectItem>
-                              <SelectItem value="SC">SC</SelectItem>
-                              <SelectItem value="PB">PB</SelectItem>
-                              <SelectItem value="MA">MA</SelectItem>
-                              <SelectItem value="ES">ES</SelectItem>
-                              <SelectItem value="PI">PI</SelectItem>
-                              <SelectItem value="AL">AL</SelectItem>
-                              <SelectItem value="RN">RN</SelectItem>
-                              <SelectItem value="MT">MT</SelectItem>
-                              <SelectItem value="MS">MS</SelectItem>
-                              <SelectItem value="DF">DF</SelectItem>
-                              <SelectItem value="SE">SE</SelectItem>
-                              <SelectItem value="AM">AM</SelectItem>
-                              <SelectItem value="RO">RO</SelectItem>
-                              <SelectItem value="AC">AC</SelectItem>
-                              <SelectItem value="AP">AP</SelectItem>
-                              <SelectItem value="RR">RR</SelectItem>
-                              <SelectItem value="TO">TO</SelectItem>
-                            </SelectContent>
-                          </Select>
-                          <FormMessage />
-                        </FormItem>
-                      )}
-                    />
+                    <div className="space-y-3">
+                      <Label htmlFor="endereco" className="text-sm font-medium">
+                        Endereço
+                      </Label>
+                      <Input
+                        id="endereco"
+                        value={formData.endereco}
+                        onChange={(e) => setFormData(prev => ({ ...prev, endereco: e.target.value }))}
+                        className="h-12 text-base"
+                        placeholder="Rua, número, bairro"
+                      />
+                    </div>
+                  </div>
+                </div>
+
+                {/* Segmento */}
+                <div className="space-y-4">
+                  <div className="pb-2 border-b border-border">
+                    <h3 className="text-base font-semibold text-card-foreground flex items-center gap-2">
+                      <div className="w-2 h-2 bg-accent rounded-full"></div>
+                      Segmento
+                    </h3>
                   </div>
 
-                  <FormField
-                    control={form.control}
-                    name="endereco"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>Endereço</FormLabel>
-                        <FormControl>
-                          <Input
-                            placeholder="Rua, número, bairro"
-                            {...field}
-                            className="bg-white"
-                          />
-                        </FormControl>
-                        <FormMessage />
-                      </FormItem>
+                  <div className="space-y-3">
+                    <Label className="text-sm font-medium">
+                      Segmento
+                    </Label>
+                    {!mostrarNovoSegmento ? (
+                      <Select 
+                        value={formData.segmento} 
+                        onValueChange={(value) => {
+                          if (value === 'novo') {
+                            setMostrarNovoSegmento(true);
+                          } else {
+                            setFormData(prev => ({ ...prev, segmento: value }));
+                          }
+                        }}
+                      >
+                        <SelectTrigger className="h-12 text-base bg-white z-50">
+                          <SelectValue placeholder="Selecione um segmento" />
+                        </SelectTrigger>
+                        <SelectContent className="bg-white border border-border z-[100] max-h-60">
+                          {segmentos.map((segmento) => (
+                            <SelectItem key={segmento.id} value={segmento.nome} className="text-base py-3">
+                              {segmento.nome}
+                            </SelectItem>
+                          ))}
+                          <SelectItem value="novo" className="font-semibold text-primary text-base py-3">
+                            + Adicionar novo segmento
+                          </SelectItem>
+                        </SelectContent>
+                      </Select>
+                    ) : (
+                      <div className="flex gap-2">
+                        <Input
+                          value={novoSegmento}
+                          onChange={(e) => setNovoSegmento(e.target.value)}
+                          placeholder="Nome do novo segmento"
+                          className="flex-1 h-12 text-base"
+                        />
+                        <Button 
+                          type="button" 
+                          size="sm" 
+                          onClick={handleNovoSegmento}
+                          disabled={!novoSegmento.trim() || criarNovoSegmentoMutation.isPending}
+                          className="h-12 px-4"
+                        >
+                          <Plus className="h-4 w-4" />
+                        </Button>
+                        <Button 
+                          type="button" 
+                          variant="outline" 
+                          size="sm" 
+                          onClick={() => {
+                            setMostrarNovoSegmento(false);
+                            setNovoSegmento('');
+                          }}
+                          className="h-12 px-4"
+                        >
+                          <X className="h-4 w-4" />
+                        </Button>
+                      </div>
                     )}
-                  />
-
-                  <FormField
-                    control={form.control}
-                    name="shopping"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>Shopping</FormLabel>
-                        <FormControl>
-                          <Input
-                            placeholder="Ex: Flamboyant Shopping"
-                            {...field}
-                            className="bg-white"
-                          />
-                        </FormControl>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
+                  </div>
                 </div>
 
                 {/* Contato */}
                 <div className="space-y-4">
-                  <h3 className="text-lg font-semibold text-gray-900 border-b pb-2">
-                    Dados de Contato
-                  </h3>
-                  
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    <FormField
-                      control={form.control}
-                      name="telefone"
-                      render={({ field }) => (
-                        <FormItem>
-                          <FormLabel>Telefone</FormLabel>
-                          <FormControl>
-                            <Input
-                              placeholder="(62) 3333-4444"
-                              {...field}
-                              className="bg-white"
-                            />
-                          </FormControl>
-                          <FormMessage />
-                        </FormItem>
-                      )}
-                    />
-
-                    <FormField
-                      control={form.control}
-                      name="whatsapp"
-                      render={({ field }) => (
-                        <FormItem>
-                          <FormLabel>WhatsApp</FormLabel>
-                          <FormControl>
-                            <Input
-                              placeholder="(62) 99999-8888"
-                              {...field}
-                              className="bg-white"
-                            />
-                          </FormControl>
-                          <FormMessage />
-                        </FormItem>
-                      )}
-                    />
+                  <div className="pb-2 border-b border-border">
+                    <h3 className="text-base font-semibold text-card-foreground flex items-center gap-2">
+                      <div className="w-2 h-2 bg-primary rounded-full"></div>
+                      Contato
+                    </h3>
                   </div>
-
-                  <FormField
-                    control={form.control}
-                    name="email"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>Email</FormLabel>
-                        <FormControl>
-                          <Input
-                            type="email"
-                            placeholder="contato@loja.com.br"
-                            {...field}
-                            className="bg-white"
-                          />
-                        </FormControl>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
-
-                  <FormField
-                    control={form.control}
-                    name="nome_responsavel"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>Nome do Responsável</FormLabel>
-                        <FormControl>
-                          <Input
-                            placeholder="Nome do responsável pela loja"
-                            {...field}
-                            className="bg-white"
-                          />
-                        </FormControl>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
-                </div>
-
-                {/* Observações */}
-                <div className="space-y-4">
-                  <h3 className="text-lg font-semibold text-gray-900 border-b pb-2">
-                    Informações Adicionais
-                  </h3>
                   
-                  <FormField
-                    control={form.control}
-                    name="observacoes"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>Observações</FormLabel>
-                        <FormControl>
-                          <Textarea
-                            placeholder="Informações adicionais sobre o lojista..."
-                            {...field}
-                            className="bg-white min-h-[100px]"
-                          />
-                        </FormControl>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
-                </div>
+                  <div className="space-y-4">
+                    <div className="space-y-3">
+                      <Label htmlFor="responsavel_nome" className="text-sm font-medium">
+                        Responsável
+                      </Label>
+                      <Input
+                        id="responsavel_nome"
+                        value={formData.responsavel_nome}
+                        onChange={(e) => setFormData(prev => ({ ...prev, responsavel_nome: e.target.value }))}
+                        className="h-12 text-base"
+                        placeholder="Nome do responsável"
+                      />
+                    </div>
 
-                {/* Botões */}
-                <div className="flex flex-col sm:flex-row gap-4 pt-6">
+                    <div className="space-y-3">
+                      <Label htmlFor="telefone" className="text-sm font-medium">
+                        Telefone
+                      </Label>
+                      <Input
+                        id="telefone"
+                        value={formData.telefone}
+                        onChange={(e) => setFormData(prev => ({ ...prev, telefone: e.target.value }))}
+                        placeholder="(00) 00000-0000"
+                        inputMode="tel"
+                        className="h-12 text-base"
+                      />
+                    </div>
+
+                    <div className="space-y-3">
+                      <Label htmlFor="email" className="text-sm font-medium">
+                        Email
+                      </Label>
+                      <Input
+                        id="email"
+                        type="email"
+                        value={formData.email}
+                        onChange={(e) => setFormData(prev => ({ ...prev, email: e.target.value }))}
+                        inputMode="email"
+                        className={`h-12 text-base ${errors.email ? 'border-destructive' : ''}`}
+                        placeholder="contato@loja.com.br"
+                      />
+                      {errors.email && <p className="text-sm text-destructive">{errors.email}</p>}
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              {/* Botões fixos no mobile */}
+              <div className="sticky bottom-0 left-0 right-0 bg-white border-t border-border mt-8 -mx-4 sm:-mx-6 p-4 sm:p-6 sm:static sm:border-t-0 sm:bg-transparent sm:mt-6">
+                <div className="flex flex-col sm:flex-row gap-3 sm:gap-4">
                   <Button
                     type="button"
                     variant="outline"
                     onClick={() => navigate(-1)}
-                    className="flex-1"
-                    disabled={isLoading}
+                    className="flex-1 h-12 text-base font-medium"
+                    disabled={salvarLojistaMutation.isPending}
                   >
                     Cancelar
                   </Button>
                   
                   <Button
-                    type="submit"
-                    className="flex-1"
-                    disabled={isLoading}
+                    type="button"
+                    className="flex-1 h-12 text-base font-medium bg-primary hover:bg-primary/90 text-primary-foreground"
+                    onClick={handleSubmit}
+                    disabled={salvarLojistaMutation.isPending}
                   >
-                    {isLoading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-                    {isLoading ? 'Cadastrando...' : 'Cadastrar Lojista'}
+                    {salvarLojistaMutation.isPending && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+                    {salvarLojistaMutation.isPending ? 'Cadastrando...' : 'Cadastrar Lojista'}
                   </Button>
                 </div>
-              </form>
-            </Form>
-          </CardContent>
-        </Card>
+              </div>
+            </CardContent>
+          </Card>
+        </div>
       </main>
     </div>
   );
