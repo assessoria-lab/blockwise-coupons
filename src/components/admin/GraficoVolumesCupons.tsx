@@ -68,7 +68,9 @@ const fetchDadosVolumesCupons = async (): Promise<DadosCupom[]> => {
     }
   });
 
-  return Object.values(dadosPorDia);
+  const resultado = Object.values(dadosPorDia);
+  console.log('Dados do gráfico:', resultado);
+  return resultado;
 };
 
 const CustomTooltip = ({ active, payload, label }: any) => {
@@ -155,7 +157,12 @@ export function GraficoVolumesCupons() {
               axisLine={false}
               tickLine={false}
               tick={{ fontSize: 12, fill: '#6b7280' }}
-              tickFormatter={(value) => `${(value / 1000).toFixed(0)}k`}
+              tickFormatter={(value) => {
+                if (value >= 1000) {
+                  return `${(value / 1000).toFixed(0)}k`;
+                }
+                return value.toString();
+              }}
             />
             <Tooltip content={<CustomTooltip />} />
             <Legend 
