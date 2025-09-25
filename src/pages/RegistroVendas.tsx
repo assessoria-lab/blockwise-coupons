@@ -316,9 +316,13 @@ const RegistroVendas = () => {
                       </SelectTrigger>
                       <SelectContent>
                         {loadingLojistas ? (
-                          <SelectItem value="" disabled>Carregando lojas...</SelectItem>
+                          <div className="p-2 text-sm text-muted-foreground text-center">
+                            Carregando lojas...
+                          </div>
                         ) : lojistas?.length === 0 ? (
-                          <SelectItem value="" disabled>Nenhuma loja com cupons disponíveis</SelectItem>
+                          <div className="p-2 text-sm text-muted-foreground text-center">
+                            Nenhuma loja com cupons disponíveis
+                          </div>
                         ) : (
                           lojistas?.map((lojista) => (
                             <SelectItem key={lojista.id} value={lojista.id}>
