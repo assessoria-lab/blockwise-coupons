@@ -230,6 +230,17 @@ export default function CadastroLojista() {
         className="flex-1 overflow-auto px-3 sm:px-4 lg:px-6 py-4 sm:py-6 bg-cover bg-center bg-no-repeat"
         style={{ backgroundImage: 'url(/assets/background-green.jpg)' }}
       >
+        {/* Logo centralizada no topo */}
+        <div className="flex justify-center mb-6 sm:mb-8">
+          <div className="bg-white/10 backdrop-blur-sm rounded-2xl px-6 py-4 border border-white/20">
+            <h1 className="text-2xl sm:text-3xl font-bold text-white text-center">
+              Sistema Blocos
+            </h1>
+            <p className="text-white/80 text-sm text-center mt-1">
+              Gestão de Cupons
+            </p>
+          </div>
+        </div>
         <div className="max-w-2xl mx-auto">
           <Card className="bg-card shadow-sm border-border">
             <CardHeader className="border-b border-border bg-card px-4 sm:px-6 py-4 sm:py-6">
