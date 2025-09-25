@@ -259,7 +259,7 @@ export default function CadastroLojista() {
                       </p>}
                   </div>
 
-                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                  <div className="space-y-4">
                     <div className="space-y-3">
                       <Label htmlFor="cnpj" className="text-sm font-medium">
                         CNPJ *
@@ -411,12 +411,12 @@ export default function CadastroLojista() {
 
               {/* Botões fixos no mobile */}
               <div className="sticky bottom-0 left-0 right-0 bg-white border-t border-border mt-8 -mx-4 sm:-mx-6 p-4 sm:p-6 sm:static sm:border-t-0 sm:bg-transparent sm:mt-6">
-                <div className="flex flex-col sm:flex-row gap-3 sm:gap-4">
-                  <Button type="button" variant="outline" onClick={() => navigate(-1)} className="flex-1 h-12 text-base font-medium" disabled={salvarLojistaMutation.isPending}>
+                <div className="flex flex-col gap-3">
+                  <Button type="button" variant="outline" onClick={() => navigate(-1)} className="w-full h-12 text-base font-medium" disabled={salvarLojistaMutation.isPending}>
                     Cancelar
                   </Button>
                   
-                  <Button type="button" className="flex-1 h-12 text-base font-medium bg-primary hover:bg-primary/90 text-primary-foreground" onClick={handleSubmit} disabled={salvarLojistaMutation.isPending}>
+                  <Button type="button" className="w-full h-12 text-base font-medium bg-primary hover:bg-primary/90 text-primary-foreground" onClick={handleSubmit} disabled={salvarLojistaMutation.isPending}>
                     {salvarLojistaMutation.isPending && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
                     {salvarLojistaMutation.isPending ? 'Cadastrando...' : 'Cadastrar Lojista'}
                   </Button>
