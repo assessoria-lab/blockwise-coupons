@@ -408,16 +408,6 @@ const RegistroVendas = () => {
                         </>
                       )}
                     </Button>
-                    
-                    <Button
-                      type="button"
-                      variant="outline"
-                      onClick={() => navigate('/')}
-                      className="w-full h-12 text-base font-medium"
-                    >
-                      <ChevronLeft className="mr-2 h-4 w-4" />
-                      Voltar ao Painel
-                    </Button>
                   </div>
                 </div>
               </form>
@@ -436,9 +426,25 @@ const RegistroVendas = () => {
             <DialogTitle className="text-xl font-bold text-center">
               Cupons Atribuídos com Sucesso!
             </DialogTitle>
-            <DialogDescription className="text-center text-base">
-              {resultadoVenda?.quantidade_cupons || 0} cupons foram atribuídos para {resultadoVenda?.cliente_nome}. 
-              O cliente já pode participar dos sorteios do Show de Prêmios.
+            <DialogDescription className="text-center text-base space-y-2">
+              <div>
+                <strong>{resultadoVenda?.quantidade_cupons || 0} cupons</strong> foram atribuídos para <strong>{resultadoVenda?.cliente_nome}</strong>.
+              </div>
+              {resultadoVenda?.numeros_cupons && (
+                <div className="mt-3 p-3 bg-muted rounded-md">
+                  <p className="font-medium mb-2">Números dos cupons atribuídos:</p>
+                  <div className="flex flex-wrap gap-1 text-sm">
+                    {resultadoVenda.numeros_cupons.map((numero: string, index: number) => (
+                      <span key={index} className="bg-primary text-primary-foreground px-2 py-1 rounded text-xs">
+                        {numero}
+                      </span>
+                    ))}
+                  </div>
+                </div>
+              )}
+              <div className="text-sm text-muted-foreground mt-2">
+                O cliente já pode participar dos sorteios do Show de Prêmios.
+              </div>
             </DialogDescription>
           </DialogHeader>
           
@@ -449,22 +455,22 @@ const RegistroVendas = () => {
                 setResultadoVenda(null);
                 // Permanece na mesma página para nova atribuição
               }} 
-              className="w-full h-12 text-base font-medium"
-              variant="outline"
+              className="w-full h-12 text-base font-medium bg-primary hover:bg-primary/90"
             >
               <UserPlus className="mr-2 h-4 w-4" />
-              Nova Atribuição
+              Registrar Nova Venda
             </Button>
             
             <Button 
               onClick={() => {
                 setShowSucessoModal(false);
-                navigate('/?page=clientes');
+                navigate('/?page=lojistas');
               }} 
-              className="w-full h-12 text-base font-medium bg-primary hover:bg-primary/90"
+              className="w-full h-12 text-base font-medium"
+              variant="outline"
             >
               <ShoppingCart className="mr-2 h-4 w-4" />
-              Ver Gestão de Clientes
+              Comprar Blocos
             </Button>
           </div>
         </DialogContent>
