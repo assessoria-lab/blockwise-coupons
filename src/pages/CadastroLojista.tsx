@@ -236,12 +236,9 @@ export default function CadastroLojista() {
         <div className="max-w-2xl mx-auto">
           <Card className="bg-card shadow-sm border-border">
             <CardHeader className="border-b border-border bg-card px-4 sm:px-6 py-4 sm:py-6">
-              <div className="flex items-start gap-3">
-                
-                <div className="min-w-0 flex-1">
-                  <CardTitle className="text-xl sm:text-2xl font-bold text-card-foreground">CADASTRE SUA LOJA NO SHOW DE PRÊMIOS</CardTitle>
-                  <CardDescription className="text-sm sm:text-base text-muted-foreground mt-1">Preencha os dados e faça parte da maior campanha de vendas do ano!</CardDescription>
-                </div>
+              <div className="text-center">
+                <CardTitle className="text-2xl sm:text-4xl font-bold text-card-foreground">CADASTRE SUA LOJA NO SHOW DE PRÊMIOS</CardTitle>
+                <CardDescription className="text-sm sm:text-base text-muted-foreground mt-1">Preencha os dados e faça parte da maior campanha de vendas do ano!</CardDescription>
               </div>
             </CardHeader>
 
