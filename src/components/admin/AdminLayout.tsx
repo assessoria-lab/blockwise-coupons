@@ -156,11 +156,15 @@ const AdminLayout = ({
 
           <div className="flex flex-1 gap-x-4 self-stretch lg:gap-x-6">
             <div className="flex items-center gap-x-4 lg:gap-x-6 ml-auto">
-              <Badge variant="outline" className="bg-primary text-primary-foreground border-primary/20 px-3 py-1">
-                <div className="text-xs font-medium">
-                  {metricas ? `${metricas.cupons_atribuidos_total.toLocaleString()}/${metricas.cupons_disponiveis.toLocaleString()}` : '--/--'}
-                </div>
-              </Badge>
+              <Button 
+                variant="default" 
+                size="sm"
+                onClick={() => window.location.href = '/cadastro-lojista'}
+                className="bg-primary hover:bg-primary/90 text-primary-foreground px-4 py-2 font-medium"
+              >
+                <Store className="h-4 w-4 mr-2" />
+                Cadastrar Loja
+              </Button>
             </div>
           </div>
         </div>
