@@ -37,7 +37,7 @@ const Index = () => {
   };
 
   return (
-    <AdminLayout currentPage={currentPage} onNavigate={handleNavigation} forceExpanded={true}>
+    <AdminLayout currentPage={currentPage} onNavigate={handleNavigation}>
       {renderCurrentPage()}
     </AdminLayout>
   );

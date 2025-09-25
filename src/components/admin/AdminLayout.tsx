@@ -7,17 +7,14 @@ interface AdminLayoutProps {
   children: React.ReactNode;
   currentPage: string;
   onNavigate: (page: string) => void;
-  forceExpanded?: boolean;
 }
 const AdminLayout = ({
   children,
   currentPage,
-  onNavigate,
-  forceExpanded = false
+  onNavigate
 }: AdminLayoutProps) => {
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
-  const isCollapsed = forceExpanded ? false : sidebarCollapsed;
   const { metricas } = useMonitoramentoRealTime();
   const navigation = [{
     name: 'Dashboard',
@@ -75,16 +72,16 @@ const AdminLayout = ({
       {/* Sidebar */}
       <div className={`
         fixed inset-y-0 left-0 z-50 bg-primary text-primary-foreground transform transition-all duration-300 ease-in-out
-        ${forceExpanded ? 'translate-x-0' : (sidebarOpen ? 'translate-x-0' : '-translate-x-full lg:translate-x-0')}
-        ${forceExpanded ? 'w-64' : (isCollapsed ? 'w-16' : 'w-64')}
+        ${sidebarOpen ? 'translate-x-0' : '-translate-x-full lg:translate-x-0'}
+        ${sidebarCollapsed ? 'w-16' : 'w-64'}
       `}>
         <div className="flex flex-col h-full">
           {/* Logo/Header */}
-          <div className={`flex items-center ${(forceExpanded || !isCollapsed) ? 'justify-center px-4' : 'justify-center px-2'} h-32 border-b border-primary-foreground/20`}>
-            {(forceExpanded || !isCollapsed) && <div className="flex items-center justify-center w-full">
+          <div className={`flex items-center ${sidebarCollapsed ? 'justify-center px-2' : 'justify-center px-4'} h-32 border-b border-primary-foreground/20`}>
+            {!sidebarCollapsed && <div className="flex items-center justify-center w-full">
                 <img src="/lovable-uploads/30762c46-4536-4a6c-bd54-a016f6a4ff1c.png" alt="Show de Prêmios - Vem Pra 44" className="h-32 w-auto my-8" />
               </div>}
-            {!forceExpanded && isCollapsed && <img src="/lovable-uploads/30762c46-4536-4a6c-bd54-a016f6a4ff1c.png" alt="Show de Prêmios" className="h-12 w-auto" />}
+            {sidebarCollapsed && <img src="/lovable-uploads/30762c46-4536-4a6c-bd54-a016f6a4ff1c.png" alt="Show de Prêmios" className="h-12 w-auto" />}
           </div>
 
           {/* Navigation */}
@@ -96,11 +93,11 @@ const AdminLayout = ({
                 e.preventDefault();
                 onNavigate(item.href.replace('#', ''));
               }} className={`
-                      flex items-center ${(forceExpanded || !isCollapsed) ? 'px-3' : 'justify-center px-3'} py-3 rounded-lg text-sm font-medium transition-all duration-200 cursor-pointer group
+                      flex items-center ${sidebarCollapsed ? 'justify-center px-3' : 'px-3'} py-3 rounded-lg text-sm font-medium transition-all duration-200 cursor-pointer group
                       ${item.current ? 'bg-primary-foreground/20 text-primary-foreground shadow-lg border-r-2 border-accent' : 'text-primary-foreground/80 hover:bg-primary-foreground/10 hover:text-primary-foreground'}
-                    `} title={(!forceExpanded && isCollapsed) ? item.name : undefined}>
+                    `} title={sidebarCollapsed ? item.name : undefined}>
                     <Icon className="h-5 w-5 flex-shrink-0" />
-                    {(forceExpanded || !isCollapsed) && <>
+                    {!sidebarCollapsed && <>
                         <span className="ml-3 flex-1">{item.name}</span>
                         {item.badge && <Badge variant="secondary" className="ml-2 text-xs bg-accent text-accent-foreground border-none hover:bg-accent hover:text-accent-foreground">
                             {item.badge}
@@ -112,7 +109,7 @@ const AdminLayout = ({
           </nav>
 
           {/* Footer */}
-          {(forceExpanded || !isCollapsed) && <div className="p-4 border-t border-primary-foreground/20">
+          {!sidebarCollapsed && <div className="p-4 border-t border-primary-foreground/20">
               <div className="flex items-center space-x-3">
                 <div className="w-8 h-8 bg-accent rounded-full flex items-center justify-center">
                   <span className="text-xs font-bold text-accent-foreground">AD</span>
@@ -132,28 +129,24 @@ const AdminLayout = ({
 
       {/* Main content */}
       <div className={`flex-1 flex flex-col min-w-0 transition-all duration-300 ${
-        forceExpanded ? 'ml-64' : (isCollapsed ? 'lg:ml-16' : 'lg:ml-64')
+        sidebarCollapsed ? 'lg:ml-16' : 'lg:ml-64'
       }`}>
         {/* Top bar */}
         <div className="flex h-14 items-center gap-x-4 bg-white border-b border-border px-4 shadow-sm lg:px-6 flex-shrink-0">
           {/* Menu collapse button - outside sidebar */}
-          {!forceExpanded && (
-            <Button
-              variant="ghost"
-              size="sm"
-              onClick={() => setSidebarCollapsed(!sidebarCollapsed)}
-              className="hidden lg:flex hover:bg-gray-100 p-2"
-              title={sidebarCollapsed ? 'Expandir menu' : 'Recolher menu'}
-            >
-              {sidebarCollapsed ? <ChevronRight className="h-4 w-4" /> : <ChevronLeft className="h-4 w-4" />}
-            </Button>
-          )}
+          <Button
+            variant="ghost"
+            size="sm"
+            onClick={() => setSidebarCollapsed(!sidebarCollapsed)}
+            className="hidden lg:flex hover:bg-gray-100 p-2"
+            title={sidebarCollapsed ? 'Expandir menu' : 'Recolher menu'}
+          >
+            {sidebarCollapsed ? <ChevronRight className="h-4 w-4" /> : <ChevronLeft className="h-4 w-4" />}
+          </Button>
           
-          {!forceExpanded && (
-            <Button variant="ghost" size="sm" className="lg:hidden" onClick={() => setSidebarOpen(true)}>
-              <Menu className="h-5 w-5" />
-            </Button>
-          )}
+          <Button variant="ghost" size="sm" className="lg:hidden" onClick={() => setSidebarOpen(true)}>
+            <Menu className="h-5 w-5" />
+          </Button>
 
           <div className="flex flex-1 gap-x-4 self-stretch lg:gap-x-6">
             <div className="flex items-center gap-x-4 lg:gap-x-6 ml-auto">
