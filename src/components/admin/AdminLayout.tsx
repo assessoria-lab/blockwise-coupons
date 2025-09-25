@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { LayoutDashboard, Package, Store, Users, Settings, Menu, X, Trophy, BarChart3, ChevronLeft, ChevronRight, Search, TrendingUp, Activity, Shield } from 'lucide-react';
+import { LayoutDashboard, Package, Store, Users, Settings, Menu, X, Trophy, BarChart3, ChevronLeft, ChevronRight, Search, TrendingUp, Activity } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { useMonitoramentoRealTime } from '@/hooks/useMonitoramentoRealTime';
@@ -58,12 +58,6 @@ const AdminLayout = ({
     icon: BarChart3,
     current: currentPage === 'relatorios',
     badge: null
-  }, {
-    name: 'Auditoria & Compliance',
-    href: '/admin/auditoria',
-    icon: Shield,
-    current: currentPage === 'auditoria',
-    badge: 'Segurança'
   }, {
     name: 'Configurações',
     href: '#configuracoes',
