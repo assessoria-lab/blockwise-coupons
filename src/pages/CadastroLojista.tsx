@@ -235,7 +235,7 @@ export default function CadastroLojista() {
           <img 
             src="/assets/logo-show-premios.png" 
             alt="Show de Prêmios"
-            className="h-16 sm:h-20 w-auto"
+            className="h-48 sm:h-60 w-auto"
           />
         </div>
         <div className="max-w-2xl mx-auto">
