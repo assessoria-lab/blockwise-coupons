@@ -7,7 +7,8 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Loader2, Store, ChevronLeft, Plus, X } from 'lucide-react';
+import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from '@/components/ui/dialog';
+import { Loader2, Store, ChevronLeft, Plus, X, CheckCircle, ShoppingCart, UserPlus } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { z } from 'zod';
 interface Lojista {
@@ -59,6 +60,8 @@ export default function CadastroLojista() {
   const queryClient = useQueryClient();
   const [novoSegmento, setNovoSegmento] = useState('');
   const [mostrarNovoSegmento, setMostrarNovoSegmento] = useState(false);
+  const [showSucessoModal, setShowSucessoModal] = useState(false);
+  const [nomeLojaRegistrada, setNomeLojaRegistrada] = useState('');
   const [formData, setFormData] = useState<Lojista>({
     nome_loja: '',
     cnpj: '',
@@ -137,6 +140,13 @@ export default function CadastroLojista() {
       queryClient.invalidateQueries({
         queryKey: ['lojistas']
       });
+      
+      // Salva o nome da loja para o modal
+      setNomeLojaRegistrada(formData.nome_loja);
+      
+      // Mostra o modal de sucesso
+      setShowSucessoModal(true);
+
       toast({
         title: "✅ Lojista cadastrado!",
         description: `${formData.nome_loja} foi cadastrado com sucesso.`
@@ -156,11 +166,6 @@ export default function CadastroLojista() {
         endereco: ''
       });
       setErrors({});
-
-      // Redirect to admin after 2 seconds
-      setTimeout(() => {
-        navigate('/admin/lojistas');
-      }, 2000);
     },
     onError: (error: any) => {
       if (error.code === '23505') {
@@ -422,5 +427,47 @@ export default function CadastroLojista() {
           </Card>
         </div>
       </main>
+      
+      {/* Modal de sucesso */}
+      <Dialog open={showSucessoModal} onOpenChange={setShowSucessoModal}>
+        <DialogContent className="sm:max-w-md">
+          <DialogHeader className="text-center">
+            <div className="mx-auto mb-4">
+              <CheckCircle className="h-16 w-16 text-green-500" />
+            </div>
+            <DialogTitle className="text-xl font-bold text-center">
+              Cadastro Realizado com Sucesso!
+            </DialogTitle>
+            <DialogDescription className="text-center text-base">
+              {nomeLojaRegistrada} foi cadastrada no Show de Prêmios. Agora você já pode comprar blocos de cupons e começar a participar da campanha.
+            </DialogDescription>
+          </DialogHeader>
+          
+          <div className="flex flex-col gap-3 mt-6">
+            <Button 
+              onClick={() => {
+                setShowSucessoModal(false);
+                // Reset para novo cadastro
+              }} 
+              className="w-full h-12 text-base font-medium"
+              variant="outline"
+            >
+              <UserPlus className="mr-2 h-4 w-4" />
+              Realizar Novo Cadastro
+            </Button>
+            
+            <Button 
+              onClick={() => {
+                setShowSucessoModal(false);
+                navigate('/admin/lojistas');
+              }} 
+              className="w-full h-12 text-base font-medium bg-primary hover:bg-primary/90"
+            >
+              <ShoppingCart className="mr-2 h-4 w-4" />
+              Comprar Blocos de Cupons
+            </Button>
+          </div>
+        </DialogContent>
+      </Dialog>
     </div>;
 }
