@@ -1,4 +1,5 @@
-import { useQuery } from '@tanstack/react-query';
+import { useQuery, useQueryClient } from '@tanstack/react-query';
+import { useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
@@ -105,11 +106,38 @@ const getPaymentIcon = (formaPagamento: string) => {
 };
 
 export function HistoricoVendasRecentes() {
+  const queryClient = useQueryClient();
+  
   const { data: vendas, isLoading, error } = useQuery({
     queryKey: ['vendas-recentes'],
     queryFn: fetchVendasRecentes,
-    refetchInterval: 30000, // Atualiza a cada 30 segundos
+    refetchInterval: 10000, // Atualiza a cada 10 segundos
   });
+
+  // Sistema de tempo real - atualiza quando há mudanças nas vendas
+  useEffect(() => {
+    const channel = supabase
+      .channel('vendas-recentes-realtime')
+      .on('postgres_changes', {
+        event: '*',
+        schema: 'public',
+        table: 'pagamentos'
+      }, () => {
+        queryClient.invalidateQueries({ queryKey: ['vendas-recentes'] });
+      })
+      .on('postgres_changes', {
+        event: '*',
+        schema: 'public',
+        table: 'vendas_blocos'
+      }, () => {
+        queryClient.invalidateQueries({ queryKey: ['vendas-recentes'] });
+      })
+      .subscribe();
+
+    return () => {
+      supabase.removeChannel(channel);
+    };
+  }, [queryClient]);
 
   if (error) {
     return (

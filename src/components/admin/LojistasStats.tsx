@@ -1,4 +1,5 @@
-import { useQuery } from '@tanstack/react-query';
+import { useQuery, useQueryClient } from '@tanstack/react-query';
+import { useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
@@ -51,11 +52,38 @@ const fetchLojistasStats = async () => {
 };
 
 export const LojistasStats = () => {
+  const queryClient = useQueryClient();
+  
   const { data: stats, isLoading } = useQuery({
     queryKey: ['lojistas-stats'],
     queryFn: fetchLojistasStats,
-    refetchInterval: 30000, // Atualiza a cada 30 segundos
+    refetchInterval: 10000, // Atualiza a cada 10 segundos
   });
+
+  // Sistema de tempo real - atualiza quando há mudanças nos lojistas ou blocos
+  useEffect(() => {
+    const channel = supabase
+      .channel('lojistas-stats-realtime')
+      .on('postgres_changes', {
+        event: '*',
+        schema: 'public',
+        table: 'lojistas'
+      }, () => {
+        queryClient.invalidateQueries({ queryKey: ['lojistas-stats'] });
+      })
+      .on('postgres_changes', {
+        event: '*',
+        schema: 'public',
+        table: 'blocos'
+      }, () => {
+        queryClient.invalidateQueries({ queryKey: ['lojistas-stats'] });
+      })
+      .subscribe();
+
+    return () => {
+      supabase.removeChannel(channel);
+    };
+  }, [queryClient]);
 
   if (isLoading) {
     return (

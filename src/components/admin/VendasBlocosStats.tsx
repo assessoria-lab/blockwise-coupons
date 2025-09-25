@@ -1,4 +1,5 @@
-import { useQuery } from '@tanstack/react-query';
+import { useQuery, useQueryClient } from '@tanstack/react-query';
+import { useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
@@ -56,11 +57,38 @@ const fetchVendasStats = async () => {
 };
 
 export const VendasBlocosStats = () => {
+  const queryClient = useQueryClient();
+  
   const { data: stats, isLoading } = useQuery({
     queryKey: ['vendas-blocos-stats'],
     queryFn: fetchVendasStats,
-    refetchInterval: 30000, // Atualiza a cada 30 segundos
+    refetchInterval: 10000, // Atualiza a cada 10 segundos
   });
+
+  // Sistema de tempo real - atualiza quando há mudanças nos blocos ou pagamentos
+  useEffect(() => {
+    const channel = supabase
+      .channel('vendas-stats-realtime')
+      .on('postgres_changes', {
+        event: '*',
+        schema: 'public',
+        table: 'blocos'
+      }, () => {
+        queryClient.invalidateQueries({ queryKey: ['vendas-blocos-stats'] });
+      })
+      .on('postgres_changes', {
+        event: '*',
+        schema: 'public',
+        table: 'pagamentos'
+      }, () => {
+        queryClient.invalidateQueries({ queryKey: ['vendas-blocos-stats'] });
+      })
+      .subscribe();
+
+    return () => {
+      supabase.removeChannel(channel);
+    };
+  }, [queryClient]);
 
   if (isLoading) {
     return (

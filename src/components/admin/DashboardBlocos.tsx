@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { useQuery } from '@tanstack/react-query';
+import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
@@ -37,8 +37,10 @@ interface UtilizacaoBloco {
   clientes_atendidos: number;
 }
 
-// Mock data - will be replaced with Supabase queries
+// Real-time dashboard metrics
 const useDashboardMetrics = () => {
+  const queryClient = useQueryClient();
+  
   const { data: metrics, isLoading } = useQuery({
     queryKey: ['dashboard-metrics'],
     queryFn: async () => {
@@ -78,8 +80,33 @@ const useDashboardMetrics = () => {
         }
       };
     },
-    refetchInterval: 30000
+    refetchInterval: 5000 // Atualiza a cada 5 segundos
   });
+
+  // Sistema de tempo real - atualiza quando há mudanças
+  useEffect(() => {
+    const channel = supabase
+      .channel('dashboard-realtime')
+      .on('postgres_changes', {
+        event: '*',
+        schema: 'public',
+        table: 'blocos'
+      }, () => {
+        queryClient.invalidateQueries({ queryKey: ['dashboard-metrics'] });
+      })
+      .on('postgres_changes', {
+        event: '*',
+        schema: 'public',
+        table: 'cupons'
+      }, () => {
+        queryClient.invalidateQueries({ queryKey: ['dashboard-metrics'] });
+      })
+      .subscribe();
+
+    return () => {
+      supabase.removeChannel(channel);
+    };
+  }, [queryClient]);
 
   return { metrics, isLoading };
 };
