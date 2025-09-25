@@ -226,32 +226,21 @@ export default function CadastroLojista() {
       
 
       {/* Conteúdo principal otimizado para mobile */}
-      <main 
-        className="flex-1 overflow-auto px-3 sm:px-4 lg:px-6 py-4 sm:py-6 bg-cover bg-center bg-no-repeat"
-        style={{ backgroundImage: 'url(/assets/background-green.jpg)' }}
-      >
+      <main className="flex-1 overflow-auto px-3 sm:px-4 lg:px-6 py-4 sm:py-6 bg-cover bg-center bg-no-repeat" style={{
+      backgroundImage: 'url(/assets/background-green.jpg)'
+    }}>
         {/* Logo centralizada no topo */}
         <div className="flex justify-center mb-6 sm:mb-8">
-          <img 
-            src="/assets/logo-show-premios.png" 
-            alt="Show de Prêmios"
-            className="h-48 sm:h-60 w-auto"
-          />
+          <img src="/assets/logo-show-premios.png" alt="Show de Prêmios" className="h-48 sm:h-60 w-auto" />
         </div>
         <div className="max-w-2xl mx-auto">
           <Card className="bg-card shadow-sm border-border">
             <CardHeader className="border-b border-border bg-card px-4 sm:px-6 py-4 sm:py-6">
               <div className="flex items-start gap-3">
-                <div className="p-2 sm:p-3 bg-primary/10 rounded-lg flex-shrink-0">
-                  <Store className="h-5 w-5 sm:h-6 sm:w-6 text-primary" />
-                </div>
+                
                 <div className="min-w-0 flex-1">
-                  <CardTitle className="text-xl sm:text-2xl font-bold text-card-foreground">
-                    Novo Lojista
-                  </CardTitle>
-                  <CardDescription className="text-sm sm:text-base text-muted-foreground mt-1">
-                    Cadastre um novo lojista no sistema
-                  </CardDescription>
+                  <CardTitle className="text-xl sm:text-2xl font-bold text-card-foreground">CADASTRE SUA LOJA NO SHOW DE PRÊMIOS</CardTitle>
+                  <CardDescription className="text-sm sm:text-base text-muted-foreground mt-1">Preencha os dados e faça parte da maior campanha de vendas do ano!</CardDescription>
                 </div>
               </div>
             </CardHeader>
