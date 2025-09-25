@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
-import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card';
+import { Card, CardHeader, CardTitle, CardContent, CardDescription } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { Label } from '@/components/ui/label';
@@ -186,89 +186,93 @@ const RegistroVendas = () => {
   const lojistaSelecionada = lojistas?.find(l => l.id === formData.lojista_id);
 
   return (
-    <div className="min-h-screen bg-background">
-      <header className="border-b bg-card">
-        <div className="container mx-auto px-4 py-4">
-          <div className="flex items-center justify-between">
-            <div className="flex items-center gap-4">
-              <Button 
-                variant="ghost" 
-                size="sm" 
-                onClick={() => navigate('/')}
-                className="gap-2"
-              >
-                <ChevronLeft className="h-4 w-4" />
-                Voltar ao Painel
-              </Button>
-              <div className="flex items-center gap-2">
-                <Receipt className="h-6 w-6 text-primary" />
-                <h1 className="text-xl font-semibold">Registro de Vendas</h1>
-              </div>
-            </div>
-          </div>
+    <div className="min-h-screen bg-primary flex flex-col">
+      {/* Conteúdo principal otimizado para mobile */}
+      <main className="flex-1 overflow-auto px-3 sm:px-4 lg:px-6 py-4 sm:py-6 bg-cover bg-center bg-no-repeat" style={{
+        backgroundImage: 'url(/assets/background-green.jpg)'
+      }}>
+        {/* Logo centralizada no topo */}
+        <div className="flex justify-center mb-6 sm:mb-8">
+          <img src="/assets/logo-show-premios.png" alt="Show de Prêmios" className="h-48 sm:h-60 w-auto" />
         </div>
-      </header>
 
-      <main className="container mx-auto px-4 py-6">
         <div className="max-w-2xl mx-auto">
-          <Card>
-            <CardHeader>
-              <CardTitle className="flex items-center gap-2">
-                <Plus className="h-5 w-5" />
-                Atribuir Cupons para Cliente
-              </CardTitle>
+          <Card className="bg-card shadow-sm border-border">
+            <CardHeader className="border-b border-border bg-card px-4 sm:px-6 py-4 sm:py-6">
+              <div className="text-center">
+                <CardTitle className="text-2xl sm:text-4xl font-bold text-card-foreground">REGISTRO DE VENDAS</CardTitle>
+                <CardDescription className="text-sm sm:text-base text-muted-foreground mt-1">
+                  Atribua cupons para seus clientes e participe do Show de Prêmios!
+                </CardDescription>
+              </div>
             </CardHeader>
-            <CardContent>
-              <form onSubmit={handleSubmit} className="space-y-6">
+
+            <CardContent className="p-4 sm:p-6">
+              <form onSubmit={handleSubmit} className="space-y-6 sm:space-y-8">
                 {/* Dados do Cliente */}
                 <div className="space-y-4">
-                  <h3 className="text-lg font-medium">Dados do Cliente</h3>
+                  <div className="pb-2 border-b border-border">
+                    <h3 className="text-base font-semibold text-card-foreground flex items-center gap-2">
+                      <div className="w-2 h-2 bg-primary rounded-full"></div>
+                      Dados do Cliente
+                    </h3>
+                  </div>
                   
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    <div>
-                      <Label htmlFor="nome">Nome do Cliente *</Label>
+                  <div className="space-y-4">
+                    <div className="space-y-3">
+                      <Label htmlFor="nome" className="text-sm font-medium">
+                        Nome do Cliente *
+                      </Label>
                       <Input
                         id="nome"
                         value={formData.nome}
                         onChange={(e) => handleInputChange('nome', e.target.value)}
                         placeholder="Nome completo"
-                        className={errors.nome ? 'border-red-500' : ''}
+                        className={`h-12 text-base ${errors.nome ? 'border-destructive' : ''}`}
                       />
-                      {errors.nome && <p className="text-sm text-red-500 mt-1">{errors.nome}</p>}
+                      {errors.nome && <p className="text-sm text-destructive">{errors.nome}</p>}
                     </div>
                     
-                    <div>
-                      <Label htmlFor="cpf">CPF *</Label>
+                    <div className="space-y-3">
+                      <Label htmlFor="cpf" className="text-sm font-medium">
+                        CPF *
+                      </Label>
                       <Input
                         id="cpf"
                         value={formData.cpf}
                         onChange={(e) => handleInputChange('cpf', e.target.value.replace(/\D/g, ''))}
-                        placeholder="000.000.000-00"
+                        placeholder="00000000000"
                         maxLength={11}
-                        className={errors.cpf ? 'border-red-500' : ''}
+                        inputMode="numeric"
+                        className={`h-12 text-base ${errors.cpf ? 'border-destructive' : ''}`}
                       />
-                      {errors.cpf && <p className="text-sm text-red-500 mt-1">{errors.cpf}</p>}
+                      {errors.cpf && <p className="text-sm text-destructive">{errors.cpf}</p>}
                     </div>
-                  </div>
 
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    <div>
-                      <Label htmlFor="telefone">Telefone</Label>
+                    <div className="space-y-3">
+                      <Label htmlFor="telefone" className="text-sm font-medium">
+                        Telefone
+                      </Label>
                       <Input
                         id="telefone"
                         value={formData.telefone}
                         onChange={(e) => handleInputChange('telefone', e.target.value)}
                         placeholder="(62) 99999-9999"
+                        inputMode="tel"
+                        className="h-12 text-base"
                       />
                     </div>
                     
-                    <div>
-                      <Label htmlFor="cidade">Cidade</Label>
+                    <div className="space-y-3">
+                      <Label htmlFor="cidade" className="text-sm font-medium">
+                        Cidade
+                      </Label>
                       <Input
                         id="cidade"
                         value={formData.cidade}
                         onChange={(e) => handleInputChange('cidade', e.target.value)}
                         placeholder="Cidade do cliente"
+                        className="h-12 text-base"
                       />
                     </div>
                   </div>
@@ -276,11 +280,18 @@ const RegistroVendas = () => {
 
                 {/* Dados da Venda */}
                 <div className="space-y-4">
-                  <h3 className="text-lg font-medium">Dados da Venda</h3>
+                  <div className="pb-2 border-b border-border">
+                    <h3 className="text-base font-semibold text-card-foreground flex items-center gap-2">
+                      <div className="w-2 h-2 bg-secondary rounded-full"></div>
+                      Dados da Venda
+                    </h3>
+                  </div>
                   
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    <div>
-                      <Label htmlFor="valor_compra">Valor da Compra (R$) *</Label>
+                  <div className="space-y-4">
+                    <div className="space-y-3">
+                      <Label htmlFor="valor_compra" className="text-sm font-medium">
+                        Valor da Compra (R$) *
+                      </Label>
                       <Input
                         id="valor_compra"
                         type="number"
@@ -289,100 +300,125 @@ const RegistroVendas = () => {
                         value={formData.valor_compra}
                         onChange={(e) => handleInputChange('valor_compra', e.target.value)}
                         placeholder="100.00"
-                        className={errors.valor_compra ? 'border-red-500' : ''}
+                        className={`h-12 text-base ${errors.valor_compra ? 'border-destructive' : ''}`}
                       />
-                      {errors.valor_compra && <p className="text-sm text-red-500 mt-1">{errors.valor_compra}</p>}
+                      {errors.valor_compra && <p className="text-sm text-destructive">{errors.valor_compra}</p>}
                     </div>
                     
-                    <div>
-                      <Label htmlFor="tipo_cliente">Tipo de Cliente</Label>
+                    <div className="space-y-3">
+                      <Label htmlFor="tipo_cliente" className="text-sm font-medium">
+                        Tipo de Cliente
+                      </Label>
                       <Select value={formData.tipo_cliente} onValueChange={(value) => handleInputChange('tipo_cliente', value)}>
-                        <SelectTrigger>
+                        <SelectTrigger className="h-12 text-base bg-white">
                           <SelectValue />
                         </SelectTrigger>
-                        <SelectContent>
-                          <SelectItem value="varejo">Varejo</SelectItem>
-                          <SelectItem value="atacado">Atacado</SelectItem>
+                        <SelectContent className="bg-white border border-border z-[100]">
+                          <SelectItem value="varejo" className="text-base py-3">Varejo</SelectItem>
+                          <SelectItem value="atacado" className="text-base py-3">Atacado</SelectItem>
                         </SelectContent>
                       </Select>
                     </div>
-                  </div>
 
-                  <div>
-                    <Label htmlFor="lojista_id">Loja *</Label>
-                    <Select value={formData.lojista_id} onValueChange={(value) => handleInputChange('lojista_id', value)}>
-                      <SelectTrigger className={errors.lojista_id ? 'border-red-500' : ''}>
-                        <SelectValue placeholder="Selecione uma loja" />
-                      </SelectTrigger>
-                      <SelectContent>
-                        {loadingLojistas ? (
-                          <div className="p-2 text-sm text-muted-foreground text-center">
-                            Carregando lojas...
-                          </div>
-                        ) : lojistas?.length === 0 ? (
-                          <div className="p-2 text-sm text-muted-foreground text-center">
-                            Nenhuma loja com cupons disponíveis
-                          </div>
-                        ) : (
-                          lojistas?.map((lojista) => (
-                            <SelectItem key={lojista.id} value={lojista.id}>
-                              {lojista.nome_loja} - {lojista.cidade} ({lojista.cupons_disponiveis} cupons)
-                            </SelectItem>
-                          ))
-                        )}
-                      </SelectContent>
-                    </Select>
-                    {errors.lojista_id && <p className="text-sm text-red-500 mt-1">{errors.lojista_id}</p>}
+                    <div className="space-y-3">
+                      <Label htmlFor="lojista_id" className="text-sm font-medium">
+                        Loja *
+                      </Label>
+                      <Select value={formData.lojista_id} onValueChange={(value) => handleInputChange('lojista_id', value)}>
+                        <SelectTrigger className={`h-12 text-base bg-white ${errors.lojista_id ? 'border-destructive' : ''}`}>
+                          <SelectValue placeholder="Selecione uma loja" />
+                        </SelectTrigger>
+                        <SelectContent className="bg-white border border-border z-[100] max-h-60">
+                          {loadingLojistas ? (
+                            <div className="p-2 text-sm text-muted-foreground text-center">
+                              Carregando lojas...
+                            </div>
+                          ) : lojistas?.length === 0 ? (
+                            <div className="p-2 text-sm text-muted-foreground text-center">
+                              Nenhuma loja com cupons disponíveis
+                            </div>
+                          ) : (
+                            lojistas?.map((lojista) => (
+                              <SelectItem key={lojista.id} value={lojista.id} className="text-base py-3">
+                                {lojista.nome_loja} - {lojista.cidade} ({lojista.cupons_disponiveis} cupons)
+                              </SelectItem>
+                            ))
+                          )}
+                        </SelectContent>
+                      </Select>
+                      {errors.lojista_id && <p className="text-sm text-destructive">{errors.lojista_id}</p>}
+                    </div>
                   </div>
                 </div>
 
-                {/* Resumo */}
+                {/* Resumo da Atribuição */}
                 {cuponsCalculados > 0 && lojistaSelecionada && (
-                  <Card className="bg-muted/50">
-                    <CardContent className="p-4">
-                      <h4 className="font-medium mb-2">Resumo da Atribuição</h4>
-                      <div className="grid grid-cols-2 gap-4 text-sm">
-                        <div>
-                          <p className="text-muted-foreground">Cupons a serem gerados:</p>
-                          <p className="font-medium">{cuponsCalculados} cupons</p>
+                  <div className="space-y-4">
+                    <div className="pb-2 border-b border-border">
+                      <h3 className="text-base font-semibold text-card-foreground flex items-center gap-2">
+                        <div className="w-2 h-2 bg-accent rounded-full"></div>
+                        Resumo da Atribuição
+                      </h3>
+                    </div>
+                    
+                    <Card className="bg-muted/30 border-muted">
+                      <CardContent className="p-4">
+                        <div className="grid grid-cols-2 gap-4 text-sm">
+                          <div>
+                            <p className="text-muted-foreground">Cupons a serem gerados:</p>
+                            <p className="font-medium text-base">{cuponsCalculados} cupons</p>
+                          </div>
+                          <div>
+                            <p className="text-muted-foreground">Loja selecionada:</p>
+                            <p className="font-medium text-base">{lojistaSelecionada.nome_loja}</p>
+                          </div>
+                          <div>
+                            <p className="text-muted-foreground">Cupons disponíveis na loja:</p>
+                            <p className="font-medium text-base">{lojistaSelecionada.cupons_disponiveis} cupons</p>
+                          </div>
+                          <div>
+                            <p className="text-muted-foreground">Status:</p>
+                            <p className={`font-medium text-base ${lojistaSelecionada.cupons_disponiveis >= cuponsCalculados ? 'text-green-600' : 'text-red-600'}`}>
+                              {lojistaSelecionada.cupons_disponiveis >= cuponsCalculados ? 'Disponível' : 'Insuficiente'}
+                            </p>
+                          </div>
                         </div>
-                        <div>
-                          <p className="text-muted-foreground">Loja selecionada:</p>
-                          <p className="font-medium">{lojistaSelecionada.nome_loja}</p>
-                        </div>
-                        <div>
-                          <p className="text-muted-foreground">Cupons disponíveis na loja:</p>
-                          <p className="font-medium">{lojistaSelecionada.cupons_disponiveis} cupons</p>
-                        </div>
-                        <div>
-                          <p className="text-muted-foreground">Status:</p>
-                          <p className={`font-medium ${lojistaSelecionada.cupons_disponiveis >= cuponsCalculados ? 'text-green-600' : 'text-red-600'}`}>
-                            {lojistaSelecionada.cupons_disponiveis >= cuponsCalculados ? 'Disponível' : 'Insuficiente'}
-                          </p>
-                        </div>
-                      </div>
-                    </CardContent>
-                  </Card>
+                      </CardContent>
+                    </Card>
+                  </div>
                 )}
 
-                <div className="flex gap-3 pt-4">
-                  <Button
-                    type="submit"
-                    disabled={atribuirCuponsMutation.isPending || cuponsCalculados === 0 || (lojistaSelecionada && lojistaSelecionada.cupons_disponiveis < cuponsCalculados)}
-                    className="flex-1"
-                  >
-                    {atribuirCuponsMutation.isPending ? (
-                      <>
-                        <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                        Processando...
-                      </>
-                    ) : (
-                      <>
-                        <Receipt className="mr-2 h-4 w-4" />
-                        Atribuir Cupons
-                      </>
-                    )}
-                  </Button>
+                {/* Botões fixos no mobile */}
+                <div className="sticky bottom-0 left-0 right-0 bg-white border-t border-border mt-8 -mx-4 sm:-mx-6 p-4 sm:p-6 sm:static sm:border-t-0 sm:bg-transparent sm:mt-6">
+                  <div className="flex flex-col gap-3">
+                    <Button
+                      type="submit"
+                      disabled={atribuirCuponsMutation.isPending || cuponsCalculados === 0 || (lojistaSelecionada && lojistaSelecionada.cupons_disponiveis < cuponsCalculados)}
+                      className="w-full h-12 text-base font-medium bg-primary hover:bg-primary/90 text-primary-foreground"
+                    >
+                      {atribuirCuponsMutation.isPending ? (
+                        <>
+                          <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                          Processando...
+                        </>
+                      ) : (
+                        <>
+                          <Receipt className="mr-2 h-4 w-4" />
+                          ATRIBUIR CUPONS
+                        </>
+                      )}
+                    </Button>
+                    
+                    <Button
+                      type="button"
+                      variant="outline"
+                      onClick={() => navigate('/')}
+                      className="w-full h-12 text-base font-medium"
+                    >
+                      <ChevronLeft className="mr-2 h-4 w-4" />
+                      Voltar ao Painel
+                    </Button>
+                  </div>
                 </div>
               </form>
             </CardContent>
