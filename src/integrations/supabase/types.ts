@@ -543,6 +543,7 @@ export type Database = {
           evento: string
           id: string
           ip_address: unknown | null
+          lojista_id: string | null
           nivel: string | null
           user_agent: string | null
           usuario_email: string | null
@@ -555,6 +556,7 @@ export type Database = {
           evento: string
           id?: string
           ip_address?: unknown | null
+          lojista_id?: string | null
           nivel?: string | null
           user_agent?: string | null
           usuario_email?: string | null
@@ -567,12 +569,28 @@ export type Database = {
           evento?: string
           id?: string
           ip_address?: unknown | null
+          lojista_id?: string | null
           nivel?: string | null
           user_agent?: string | null
           usuario_email?: string | null
           usuario_id?: string | null
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "logs_sistema_lojista_id_fkey"
+            columns: ["lojista_id"]
+            isOneToOne: false
+            referencedRelation: "lojistas"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "logs_sistema_lojista_id_fkey"
+            columns: ["lojista_id"]
+            isOneToOne: false
+            referencedRelation: "mv_ranking_lojistas"
+            referencedColumns: ["lojista_id"]
+          },
+        ]
       }
       lojistas: {
         Row: {
