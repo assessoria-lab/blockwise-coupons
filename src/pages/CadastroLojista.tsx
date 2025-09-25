@@ -239,7 +239,7 @@ export default function CadastroLojista() {
           />
         </div>
         <div className="max-w-2xl mx-auto">
-          <Card className="bg-card shadow-sm border-border">
+          <Card className="bg-card shadow-sm border-border shadow-[0_0_20px_rgba(255,255,0,0.15)]">
             <CardHeader className="border-b border-border bg-card px-4 sm:px-6 py-4 sm:py-6">
               <div className="flex items-start gap-3">
                 <div className="p-2 sm:p-3 bg-primary/10 rounded-lg flex-shrink-0">
