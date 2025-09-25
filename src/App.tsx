@@ -8,6 +8,7 @@ import Index from "./pages/Index";
 import NotFound from "./pages/NotFound";
 import GestaoLojistas from "./pages/GestaoLojistas";
 import CadastroLojista from "./pages/CadastroLojista";
+import RegistroVendas from "./pages/RegistroVendas";
 import { HistoricoCupons } from "./components/admin/HistoricoCupons";
 import { DashboardFinanceiro } from "./components/admin/DashboardFinanceiro";
 import { RelatoriosAnalises } from "./components/admin/RelatoriosAnalises";
@@ -28,6 +29,7 @@ const App = () => (
         <Routes>
           <Route path="/" element={<Index />} />
           <Route path="/cadastro-lojista" element={<CadastroLojista />} />
+          <Route path="/registro-vendas" element={<RegistroVendas />} />
           <Route path="/admin/relatorios" element={<RelatoriosAnalises />} />
           <Route path="/admin/historico" element={<HistoricoCupons />} />
           <Route path="/admin/financeiro" element={<DashboardFinanceiro />} />

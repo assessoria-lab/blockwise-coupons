@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { LayoutDashboard, Package, Store, Users, Settings, Menu, X, Trophy, BarChart3, ChevronLeft, ChevronRight, Search, TrendingUp, Activity } from 'lucide-react';
+import { LayoutDashboard, Package, Store, Users, Settings, Menu, X, Trophy, BarChart3, ChevronLeft, ChevronRight, Search, TrendingUp, Activity, Receipt } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { useMonitoramentoRealTime } from '@/hooks/useMonitoramentoRealTime';
@@ -150,6 +150,16 @@ const AdminLayout = ({
 
           <div className="flex flex-1 gap-x-4 self-stretch lg:gap-x-6">
             <div className="flex items-center gap-x-4 lg:gap-x-6 ml-auto">
+              <Button 
+                variant="outline" 
+                size="sm"
+                onClick={() => window.location.href = '/registro-vendas'}
+                className="px-4 py-2 font-medium"
+              >
+                <Receipt className="h-4 w-4 mr-2" />
+                Registro de Vendas
+              </Button>
+              
               <Button 
                 variant="default" 
                 size="sm"
