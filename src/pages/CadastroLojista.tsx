@@ -191,6 +191,12 @@ export default function CadastroLojista() {
           }
         });
         setErrors(newErrors);
+        
+        // Scroll to first error on mobile
+        const firstErrorField = document.getElementById(Object.keys(newErrors)[0]);
+        if (firstErrorField) {
+          firstErrorField.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        }
       }
     }
   };
@@ -208,120 +214,171 @@ export default function CadastroLojista() {
 
   return (
     <div className="min-h-screen bg-gray-50 flex flex-col">
-      {/* Header igual ao painel administrativo */}
-      <header className="flex h-14 items-center gap-x-4 bg-white border-b border-border px-4 shadow-sm lg:px-6 flex-shrink-0">
+      {/* Header otimizado para mobile */}
+      <header className="flex h-16 sm:h-14 items-center gap-x-2 sm:gap-x-4 bg-white border-b border-border px-3 sm:px-4 lg:px-6 shadow-sm flex-shrink-0">
         <Button
           variant="ghost"
           size="sm"
           onClick={() => navigate(-1)}
-          className="flex items-center gap-2 hover:bg-gray-100 p-2"
+          className="flex items-center gap-1 sm:gap-2 hover:bg-gray-100 p-2 min-w-0"
         >
-          <ChevronLeft className="h-4 w-4" />
-          <span className="hidden sm:inline">Voltar</span>
+          <ChevronLeft className="h-4 w-4 flex-shrink-0" />
+          <span className="hidden xs:inline text-sm">Voltar</span>
         </Button>
         
-        <div className="flex items-center gap-3">
+        <div className="flex items-center gap-2 sm:gap-3 min-w-0 flex-1">
           <img 
             src="/lovable-uploads/30762c46-4536-4a6c-bd54-a016f6a4ff1c.png" 
             alt="Show de Prêmios - Vem Pra 44" 
-            className="h-8 w-auto"
+            className="h-6 sm:h-8 w-auto flex-shrink-0"
           />
-          <div className="hidden sm:block">
-            <h1 className="text-lg font-semibold text-foreground">
+          <div className="hidden sm:block min-w-0">
+            <h1 className="text-base sm:text-lg font-semibold text-foreground truncate">
               Cadastro de Lojista
             </h1>
           </div>
         </div>
 
-        <div className="flex flex-1 gap-x-4 self-stretch lg:gap-x-6">
-          <div className="flex items-center gap-x-4 lg:gap-x-6 ml-auto">
-            <Button 
-              variant="outline" 
-              size="sm"
-              onClick={() => navigate('/admin/lojistas')}
-              className="flex items-center gap-2"
-            >
-              <Store className="h-4 w-4" />
-              <span className="hidden sm:inline">Gerenciar Lojas</span>
-            </Button>
-          </div>
+        <div className="flex items-center gap-x-2 sm:gap-x-4">
+          <Button 
+            variant="outline" 
+            size="sm"
+            onClick={() => navigate('/admin/lojistas')}
+            className="flex items-center gap-1 sm:gap-2 text-xs sm:text-sm px-2 sm:px-3"
+          >
+            <Store className="h-3 w-3 sm:h-4 sm:w-4 flex-shrink-0" />
+            <span className="hidden sm:inline">Gerenciar</span>
+          </Button>
         </div>
       </header>
 
-      {/* Conteúdo principal */}
-      <main className="flex-1 overflow-auto p-6">
+      {/* Conteúdo principal otimizado para mobile */}
+      <main className="flex-1 overflow-auto px-3 sm:px-4 lg:px-6 py-4 sm:py-6">
         <div className="max-w-2xl mx-auto">
           <Card className="bg-card shadow-sm border-border">
-            <CardHeader className="border-b border-border bg-card">
-              <div className="flex items-center gap-3">
-                <div className="p-3 bg-primary/10 rounded-lg">
-                  <Store className="h-6 w-6 text-primary" />
+            <CardHeader className="border-b border-border bg-card px-4 sm:px-6 py-4 sm:py-6">
+              <div className="flex items-start gap-3">
+                <div className="p-2 sm:p-3 bg-primary/10 rounded-lg flex-shrink-0">
+                  <Store className="h-5 w-5 sm:h-6 sm:w-6 text-primary" />
                 </div>
-                <div>
-                  <CardTitle className="text-2xl font-bold text-card-foreground">
+                <div className="min-w-0 flex-1">
+                  <CardTitle className="text-xl sm:text-2xl font-bold text-card-foreground">
                     Novo Lojista
                   </CardTitle>
-                  <CardDescription className="text-muted-foreground">
+                  <CardDescription className="text-sm sm:text-base text-muted-foreground mt-1">
                     Cadastre um novo lojista no sistema
                   </CardDescription>
                 </div>
               </div>
             </CardHeader>
 
-            <CardContent className="p-6">
-              <div className="grid gap-4">
-                <div className="grid grid-cols-2 gap-4">
-                  <div className="space-y-2">
-                    <Label htmlFor="nome_loja">Nome da Loja *</Label>
+            <CardContent className="p-4 sm:p-6">
+              <div className="space-y-6 sm:space-y-8">
+                {/* Campos obrigatórios primeiro */}
+                <div className="space-y-4">
+                  <div className="space-y-3">
+                    <Label htmlFor="nome_loja" className="text-sm font-medium">
+                      Nome da Loja *
+                    </Label>
                     <Input
                       id="nome_loja"
                       value={formData.nome_loja}
                       onChange={(e) => setFormData(prev => ({ ...prev, nome_loja: e.target.value }))}
-                      className={errors.nome_loja ? 'border-destructive' : ''}
+                      className={`h-12 text-base ${errors.nome_loja ? 'border-destructive' : ''}`}
+                      placeholder="Ex: Loja da Moda"
                     />
-                    {errors.nome_loja && <p className="text-sm text-destructive">{errors.nome_loja}</p>}
+                    {errors.nome_loja && (
+                      <p className="text-sm text-destructive flex items-center gap-1">
+                        {errors.nome_loja}
+                      </p>
+                    )}
                   </div>
 
-                  <div className="space-y-2">
-                    <Label htmlFor="cnpj">CNPJ *</Label>
-                    <Input
-                      id="cnpj"
-                      value={formData.cnpj}
-                      onChange={(e) => setFormData(prev => ({ ...prev, cnpj: formatCNPJ(e.target.value) }))}
-                      placeholder="00000000000000"
-                      maxLength={14}
-                      className={errors.cnpj ? 'border-destructive' : ''}
-                    />
-                    {errors.cnpj && <p className="text-sm text-destructive">{errors.cnpj}</p>}
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                    <div className="space-y-3">
+                      <Label htmlFor="cnpj" className="text-sm font-medium">
+                        CNPJ *
+                      </Label>
+                      <Input
+                        id="cnpj"
+                        value={formData.cnpj}
+                        onChange={(e) => setFormData(prev => ({ ...prev, cnpj: formatCNPJ(e.target.value) }))}
+                        placeholder="00000000000000"
+                        maxLength={14}
+                        inputMode="numeric"
+                        className={`h-12 text-base ${errors.cnpj ? 'border-destructive' : ''}`}
+                      />
+                      {errors.cnpj && <p className="text-sm text-destructive">{errors.cnpj}</p>}
+                    </div>
+
+                    <div className="space-y-3">
+                      <Label htmlFor="cidade" className="text-sm font-medium">
+                        Cidade *
+                      </Label>
+                      <Input
+                        id="cidade"
+                        value={formData.cidade}
+                        onChange={(e) => setFormData(prev => ({ ...prev, cidade: e.target.value }))}
+                        className={`h-12 text-base ${errors.cidade ? 'border-destructive' : ''}`}
+                        placeholder="Ex: Goiânia"
+                      />
+                      {errors.cidade && <p className="text-sm text-destructive">{errors.cidade}</p>}
+                    </div>
                   </div>
                 </div>
 
-                <div className="grid grid-cols-2 gap-4">
-                  <div className="space-y-2">
-                    <Label htmlFor="cidade">Cidade *</Label>
-                    <Input
-                      id="cidade"
-                      value={formData.cidade}
-                      onChange={(e) => setFormData(prev => ({ ...prev, cidade: e.target.value }))}
-                      className={errors.cidade ? 'border-destructive' : ''}
-                    />
-                    {errors.cidade && <p className="text-sm text-destructive">{errors.cidade}</p>}
+                {/* Localização */}
+                <div className="space-y-4">
+                  <div className="pb-2 border-b border-border">
+                    <h3 className="text-base font-semibold text-card-foreground flex items-center gap-2">
+                      <div className="w-2 h-2 bg-secondary rounded-full"></div>
+                      Localização
+                    </h3>
                   </div>
+                  
+                  <div className="space-y-4">
+                    <div className="space-y-3">
+                      <Label htmlFor="shopping" className="text-sm font-medium">
+                        Shopping/Galeria
+                      </Label>
+                      <Input
+                        id="shopping"
+                        value={formData.shopping}
+                        onChange={(e) => setFormData(prev => ({ ...prev, shopping: e.target.value }))}
+                        className="h-12 text-base"
+                        placeholder="Ex: Flamboyant Shopping"
+                      />
+                    </div>
 
-                  <div className="space-y-2">
-                    <Label htmlFor="shopping">Shopping/Galeria</Label>
-                    <Input
-                      id="shopping"
-                      value={formData.shopping}
-                      onChange={(e) => setFormData(prev => ({ ...prev, shopping: e.target.value }))}
-                    />
+                    <div className="space-y-3">
+                      <Label htmlFor="endereco" className="text-sm font-medium">
+                        Endereço
+                      </Label>
+                      <Input
+                        id="endereco"
+                        value={formData.endereco}
+                        onChange={(e) => setFormData(prev => ({ ...prev, endereco: e.target.value }))}
+                        className="h-12 text-base"
+                        placeholder="Rua, número, bairro"
+                      />
+                    </div>
                   </div>
                 </div>
 
-                <div className="space-y-2">
-                  <Label>Segmento</Label>
-                  {!mostrarNovoSegmento ? (
-                    <div className="flex gap-2">
+                {/* Segmento */}
+                <div className="space-y-4">
+                  <div className="pb-2 border-b border-border">
+                    <h3 className="text-base font-semibold text-card-foreground flex items-center gap-2">
+                      <div className="w-2 h-2 bg-accent rounded-full"></div>
+                      Segmento
+                    </h3>
+                  </div>
+
+                  <div className="space-y-3">
+                    <Label className="text-sm font-medium">
+                      Segmento
+                    </Label>
+                    {!mostrarNovoSegmento ? (
                       <Select 
                         value={formData.segmento} 
                         onValueChange={(value) => {
@@ -332,116 +389,133 @@ export default function CadastroLojista() {
                           }
                         }}
                       >
-                        <SelectTrigger className="flex-1">
+                        <SelectTrigger className="h-12 text-base bg-white z-50">
                           <SelectValue placeholder="Selecione um segmento" />
                         </SelectTrigger>
-                        <SelectContent className="bg-white z-50">
+                        <SelectContent className="bg-white border border-border z-[100] max-h-60">
                           {segmentos.map((segmento) => (
-                            <SelectItem key={segmento.id} value={segmento.nome}>
+                            <SelectItem key={segmento.id} value={segmento.nome} className="text-base py-3">
                               {segmento.nome}
                             </SelectItem>
                           ))}
-                          <SelectItem value="novo" className="font-semibold text-primary">
+                          <SelectItem value="novo" className="font-semibold text-primary text-base py-3">
                             + Adicionar novo segmento
                           </SelectItem>
                         </SelectContent>
                       </Select>
-                    </div>
-                  ) : (
-                    <div className="flex gap-2">
+                    ) : (
+                      <div className="flex gap-2">
+                        <Input
+                          value={novoSegmento}
+                          onChange={(e) => setNovoSegmento(e.target.value)}
+                          placeholder="Nome do novo segmento"
+                          className="flex-1 h-12 text-base"
+                        />
+                        <Button 
+                          type="button" 
+                          size="sm" 
+                          onClick={handleNovoSegmento}
+                          disabled={!novoSegmento.trim() || criarNovoSegmentoMutation.isPending}
+                          className="h-12 px-4"
+                        >
+                          <Plus className="h-4 w-4" />
+                        </Button>
+                        <Button 
+                          type="button" 
+                          variant="outline" 
+                          size="sm" 
+                          onClick={() => {
+                            setMostrarNovoSegmento(false);
+                            setNovoSegmento('');
+                          }}
+                          className="h-12 px-4"
+                        >
+                          <X className="h-4 w-4" />
+                        </Button>
+                      </div>
+                    )}
+                  </div>
+                </div>
+
+                {/* Contato */}
+                <div className="space-y-4">
+                  <div className="pb-2 border-b border-border">
+                    <h3 className="text-base font-semibold text-card-foreground flex items-center gap-2">
+                      <div className="w-2 h-2 bg-primary rounded-full"></div>
+                      Contato
+                    </h3>
+                  </div>
+                  
+                  <div className="space-y-4">
+                    <div className="space-y-3">
+                      <Label htmlFor="responsavel_nome" className="text-sm font-medium">
+                        Responsável
+                      </Label>
                       <Input
-                        value={novoSegmento}
-                        onChange={(e) => setNovoSegmento(e.target.value)}
-                        placeholder="Nome do novo segmento"
-                        className="flex-1"
+                        id="responsavel_nome"
+                        value={formData.responsavel_nome}
+                        onChange={(e) => setFormData(prev => ({ ...prev, responsavel_nome: e.target.value }))}
+                        className="h-12 text-base"
+                        placeholder="Nome do responsável"
                       />
-                      <Button 
-                        type="button" 
-                        size="sm" 
-                        onClick={handleNovoSegmento}
-                        disabled={!novoSegmento.trim() || criarNovoSegmentoMutation.isPending}
-                      >
-                        <Plus className="h-4 w-4" />
-                      </Button>
-                      <Button 
-                        type="button" 
-                        variant="outline" 
-                        size="sm" 
-                        onClick={() => {
-                          setMostrarNovoSegmento(false);
-                          setNovoSegmento('');
-                        }}
-                      >
-                        <X className="h-4 w-4" />
-                      </Button>
                     </div>
-                  )}
-                </div>
 
-                <div className="grid grid-cols-2 gap-4">
-                  <div className="space-y-2">
-                    <Label htmlFor="responsavel_nome">Responsável</Label>
-                    <Input
-                      id="responsavel_nome"
-                      value={formData.responsavel_nome}
-                      onChange={(e) => setFormData(prev => ({ ...prev, responsavel_nome: e.target.value }))}
-                    />
+                    <div className="space-y-3">
+                      <Label htmlFor="telefone" className="text-sm font-medium">
+                        Telefone
+                      </Label>
+                      <Input
+                        id="telefone"
+                        value={formData.telefone}
+                        onChange={(e) => setFormData(prev => ({ ...prev, telefone: e.target.value }))}
+                        placeholder="(00) 00000-0000"
+                        inputMode="tel"
+                        className="h-12 text-base"
+                      />
+                    </div>
+
+                    <div className="space-y-3">
+                      <Label htmlFor="email" className="text-sm font-medium">
+                        Email
+                      </Label>
+                      <Input
+                        id="email"
+                        type="email"
+                        value={formData.email}
+                        onChange={(e) => setFormData(prev => ({ ...prev, email: e.target.value }))}
+                        inputMode="email"
+                        className={`h-12 text-base ${errors.email ? 'border-destructive' : ''}`}
+                        placeholder="contato@loja.com.br"
+                      />
+                      {errors.email && <p className="text-sm text-destructive">{errors.email}</p>}
+                    </div>
                   </div>
-
-                  <div className="space-y-2">
-                    <Label htmlFor="telefone">Telefone</Label>
-                    <Input
-                      id="telefone"
-                      value={formData.telefone}
-                      onChange={(e) => setFormData(prev => ({ ...prev, telefone: e.target.value }))}
-                      placeholder="(00) 00000-0000"
-                    />
-                  </div>
-                </div>
-
-                <div className="space-y-2">
-                  <Label htmlFor="email">Email</Label>
-                  <Input
-                    id="email"
-                    type="email"
-                    value={formData.email}
-                    onChange={(e) => setFormData(prev => ({ ...prev, email: e.target.value }))}
-                    className={errors.email ? 'border-destructive' : ''}
-                  />
-                  {errors.email && <p className="text-sm text-destructive">{errors.email}</p>}
-                </div>
-
-                <div className="space-y-2">
-                  <Label htmlFor="endereco">Endereço</Label>
-                  <Input
-                    id="endereco"
-                    value={formData.endereco}
-                    onChange={(e) => setFormData(prev => ({ ...prev, endereco: e.target.value }))}
-                  />
                 </div>
               </div>
 
-              {/* Botões */}
-              <div className="flex flex-col sm:flex-row gap-4 pt-6 mt-6 border-t border-border">
-                <Button
-                  type="button"
-                  variant="outline"
-                  onClick={() => navigate(-1)}
-                  className="flex-1"
-                  disabled={salvarLojistaMutation.isPending}
-                >
-                  Cancelar
-                </Button>
-                
-                <Button
-                  type="button"
-                  className="flex-1 bg-primary hover:bg-primary/90 text-primary-foreground"
-                  onClick={handleSubmit}
-                  disabled={salvarLojistaMutation.isPending}
-                >
-                  {salvarLojistaMutation.isPending && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-                  {salvarLojistaMutation.isPending ? 'Cadastrando...' : 'Cadastrar Lojista'}
-                </Button>
+              {/* Botões fixos no mobile */}
+              <div className="sticky bottom-0 left-0 right-0 bg-white border-t border-border mt-8 -mx-4 sm:-mx-6 p-4 sm:p-6 sm:static sm:border-t-0 sm:bg-transparent sm:mt-6">
+                <div className="flex flex-col sm:flex-row gap-3 sm:gap-4">
+                  <Button
+                    type="button"
+                    variant="outline"
+                    onClick={() => navigate(-1)}
+                    className="flex-1 h-12 text-base font-medium"
+                    disabled={salvarLojistaMutation.isPending}
+                  >
+                    Cancelar
+                  </Button>
+                  
+                  <Button
+                    type="button"
+                    className="flex-1 h-12 text-base font-medium bg-primary hover:bg-primary/90 text-primary-foreground"
+                    onClick={handleSubmit}
+                    disabled={salvarLojistaMutation.isPending}
+                  >
+                    {salvarLojistaMutation.isPending && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+                    {salvarLojistaMutation.isPending ? 'Cadastrando...' : 'Cadastrar Lojista'}
+                  </Button>
+                </div>
               </div>
             </CardContent>
           </Card>
