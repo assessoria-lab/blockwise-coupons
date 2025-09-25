@@ -233,12 +233,11 @@ export default function CadastroLojista() {
         {/* Logo centralizada no topo */}
         <div className="flex justify-center mb-6 sm:mb-8">
           <div className="bg-white/10 backdrop-blur-sm rounded-2xl px-6 py-4 border border-white/20">
-            <h1 className="text-2xl sm:text-3xl font-bold text-white text-center">
-              Sistema Blocos
-            </h1>
-            <p className="text-white/80 text-sm text-center mt-1">
-              Gestão de Cupons
-            </p>
+            <img 
+              src="/assets/logo-show-premios.png" 
+              alt="Show de Prêmios"
+              className="h-16 sm:h-20 w-auto mx-auto"
+            />
           </div>
         </div>
         <div className="max-w-2xl mx-auto">
