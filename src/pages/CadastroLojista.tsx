@@ -223,23 +223,7 @@ export default function CadastroLojista() {
   };
   return <div className="min-h-screen bg-primary flex flex-col">
       {/* Header otimizado para mobile */}
-      <header className="flex h-16 sm:h-14 items-center gap-x-2 sm:gap-x-4 bg-white border-b border-border px-3 sm:px-4 lg:px-6 shadow-sm flex-shrink-0">
-        <Button variant="ghost" size="sm" onClick={() => navigate(-1)} className="flex items-center gap-1 sm:gap-2 hover:bg-gray-100 p-2 min-w-0">
-          <ChevronLeft className="h-4 w-4 flex-shrink-0" />
-          <span className="hidden xs:inline text-sm">Voltar</span>
-        </Button>
-        
-        <div className="flex items-center gap-2 sm:gap-3 min-w-0 flex-1">
-          
-          <div className="hidden sm:block min-w-0">
-            
-          </div>
-        </div>
-
-        <div className="flex items-center gap-x-2 sm:gap-x-4">
-          
-        </div>
-      </header>
+      
 
       {/* Conteúdo principal otimizado para mobile */}
       <main className="flex-1 overflow-auto px-3 sm:px-4 lg:px-6 py-4 sm:py-6">
