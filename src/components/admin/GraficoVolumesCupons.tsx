@@ -18,13 +18,12 @@ const fetchDadosVolumesCupons = async (): Promise<DadosCupom[]> => {
   const seteDiasAtras = subDays(hoje, 6);
 
   // Buscar compras de cupons (através de vendas de blocos)
-  const { data: pagamentos, error: errorPagamentos } = await supabase
-    .from('pagamentos')
-    .select('created_at, quantidade_blocos')
-    .gte('created_at', seteDiasAtras.toISOString())
-    .eq('status_pagamento', 'aprovado');
+  const { data: vendasBlocos, error: errorVendas } = await supabase
+    .from('vendas_blocos')
+    .select('data_venda, quantidade_blocos')
+    .gte('data_venda', seteDiasAtras.toISOString());
 
-  if (errorPagamentos) throw errorPagamentos;
+  if (errorVendas) throw errorVendas;
 
   // Buscar atribuições de cupons
   const { data: cupons, error: errorCupons } = await supabase
@@ -54,10 +53,10 @@ const fetchDadosVolumesCupons = async (): Promise<DadosCupom[]> => {
   }
 
   // Contar compras de cupons (blocos * 100 cupons por bloco)
-  (pagamentos || []).forEach(pagamento => {
-    const dataStr = format(startOfDay(new Date(pagamento.created_at)), 'yyyy-MM-dd');
+  (vendasBlocos || []).forEach(venda => {
+    const dataStr = format(startOfDay(new Date(venda.data_venda)), 'yyyy-MM-dd');
     if (dadosPorDia[dataStr]) {
-      dadosPorDia[dataStr].compras += pagamento.quantidade_blocos * 100;
+      dadosPorDia[dataStr].compras += venda.quantidade_blocos * 100;
     }
   });
 
