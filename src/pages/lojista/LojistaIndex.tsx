@@ -1,17 +1,21 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { useAuth } from '@/hooks/useAuth';
 import { useLojistas } from '@/hooks/useLojistas';
+import { useCuponsStats } from '@/hooks/useCuponsStats';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { LogOut, Store, BarChart3, UserPlus, Building2 } from 'lucide-react';
+import { LogOut, Store, BarChart3, UserPlus, Building2, ShoppingCart, Ticket, TrendingUp, Users, Package } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { AtribuirCuponsManual } from '@/components/lojistas/AtribuirCuponsManual';
+import { CompraBlocosModal } from '@/components/lojistas/CompraBlocosModal';
 
 const LojistaIndex = () => {
   const { profile, signOut } = useAuth();
   const { lojas, loja, lojaSelecionada, setLojaSelecionada, isLoading } = useLojistas();
+  const { data: stats, isLoading: statsLoading } = useCuponsStats(loja?.id);
   const { toast } = useToast();
+  const [showCompraBlocos, setShowCompraBlocos] = useState(false);
 
   const handleSignOut = async () => {
     await signOut();
@@ -21,7 +25,7 @@ const LojistaIndex = () => {
     });
   };
 
-  if (isLoading) {
+  if (isLoading || statsLoading) {
     return (
       <div className="min-h-screen flex items-center justify-center">
         <Card>
@@ -114,7 +118,7 @@ const LojistaIndex = () => {
         {loja && (
           <>
             {/* Informações da Loja Selecionada */}
-            <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3 mb-8">
+            <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-4 mb-8">
               <Card>
                 <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
                   <CardTitle className="text-sm font-medium">Loja Atual</CardTitle>
@@ -130,59 +134,118 @@ const LojistaIndex = () => {
 
               <Card>
                 <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                  <CardTitle className="text-sm font-medium">CNPJ</CardTitle>
-                  <BarChart3 className="h-4 w-4 text-muted-foreground" />
+                  <CardTitle className="text-sm font-medium">Cupons Disponíveis</CardTitle>
+                  <Ticket className="h-4 w-4 text-green-600" />
                 </CardHeader>
                 <CardContent>
-                  <div className="text-2xl font-bold">{loja.cnpj}</div>
+                  <div className="text-2xl font-bold text-green-600">
+                    {stats?.total_cupons_disponiveis || 0}
+                  </div>
                   <p className="text-xs text-muted-foreground">
-                    {loja.segmento && `Segmento: ${loja.segmento}`}
+                    Prontos para distribuir
                   </p>
                 </CardContent>
               </Card>
 
               <Card>
                 <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                  <CardTitle className="text-sm font-medium">Cupons Disponíveis</CardTitle>
-                  <div className="h-2 w-2 bg-green-500 rounded-full"></div>
+                  <CardTitle className="text-sm font-medium">Cupons Atribuídos</CardTitle>
+                  <Users className="h-4 w-4 text-blue-600" />
                 </CardHeader>
                 <CardContent>
-                  <div className="text-2xl font-bold text-green-600">{loja.cupons_nao_atribuidos}</div>
+                  <div className="text-2xl font-bold text-blue-600">
+                    {stats?.total_cupons_atribuidos || 0}
+                  </div>
                   <p className="text-xs text-muted-foreground">
-                    Prontos para distribuir
+                    Hoje: {stats?.cupons_atribuidos_hoje || 0} cupons
+                  </p>
+                </CardContent>
+              </Card>
+
+              <Card>
+                <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                  <CardTitle className="text-sm font-medium">Blocos Comprados</CardTitle>
+                  <Package className="h-4 w-4 text-purple-600" />
+                </CardHeader>
+                <CardContent>
+                  <div className="text-2xl font-bold text-purple-600">
+                    {stats?.total_blocos || 0}
+                  </div>
+                  <p className="text-xs text-muted-foreground">
+                    Valor gerado: R$ {(stats?.valor_gerado_total || 0).toFixed(2)}
                   </p>
                 </CardContent>
               </Card>
             </div>
 
-            {/* Atribuir Cupons */}
-            <div className="grid gap-6 lg:grid-cols-3">
-              <div className="lg:col-span-2">
+            {/* Ações Principais */}
+            <div className="grid gap-6 lg:grid-cols-3 mb-8">
+              <Card className="lg:col-span-2">
+                <CardHeader>
+                  <CardTitle className="flex items-center gap-2">
+                    <UserPlus className="h-5 w-5" />
+                    Atribuir Cupom a Cliente
+                  </CardTitle>
+                  <CardDescription>
+                    Informe os dados da compra para gerar cupons para o cliente
+                  </CardDescription>
+                </CardHeader>
+                <CardContent>
+                  <AtribuirCuponsManual 
+                    lojistaId={loja.id}
+                    onSuccess={() => {
+                      toast({
+                        title: "Cupons atribuídos",
+                        description: "Cupons gerados com sucesso para o cliente!",
+                      });
+                    }}
+                  />
+                </CardContent>
+              </Card>
+
+              <div className="space-y-6">
                 <Card>
                   <CardHeader>
                     <CardTitle className="flex items-center gap-2">
-                      <UserPlus className="h-5 w-5" />
-                      Atribuir Cupom a Cliente
+                      <ShoppingCart className="h-5 w-5" />
+                      Comprar Cupons
                     </CardTitle>
                     <CardDescription>
-                      Informe os dados da compra para gerar cupons para o cliente
+                      Adquira mais blocos de cupons
                     </CardDescription>
                   </CardHeader>
-                  <CardContent>
-                    <AtribuirCuponsManual 
-                      lojistaId={loja.id}
-                      onSuccess={() => {
-                        toast({
-                          title: "Cupons atribuídos",
-                          description: "Cupons gerados com sucesso para o cliente!",
-                        });
-                      }}
-                    />
+                  <CardContent className="space-y-4">
+                    <div className="text-center">
+                      <div className="text-3xl font-bold text-primary mb-2">
+                        {stats?.total_cupons_disponiveis || 0}
+                      </div>
+                      <p className="text-sm text-muted-foreground mb-4">
+                        Cupons restantes
+                      </p>
+                      
+                      {(stats?.total_cupons_disponiveis || 0) < 50 && (
+                        <div className="bg-orange-50 border border-orange-200 rounded-lg p-3 mb-4">
+                          <p className="text-orange-800 text-sm font-medium">
+                            ⚠️ Estoque baixo!
+                          </p>
+                          <p className="text-orange-600 text-xs">
+                            Recomendamos comprar mais cupons
+                          </p>
+                        </div>
+                      )}
+
+                      <Button 
+                        onClick={() => setShowCompraBlocos(true)}
+                        className="w-full"
+                        size="lg"
+                      >
+                        <ShoppingCart className="h-4 w-4 mr-2" />
+                        Comprar Cupons
+                      </Button>
+                    </div>
                   </CardContent>
                 </Card>
-              </div>
 
-              <div className="space-y-6">
                 <Card>
                   <CardHeader>
                     <CardTitle>Informações</CardTitle>
@@ -192,6 +255,7 @@ const LojistaIndex = () => {
                       <h4 className="font-medium mb-2">Como funciona:</h4>
                       <ul className="text-sm text-muted-foreground space-y-1">
                         <li>• A cada R$ 100 em compras = 1 cupom</li>
+                        <li>• 1 bloco = 100 cupons por R$ 50</li>
                         <li>• Cupons são gerados automaticamente</li>
                         <li>• Cliente concorre aos sorteios</li>
                       </ul>
@@ -229,6 +293,15 @@ const LojistaIndex = () => {
           </>
         )}
       </div>
+
+      {/* Modal de compra */}
+      {loja && (
+        <CompraBlocosModal
+          lojistaId={loja.id}
+          open={showCompraBlocos}
+          onOpenChange={setShowCompraBlocos}
+        />
+      )}
     </div>
   );
 };
