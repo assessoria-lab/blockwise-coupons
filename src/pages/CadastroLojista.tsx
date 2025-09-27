@@ -181,7 +181,11 @@ export default function CadastroLojista() {
           tipo_usuario: 'lojista'
         }]);
 
-      if (profileError) throw profileError;
+      if (profileError) {
+        // Se houver erro ao criar o perfil, tentar deletar o usuário criado
+        console.error('Erro ao criar perfil:', profileError);
+        throw profileError;
+      }
 
       return novaLoja;
     },
