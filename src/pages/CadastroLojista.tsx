@@ -25,6 +25,8 @@ interface Lojista {
   endereco?: string;
   cupons_nao_atribuidos?: number;
   blocos_comprados?: number;
+  senha?: string;
+  confirmar_senha?: string;
 }
 interface Segmento {
   id: string;
@@ -48,9 +50,20 @@ const lojistaSchema = z.object({
   telefone: z.string().max(15).optional(),
   email: z.string().email({
     message: "Email inválido"
-  }).max(255).optional().or(z.literal('')),
+  }).max(255).nonempty({
+    message: "Email é obrigatório"
+  }),
   responsavel_nome: z.string().max(100).optional(),
-  endereco: z.string().max(255).optional()
+  endereco: z.string().max(255).optional(),
+  senha: z.string().min(6, {
+    message: "Senha deve ter pelo menos 6 caracteres"
+  }),
+  confirmar_senha: z.string().min(6, {
+    message: "Confirmação de senha deve ter pelo menos 6 caracteres"
+  })
+}).refine((data) => data.senha === data.confirmar_senha, {
+  message: "As senhas não conferem",
+  path: ["confirmar_senha"]
 });
 export default function CadastroLojista() {
   const {
@@ -72,7 +85,9 @@ export default function CadastroLojista() {
     telefone: '',
     email: '',
     responsavel_nome: '',
-    endereco: ''
+    endereco: '',
+    senha: '',
+    confirmar_senha: ''
   });
   const [errors, setErrors] = useState<Record<string, string>>({});
 
@@ -131,10 +146,42 @@ export default function CadastroLojista() {
   // Mutation para salvar lojista
   const salvarLojistaMutation = useMutation({
     mutationFn: async (data: Lojista) => {
-      const {
-        error
-      } = await supabase.from('lojistas').insert([data]);
-      if (error) throw error;
+      // 1. Criar usuário no Supabase Auth
+      const { data: authUser, error: authError } = await supabase.auth.signUp({
+        email: data.email!,
+        password: data.senha!,
+        options: {
+          emailRedirectTo: `${window.location.origin}/lojista`
+        }
+      });
+
+      if (authError) throw authError;
+      if (!authUser.user) throw new Error('Falha ao criar usuário');
+
+      // 2. Criar lojista (sem senha)
+      const { senha, confirmar_senha, ...lojistaData } = data;
+      const { data: novoLojista, error: lojistaError } = await supabase
+        .from('lojistas')
+        .insert([lojistaData])
+        .select()
+        .single();
+
+      if (lojistaError) throw lojistaError;
+
+      // 3. Criar perfil do usuário
+      const { error: profileError } = await supabase
+        .from('profiles')
+        .insert([{
+          user_id: authUser.user.id,
+          nome: data.responsavel_nome || data.nome_loja,
+          email: data.email!,
+          tipo_usuario: 'lojista',
+          lojista_id: novoLojista.id
+        }]);
+
+      if (profileError) throw profileError;
+
+      return novoLojista;
     },
     onSuccess: () => {
       queryClient.invalidateQueries({
@@ -149,7 +196,7 @@ export default function CadastroLojista() {
 
       toast({
         title: "✅ Lojista cadastrado!",
-        description: `${formData.nome_loja} foi cadastrado com sucesso.`
+        description: `${formData.nome_loja} foi cadastrado com sucesso. Verifique seu email para confirmar a conta.`
       });
 
       // Reset form
@@ -163,7 +210,9 @@ export default function CadastroLojista() {
         telefone: '',
         email: '',
         responsavel_nome: '',
-        endereco: ''
+        endereco: '',
+        senha: '',
+        confirmar_senha: ''
       });
       setErrors({});
     },
@@ -173,6 +222,12 @@ export default function CadastroLojista() {
         toast({
           title: "Erro no cadastro",
           description: "Já existe um lojista cadastrado com este CNPJ.",
+          variant: "destructive"
+        });
+      } else if (error.message?.includes('User already registered')) {
+        toast({
+          title: "Erro no cadastro",
+          description: "Já existe um usuário cadastrado com este email.",
           variant: "destructive"
         });
       } else {
@@ -187,10 +242,7 @@ export default function CadastroLojista() {
   const handleSubmit = () => {
     try {
       // Validar dados
-      const validatedData = lojistaSchema.parse({
-        ...formData,
-        email: formData.email || undefined
-      });
+      const validatedData = lojistaSchema.parse(formData);
       setErrors({});
       salvarLojistaMutation.mutate({
         ...validatedData,
@@ -400,16 +452,64 @@ export default function CadastroLojista() {
                     }))} placeholder="(00) 00000-0000" inputMode="tel" className="h-12 text-base" />
                     </div>
 
-                    <div className="space-y-3">
-                      <Label htmlFor="email" className="text-sm font-medium">
-                        Email
-                      </Label>
-                      <Input id="email" type="email" value={formData.email} onChange={e => setFormData(prev => ({
-                      ...prev,
-                      email: e.target.value
-                    }))} inputMode="email" className={`h-12 text-base ${errors.email ? 'border-destructive' : ''}`} placeholder="contato@loja.com.br" />
-                      {errors.email && <p className="text-sm text-destructive">{errors.email}</p>}
-                    </div>
+                     <div className="space-y-3">
+                       <Label htmlFor="email" className="text-sm font-medium">
+                         Email *
+                       </Label>
+                       <Input id="email" type="email" value={formData.email} onChange={e => setFormData(prev => ({
+                       ...prev,
+                       email: e.target.value
+                     }))} inputMode="email" className={`h-12 text-base ${errors.email ? 'border-destructive' : ''}`} placeholder="contato@loja.com.br" />
+                       {errors.email && <p className="text-sm text-destructive">{errors.email}</p>}
+                     </div>
+                   </div>
+                 </div>
+
+                 {/* Senha */}
+                 <div className="space-y-4">
+                   <div className="pb-2 border-b border-border">
+                     <h3 className="text-base font-semibold text-card-foreground flex items-center gap-2">
+                       <div className="w-2 h-2 bg-destructive rounded-full"></div>
+                       Dados de Acesso
+                     </h3>
+                   </div>
+                   
+                   <div className="space-y-4">
+                     <div className="space-y-3">
+                       <Label htmlFor="senha" className="text-sm font-medium">
+                         Senha de Acesso *
+                       </Label>
+                       <Input 
+                         id="senha" 
+                         type="password" 
+                         value={formData.senha} 
+                         onChange={e => setFormData(prev => ({
+                           ...prev,
+                           senha: e.target.value
+                         }))} 
+                         className={`h-12 text-base ${errors.senha ? 'border-destructive' : ''}`} 
+                         placeholder="Digite sua senha (mín. 6 caracteres)" 
+                       />
+                       {errors.senha && <p className="text-sm text-destructive">{errors.senha}</p>}
+                     </div>
+
+                     <div className="space-y-3">
+                       <Label htmlFor="confirmar_senha" className="text-sm font-medium">
+                         Confirmar Senha *
+                       </Label>
+                       <Input 
+                         id="confirmar_senha" 
+                         type="password" 
+                         value={formData.confirmar_senha} 
+                         onChange={e => setFormData(prev => ({
+                           ...prev,
+                           confirmar_senha: e.target.value
+                         }))} 
+                         className={`h-12 text-base ${errors.confirmar_senha ? 'border-destructive' : ''}`} 
+                         placeholder="Digite novamente sua senha" 
+                       />
+                       {errors.confirmar_senha && <p className="text-sm text-destructive">{errors.confirmar_senha}</p>}
+                     </div>
                   </div>
                 </div>
               </div>
