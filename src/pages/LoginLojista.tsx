@@ -6,9 +6,9 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { useToast } from '@/hooks/use-toast';
-import { Eye, EyeOff } from 'lucide-react';
+import { Eye, EyeOff, Store } from 'lucide-react';
 
-const Login = () => {
+const LoginLojista = () => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
@@ -20,9 +20,18 @@ const Login = () => {
   // Redirect if already authenticated
   useEffect(() => {
     if (!loading && user && profile) {
-      // Don't redirect here, let the component handle it below
+      if (profile.tipo_usuario === 'lojista') {
+        // Already a lojista, stay here or redirect to lojista dashboard
+      } else if (profile.tipo_usuario === 'admin') {
+        // Admin user trying to access lojista login, redirect to admin login
+        toast({
+          title: "Acesso negado",
+          description: "Você é um administrador. Use o login de administrador.",
+          variant: "destructive",
+        });
+      }
     }
-  }, [user, profile, loading]);
+  }, [user, profile, loading, toast]);
 
   if (loading) {
     return (
@@ -32,12 +41,12 @@ const Login = () => {
     );
   }
 
-  // Redirect based on user type - Only admin access here
+  // Redirect based on user type
   if (user && profile) {
-    if (profile.tipo_usuario === 'admin') {
-      return <Navigate to="/admin" replace />;
-    } else if (profile.tipo_usuario === 'lojista') {
-      return <Navigate to="/login-lojista" replace />;
+    if (profile.tipo_usuario === 'lojista') {
+      return <Navigate to="/lojista" replace />;
+    } else if (profile.tipo_usuario === 'admin') {
+      return <Navigate to="/login" replace />; // Redirect admin to admin login
     }
   }
 
@@ -67,7 +76,7 @@ const Login = () => {
       } else {
         toast({
           title: "Login realizado",
-          description: "Bem-vindo ao Show de Prêmios!",
+          description: "Bem-vindo ao painel do lojista!",
         });
       }
     } catch (error) {
@@ -82,19 +91,17 @@ const Login = () => {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-primary/10 to-secondary/10 flex items-center justify-center p-4">
+    <div className="min-h-screen bg-gradient-to-br from-emerald-50 to-blue-50 flex items-center justify-center p-4">
       <Card className="w-full max-w-md">
         <CardHeader className="text-center">
           <div className="flex justify-center mb-4">
-            <img 
-              src="/assets/logo-show-premios.png" 
-              alt="Show de Prêmios" 
-              className="h-16 w-auto"
-            />
+            <div className="p-3 bg-emerald-100 rounded-full">
+              <Store className="h-8 w-8 text-emerald-600" />
+            </div>
           </div>
-          <CardTitle className="text-2xl font-bold">Show de Prêmios</CardTitle>
+          <CardTitle className="text-2xl font-bold text-emerald-800">Painel do Lojista</CardTitle>
           <CardDescription>
-            Painel Administrativo - Faça login para acessar
+            Faça login para acessar seu painel
           </CardDescription>
         </CardHeader>
         <CardContent>
@@ -143,7 +150,7 @@ const Login = () => {
             
             <Button 
               type="submit" 
-              className="w-full" 
+              className="w-full bg-emerald-600 hover:bg-emerald-700" 
               disabled={isLoading}
             >
               {isLoading ? "Entrando..." : "Entrar"}
@@ -164,10 +171,21 @@ const Login = () => {
               type="button" 
               variant="outline"
               className="w-full"
-              onClick={() => navigate('/login-lojista')}
+              onClick={() => navigate('/cadastro-lojista-publico')}
             >
-              Área do Lojista
+              Cadastrar Nova Loja
             </Button>
+            
+            <div className="text-center">
+              <Button 
+                type="button" 
+                variant="link"
+                className="text-sm text-muted-foreground"
+                onClick={() => navigate('/login')}
+              >
+                Área do Administrador
+              </Button>
+            </div>
           </form>
         </CardContent>
       </Card>
@@ -175,4 +193,4 @@ const Login = () => {
   );
 };
 
-export default Login;
+export default LoginLojista;

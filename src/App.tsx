@@ -10,6 +10,7 @@ import GestaoLojistas from "./pages/GestaoLojistas";
 import CadastroLojista from "./pages/CadastroLojista";
 import RegistroVendas from "./pages/RegistroVendas";
 import Login from "./pages/Login";
+import LoginLojista from "./pages/LoginLojista";
 import LojistaIndex from "./pages/lojista/LojistaIndex";
 import { AuthProvider } from "./components/auth/AuthProvider";
 import { ProtectedRoute } from "./components/auth/ProtectedRoute";
@@ -33,6 +34,7 @@ const App = () => (
         <BrowserRouter>
           <Routes>
             <Route path="/login" element={<Login />} />
+            <Route path="/login-lojista" element={<LoginLojista />} />
             <Route path="/cadastro-lojista-publico" element={<CadastroLojista />} />
             <Route 
               path="/admin" 
@@ -138,7 +140,7 @@ const App = () => (
                 </ProtectedRoute>
               } 
             />
-            <Route path="/" element={<Login />} />
+            <Route path="/" element={<LoginLojista />} />
             {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
             <Route path="*" element={<NotFound />} />
           </Routes>
