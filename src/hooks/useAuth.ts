@@ -8,15 +8,7 @@ interface Profile {
   nome: string;
   email: string;
   tipo_usuario: 'admin' | 'lojista';
-  lojista_id: string | null;
   ativo: boolean;
-  lojista_info?: {
-    nome_loja: string;
-    cnpj: string;
-    cidade: string;
-    shopping: string;
-    segmento: string;
-  };
 }
 
 interface AuthContextType {
@@ -48,18 +40,21 @@ export const useAuthProvider = () => {
 
   const fetchProfile = async (userId: string) => {
     try {
-      const { data } = await supabase.rpc('get_user_profile', { user_uuid: userId });
-      if (data && data.length > 0) {
-        const profileData = data[0];
+      const { data } = await supabase
+        .from('profiles')
+        .select('*')
+        .eq('user_id', userId)
+        .eq('ativo', true)
+        .single();
+
+      if (data) {
         setProfile({
-          id: profileData.id,
-          user_id: profileData.user_id,
-          nome: profileData.nome,
-          email: profileData.email,
-          tipo_usuario: profileData.tipo_usuario as 'admin' | 'lojista',
-          lojista_id: profileData.lojista_id,
-          ativo: profileData.ativo,
-          lojista_info: profileData.lojista_info as Profile['lojista_info']
+          id: data.id,
+          user_id: data.user_id,
+          nome: data.nome,
+          email: data.email,
+          tipo_usuario: data.tipo_usuario as 'admin' | 'lojista',
+          ativo: data.ativo
         });
       }
     } catch (error) {

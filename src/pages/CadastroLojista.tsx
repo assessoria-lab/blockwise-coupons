@@ -158,30 +158,32 @@ export default function CadastroLojista() {
       if (authError) throw authError;
       if (!authUser.user) throw new Error('Falha ao criar usuário');
 
-      // 2. Criar lojista (sem senha)
+      // 2. Criar loja vinculada ao usuário (sem senha)
       const { senha, confirmar_senha, ...lojistaData } = data;
-      const { data: novoLojista, error: lojistaError } = await supabase
+      const { data: novaLoja, error: lojaError } = await supabase
         .from('lojistas')
-        .insert([lojistaData])
+        .insert([{
+          ...lojistaData,
+          user_id: authUser.user.id
+        }])
         .select()
         .single();
 
-      if (lojistaError) throw lojistaError;
+      if (lojaError) throw lojaError;
 
-      // 3. Criar perfil do usuário
+      // 3. Criar perfil do usuário (sem referência à loja específica)
       const { error: profileError } = await supabase
         .from('profiles')
         .insert([{
           user_id: authUser.user.id,
           nome: data.responsavel_nome || data.nome_loja,
           email: data.email!,
-          tipo_usuario: 'lojista',
-          lojista_id: novoLojista.id
+          tipo_usuario: 'lojista'
         }]);
 
       if (profileError) throw profileError;
 
-      return novoLojista;
+      return novaLoja;
     },
     onSuccess: () => {
       queryClient.invalidateQueries({

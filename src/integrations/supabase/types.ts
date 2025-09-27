@@ -616,6 +616,7 @@ export type Database = {
           status: string
           telefone: string | null
           updated_at: string
+          user_id: string | null
           whatsapp: string | null
         }
         Insert: {
@@ -641,6 +642,7 @@ export type Database = {
           status?: string
           telefone?: string | null
           updated_at?: string
+          user_id?: string | null
           whatsapp?: string | null
         }
         Update: {
@@ -666,6 +668,7 @@ export type Database = {
           status?: string
           telefone?: string | null
           updated_at?: string
+          user_id?: string | null
           whatsapp?: string | null
         }
         Relationships: []
@@ -763,7 +766,6 @@ export type Database = {
           created_at: string
           email: string
           id: string
-          lojista_id: string | null
           nome: string
           tipo_usuario: string
           updated_at: string
@@ -774,7 +776,6 @@ export type Database = {
           created_at?: string
           email: string
           id?: string
-          lojista_id?: string | null
           nome: string
           tipo_usuario: string
           updated_at?: string
@@ -785,28 +786,12 @@ export type Database = {
           created_at?: string
           email?: string
           id?: string
-          lojista_id?: string | null
           nome?: string
           tipo_usuario?: string
           updated_at?: string
           user_id?: string
         }
-        Relationships: [
-          {
-            foreignKeyName: "profiles_lojista_id_fkey"
-            columns: ["lojista_id"]
-            isOneToOne: false
-            referencedRelation: "lojistas"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "profiles_lojista_id_fkey"
-            columns: ["lojista_id"]
-            isOneToOne: false
-            referencedRelation: "mv_ranking_lojistas"
-            referencedColumns: ["lojista_id"]
-          },
-        ]
+        Relationships: []
       }
       query_history: {
         Row: {
