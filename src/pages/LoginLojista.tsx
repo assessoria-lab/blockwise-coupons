@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { useAuth } from '@/hooks/useAuth';
+import { useCustomAuth } from '@/hooks/useCustomAuth';
 import { Navigate, useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -7,23 +7,22 @@ import { Label } from '@/components/ui/label';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { useToast } from '@/hooks/use-toast';
 import { Eye, EyeOff, Store } from 'lucide-react';
-import { supabase } from '@/integrations/supabase/client';
 
 const LoginLojista = () => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
-  const { signIn, user, profile, loading } = useAuth();
+  const { signInLojista, user, loading } = useCustomAuth();
   const { toast } = useToast();
   const navigate = useNavigate();
 
   // Redirect if already authenticated
   useEffect(() => {
-    if (!loading && user && profile) {
-      if (profile.tipo_usuario === 'lojista') {
+    if (!loading && user) {
+      if (user.tipo === 'lojista') {
         // Already a lojista, stay here or redirect to lojista dashboard
-      } else if (profile.tipo_usuario === 'admin') {
+      } else if (user.tipo === 'admin') {
         // Admin user trying to access lojista login, redirect to admin login
         toast({
           title: "Acesso negado",
@@ -32,7 +31,7 @@ const LoginLojista = () => {
         });
       }
     }
-  }, [user, profile, loading, toast]);
+  }, [user, loading, toast]);
 
   if (loading) {
     return (
@@ -43,10 +42,10 @@ const LoginLojista = () => {
   }
 
   // Redirect based on user type
-  if (user && profile) {
-    if (profile.tipo_usuario === 'lojista') {
+  if (user) {
+    if (user.tipo === 'lojista') {
       return <Navigate to="/lojista" replace />;
-    } else if (profile.tipo_usuario === 'admin') {
+    } else if (user.tipo === 'admin') {
       return <Navigate to="/login" replace />; // Redirect admin to admin login
     }
   }
@@ -66,54 +65,27 @@ const LoginLojista = () => {
     setIsLoading(true);
     
     try {
-      const { error } = await signIn(email, password);
+      const { error } = await signInLojista(email, password);
       
       if (error) {
         toast({
           title: "Erro no login",
-          description: "Email ou senha incorretos.",
+          description: error,
           variant: "destructive",
         });
-        setIsLoading(false);
-        return;
+      } else {
+        toast({
+          title: "Login realizado",
+          description: "Bem-vindo ao painel do lojista!",
+        });
       }
-
-      // Aguarda um momento para o perfil ser carregado
-      setTimeout(async () => {
-        const { data: { session } } = await supabase.auth.getSession();
-        if (session) {
-          const { data: profileData } = await supabase
-            .from('profiles')
-            .select('*')
-            .eq('user_id', session.user.id)
-            .eq('ativo', true)
-            .single();
-
-          if (profileData?.tipo_usuario !== 'lojista') {
-            await supabase.auth.signOut();
-            toast({
-              title: "Acesso negado",
-              description: "Esta área é exclusiva para lojistas.",
-              variant: "destructive",
-            });
-            setIsLoading(false);
-            return;
-          }
-
-          toast({
-            title: "Login realizado",
-            description: "Bem-vindo ao painel do lojista!",
-          });
-        }
-        setIsLoading(false);
-      }, 500);
-      
     } catch (error) {
       toast({
         title: "Erro",
         description: "Ocorreu um erro inesperado. Tente novamente.",
         variant: "destructive",
       });
+    } finally {
       setIsLoading(false);
     }
   };

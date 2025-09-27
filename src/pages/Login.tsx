@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { useAuth } from '@/hooks/useAuth';
+import { useCustomAuth } from '@/hooks/useCustomAuth';
 import { Navigate, useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -7,23 +7,22 @@ import { Label } from '@/components/ui/label';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { useToast } from '@/hooks/use-toast';
 import { Eye, EyeOff } from 'lucide-react';
-import { supabase } from '@/integrations/supabase/client';
 
 const Login = () => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
-  const { signIn, user, profile, loading } = useAuth();
+  const { signInAdmin, user, loading } = useCustomAuth();
   const { toast } = useToast();
   const navigate = useNavigate();
 
   // Redirect if already authenticated
   useEffect(() => {
-    if (!loading && user && profile) {
+    if (!loading && user) {
       // Don't redirect here, let the component handle it below
     }
-  }, [user, profile, loading]);
+  }, [user, loading]);
 
   if (loading) {
     return (
@@ -34,11 +33,11 @@ const Login = () => {
   }
 
   // Redirect based on user type - Only admin access here
-  if (user && profile) {
-    if (profile.tipo_usuario === 'admin') {
+  if (user) {
+    if (user.tipo === 'admin') {
       return <Navigate to="/admin" replace />;
-    } else if (profile.tipo_usuario === 'lojista') {
-      return <Navigate to="/login-lojista" replace />;
+    } else if (user.tipo === 'lojista') {
+      return <Navigate to="/lojista" replace />;
     }
   }
 
@@ -57,54 +56,27 @@ const Login = () => {
     setIsLoading(true);
     
     try {
-      const { error } = await signIn(email, password);
+      const { error } = await signInAdmin(email, password);
       
       if (error) {
         toast({
           title: "Erro no login",
-          description: "Email ou senha incorretos.",
+          description: error,
           variant: "destructive",
         });
-        setIsLoading(false);
-        return;
+      } else {
+        toast({
+          title: "Login realizado",
+          description: "Bem-vindo ao Show de Prêmios!",
+        });
       }
-
-      // Aguarda um momento para o perfil ser carregado
-      setTimeout(async () => {
-        const { data: { session } } = await supabase.auth.getSession();
-        if (session) {
-          const { data: profileData } = await supabase
-            .from('profiles')
-            .select('*')
-            .eq('user_id', session.user.id)
-            .eq('ativo', true)
-            .single();
-
-          if (profileData?.tipo_usuario !== 'admin') {
-            await supabase.auth.signOut();
-            toast({
-              title: "Acesso negado",
-              description: "Esta área é exclusiva para administradores.",
-              variant: "destructive",
-            });
-            setIsLoading(false);
-            return;
-          }
-
-          toast({
-            title: "Login realizado",
-            description: "Bem-vindo ao Show de Prêmios!",
-          });
-        }
-        setIsLoading(false);
-      }, 500);
-      
     } catch (error) {
       toast({
         title: "Erro",
         description: "Ocorreu um erro inesperado. Tente novamente.",
         variant: "destructive",
       });
+    } finally {
       setIsLoading(false);
     }
   };

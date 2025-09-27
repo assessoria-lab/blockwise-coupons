@@ -594,6 +594,7 @@ export type Database = {
       }
       lojistas: {
         Row: {
+          bloqueado_ate: string | null
           cidade: string
           cnpj: string
           created_at: string
@@ -609,17 +610,21 @@ export type Database = {
           nome_loja: string
           nome_responsavel: string | null
           observacoes: string | null
+          password_hash: string | null
           responsavel_nome: string | null
           responsavel_telefone: string | null
           segmento: string | null
           shopping: string | null
           status: string
           telefone: string | null
+          tentativas_login: number | null
+          ultimo_login: string | null
           updated_at: string
           user_id: string | null
           whatsapp: string | null
         }
         Insert: {
+          bloqueado_ate?: string | null
           cidade: string
           cnpj: string
           created_at?: string
@@ -635,17 +640,21 @@ export type Database = {
           nome_loja: string
           nome_responsavel?: string | null
           observacoes?: string | null
+          password_hash?: string | null
           responsavel_nome?: string | null
           responsavel_telefone?: string | null
           segmento?: string | null
           shopping?: string | null
           status?: string
           telefone?: string | null
+          tentativas_login?: number | null
+          ultimo_login?: string | null
           updated_at?: string
           user_id?: string | null
           whatsapp?: string | null
         }
         Update: {
+          bloqueado_ate?: string | null
           cidade?: string
           cnpj?: string
           created_at?: string
@@ -661,12 +670,15 @@ export type Database = {
           nome_loja?: string
           nome_responsavel?: string | null
           observacoes?: string | null
+          password_hash?: string | null
           responsavel_nome?: string | null
           responsavel_telefone?: string | null
           segmento?: string | null
           shopping?: string | null
           status?: string
           telefone?: string | null
+          tentativas_login?: number | null
+          ultimo_login?: string | null
           updated_at?: string
           user_id?: string | null
           whatsapp?: string | null
@@ -1491,6 +1503,14 @@ export type Database = {
       sparsevec_typmod_in: {
         Args: { "": unknown[] }
         Returns: number
+      }
+      validar_login_admin: {
+        Args: { p_email: string; p_senha: string }
+        Returns: Json
+      }
+      validar_login_lojista: {
+        Args: { p_email: string; p_senha: string }
+        Returns: Json
       }
       vector_avg: {
         Args: { "": number[] }
