@@ -1,8 +1,10 @@
 import { useState } from 'react';
-import { LayoutDashboard, Package, Store, Users, Settings, Menu, X, Trophy, BarChart3, ChevronLeft, ChevronRight, Search, TrendingUp, Activity, Receipt } from 'lucide-react';
+import { LayoutDashboard, Package, Store, Users, Settings, Menu, X, Trophy, BarChart3, ChevronLeft, ChevronRight, Search, TrendingUp, Activity, Receipt, LogOut } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { useMonitoramentoRealTime } from '@/hooks/useMonitoramentoRealTime';
+import { useAuth } from '@/hooks/useAuth';
+import { useToast } from '@/hooks/use-toast';
 interface AdminLayoutProps {
   children: React.ReactNode;
   currentPage: string;
@@ -16,6 +18,16 @@ const AdminLayout = ({
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
   const { metricas } = useMonitoramentoRealTime();
+  const { profile, signOut } = useAuth();
+  const { toast } = useToast();
+
+  const handleSignOut = async () => {
+    await signOut();
+    toast({
+      title: "Logout realizado",
+      description: "Até logo!",
+    });
+  };
   const navigation = [{
     name: 'Dashboard',
     href: '#dashboard',
@@ -112,16 +124,27 @@ const AdminLayout = ({
           {!sidebarCollapsed && <div className="p-4 border-t border-primary-foreground/20">
               <div className="flex items-center space-x-3">
                 <div className="w-8 h-8 bg-accent rounded-full flex items-center justify-center">
-                  <span className="text-xs font-bold text-accent-foreground">AD</span>
+                  <span className="text-xs font-bold text-accent-foreground">
+                    {profile?.nome?.charAt(0)?.toUpperCase() || 'A'}
+                  </span>
                 </div>
                 <div className="flex-1 min-w-0">
                   <p className="text-sm font-medium text-primary-foreground truncate">
-                    Admin User
+                    {profile?.nome || 'Admin User'}
                   </p>
                   <p className="text-xs text-primary-foreground/70 truncate">
-                    admin@system.com
+                    {profile?.email || 'admin@system.com'}
                   </p>
                 </div>
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={handleSignOut}
+                  className="text-primary-foreground/70 hover:text-primary-foreground hover:bg-primary-foreground/10 p-1"
+                  title="Sair do sistema"
+                >
+                  <LogOut className="h-4 w-4" />
+                </Button>
               </div>
             </div>}
         </div>

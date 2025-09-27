@@ -1364,6 +1364,14 @@ export type Database = {
           id: number
         }[]
       }
+      is_admin: {
+        Args: { user_uuid: string }
+        Returns: boolean
+      }
+      is_lojista_owner: {
+        Args: { target_lojista_id: string; user_uuid: string }
+        Returns: boolean
+      }
       ivfflat_bit_support: {
         Args: { "": unknown }
         Returns: unknown
