@@ -3,7 +3,7 @@ import { LayoutDashboard, Package, Store, Users, Settings, Menu, X, Trophy, BarC
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { useMonitoramentoRealTime } from '@/hooks/useMonitoramentoRealTime';
-import { useAuth } from '@/hooks/useAuth';
+import { useCustomAuth } from '@/hooks/useCustomAuth';
 import { useToast } from '@/hooks/use-toast';
 interface AdminLayoutProps {
   children: React.ReactNode;
@@ -18,7 +18,7 @@ const AdminLayout = ({
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
   const { metricas } = useMonitoramentoRealTime();
-  const { profile, signOut } = useAuth();
+  const { user, signOut } = useCustomAuth();
   const { toast } = useToast();
 
   const handleSignOut = async () => {
@@ -125,15 +125,15 @@ const AdminLayout = ({
               <div className="flex items-center space-x-3">
                 <div className="w-8 h-8 bg-accent rounded-full flex items-center justify-center">
                   <span className="text-xs font-bold text-accent-foreground">
-                    {profile?.nome?.charAt(0)?.toUpperCase() || 'A'}
+                    {user?.tipo === 'admin' ? user.nome?.charAt(0)?.toUpperCase() || 'A' : 'A'}
                   </span>
                 </div>
                 <div className="flex-1 min-w-0">
                   <p className="text-sm font-medium text-primary-foreground truncate">
-                    {profile?.nome || 'Admin User'}
+                    {user?.tipo === 'admin' ? user.nome || 'Admin User' : 'Admin User'}
                   </p>
                   <p className="text-xs text-primary-foreground/70 truncate">
-                    {profile?.email || 'admin@system.com'}
+                    {user?.email || 'admin@system.com'}
                   </p>
                 </div>
                 <Button

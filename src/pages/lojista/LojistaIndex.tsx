@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { useAuth } from '@/hooks/useAuth';
+import { useCustomAuth } from '@/hooks/useCustomAuth';
 import { useLojistas } from '@/hooks/useLojistas';
 import { useCuponsStats } from '@/hooks/useCuponsStats';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
@@ -12,7 +12,7 @@ import { CompraBlocosModal } from '@/components/lojistas/CompraBlocosModal';
 import { HistoricoCompras } from '@/components/lojistas/HistoricoCompras';
 
 const LojistaIndex = () => {
-  const { profile, signOut } = useAuth();
+  const { user, signOut } = useCustomAuth();
   const { lojas, loja, lojaSelecionada, setLojaSelecionada, isLoading } = useLojistas();
   const { data: stats, isLoading: statsLoading } = useCuponsStats(loja?.id);
   const { toast } = useToast();
@@ -75,7 +75,9 @@ const LojistaIndex = () => {
             
             <div className="flex items-center space-x-4">
               <div className="text-right">
-                <p className="text-sm font-medium">{profile?.nome}</p>
+                <p className="text-sm font-medium">
+                  {user?.tipo === 'lojista' ? user.nome_responsavel || user.nome_loja : 'Lojista'}
+                </p>
                 <p className="text-xs text-muted-foreground">{lojas.length} loja(s)</p>
               </div>
               <Button variant="ghost" size="sm" onClick={handleSignOut}>

@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
-import { useAuth } from './useAuth';
+import { useCustomAuth } from './useCustomAuth';
 
 interface Loja {
   id: string;
@@ -15,25 +15,25 @@ interface Loja {
 }
 
 export const useLojistas = () => {
-  const { user } = useAuth();
+  const { user } = useCustomAuth();
   const [lojaSelecionada, setLojaSelecionada] = useState<string | null>(null);
 
   const { data: lojas = [], isLoading } = useQuery({
     queryKey: ['lojistas', user?.id],
     queryFn: async () => {
-      if (!user?.id) return [];
+      if (!user?.id || user.tipo !== 'lojista') return [];
       
       const { data, error } = await supabase
         .from('lojistas')
         .select('*')
-        .eq('user_id', user.id)
+        .eq('id', user.id)  // Use the lojista ID directly
         .eq('status', 'ativo')
         .order('nome_loja');
 
       if (error) throw error;
       return data as Loja[];
     },
-    enabled: !!user?.id
+    enabled: !!user?.id && user?.tipo === 'lojista'
   });
 
   // Selecionar primeira loja automaticamente
