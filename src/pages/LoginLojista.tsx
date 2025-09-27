@@ -7,6 +7,7 @@ import { Label } from '@/components/ui/label';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { useToast } from '@/hooks/use-toast';
 import { Eye, EyeOff, Store } from 'lucide-react';
+import { supabase } from '@/integrations/supabase/client';
 
 const LoginLojista = () => {
   const [email, setEmail] = useState('');
@@ -73,19 +74,46 @@ const LoginLojista = () => {
           description: "Email ou senha incorretos.",
           variant: "destructive",
         });
-      } else {
-        toast({
-          title: "Login realizado",
-          description: "Bem-vindo ao painel do lojista!",
-        });
+        setIsLoading(false);
+        return;
       }
+
+      // Aguarda um momento para o perfil ser carregado
+      setTimeout(async () => {
+        const { data: { session } } = await supabase.auth.getSession();
+        if (session) {
+          const { data: profileData } = await supabase
+            .from('profiles')
+            .select('*')
+            .eq('user_id', session.user.id)
+            .eq('ativo', true)
+            .single();
+
+          if (profileData?.tipo_usuario !== 'lojista') {
+            await supabase.auth.signOut();
+            toast({
+              title: "Acesso negado",
+              description: "Esta área é exclusiva para lojistas.",
+              variant: "destructive",
+            });
+            setIsLoading(false);
+            return;
+          }
+
+          toast({
+            title: "Login realizado",
+            description: "Bem-vindo ao painel do lojista!",
+          });
+        }
+        setIsLoading(false);
+      }, 500);
+      
     } catch (error) {
       toast({
         title: "Erro",
         description: "Ocorreu um erro inesperado. Tente novamente.",
         variant: "destructive",
       });
-    } finally {
       setIsLoading(false);
     }
   };

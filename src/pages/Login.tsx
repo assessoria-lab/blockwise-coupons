@@ -7,6 +7,7 @@ import { Label } from '@/components/ui/label';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { useToast } from '@/hooks/use-toast';
 import { Eye, EyeOff } from 'lucide-react';
+import { supabase } from '@/integrations/supabase/client';
 
 const Login = () => {
   const [email, setEmail] = useState('');
@@ -64,19 +65,46 @@ const Login = () => {
           description: "Email ou senha incorretos.",
           variant: "destructive",
         });
-      } else {
-        toast({
-          title: "Login realizado",
-          description: "Bem-vindo ao Show de Prêmios!",
-        });
+        setIsLoading(false);
+        return;
       }
+
+      // Aguarda um momento para o perfil ser carregado
+      setTimeout(async () => {
+        const { data: { session } } = await supabase.auth.getSession();
+        if (session) {
+          const { data: profileData } = await supabase
+            .from('profiles')
+            .select('*')
+            .eq('user_id', session.user.id)
+            .eq('ativo', true)
+            .single();
+
+          if (profileData?.tipo_usuario !== 'admin') {
+            await supabase.auth.signOut();
+            toast({
+              title: "Acesso negado",
+              description: "Esta área é exclusiva para administradores.",
+              variant: "destructive",
+            });
+            setIsLoading(false);
+            return;
+          }
+
+          toast({
+            title: "Login realizado",
+            description: "Bem-vindo ao Show de Prêmios!",
+          });
+        }
+        setIsLoading(false);
+      }, 500);
+      
     } catch (error) {
       toast({
         title: "Erro",
         description: "Ocorreu um erro inesperado. Tente novamente.",
         variant: "destructive",
       });
-    } finally {
       setIsLoading(false);
     }
   };
