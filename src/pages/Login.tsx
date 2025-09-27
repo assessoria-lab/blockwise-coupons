@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useAuth } from '@/hooks/useAuth';
-import { Navigate } from 'react-router-dom';
+import { Navigate, useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -15,6 +15,7 @@ const Login = () => {
   const [isLoading, setIsLoading] = useState(false);
   const { signIn, user, profile, loading } = useAuth();
   const { toast } = useToast();
+  const navigate = useNavigate();
 
   // Redirect if already authenticated
   useEffect(() => {
@@ -146,6 +147,26 @@ const Login = () => {
               disabled={isLoading}
             >
               {isLoading ? "Entrando..." : "Entrar"}
+            </Button>
+            
+            <div className="relative">
+              <div className="absolute inset-0 flex items-center">
+                <span className="w-full border-t" />
+              </div>
+              <div className="relative flex justify-center text-xs uppercase">
+                <span className="bg-background px-2 text-muted-foreground">
+                  Ou
+                </span>
+              </div>
+            </div>
+            
+            <Button 
+              type="button" 
+              variant="outline"
+              className="w-full"
+              onClick={() => navigate('/cadastro-lojista-publico')}
+            >
+              Cadastrar Nova Loja
             </Button>
           </form>
         </CardContent>
