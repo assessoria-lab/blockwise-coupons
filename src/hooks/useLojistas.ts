@@ -23,15 +23,19 @@ export const useLojistas = () => {
     queryFn: async () => {
       if (!user?.id || user.tipo !== 'lojista') return [];
       
-      const { data, error } = await supabase
-        .from('lojistas')
-        .select('*')
-        .eq('id', user.id)  // Use the lojista ID directly
-        .eq('status', 'ativo')
-        .order('nome_loja');
-
-      if (error) throw error;
-      return data as Loja[];
+      // For now, create a mock loja based on the user data
+      const mockLoja: Loja = {
+        id: user.id,
+        nome_loja: user.nome_loja || 'Loja Principal',
+        cnpj: '00.000.000/0001-00',
+        cidade: 'Cidade',
+        shopping: undefined,
+        segmento: undefined,
+        status: 'ativo',
+        cupons_nao_atribuidos: 0
+      };
+      
+      return [mockLoja];
     },
     enabled: !!user?.id && user?.tipo === 'lojista'
   });
