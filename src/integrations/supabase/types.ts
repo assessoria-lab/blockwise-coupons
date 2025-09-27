@@ -757,6 +757,57 @@ export type Database = {
         }
         Relationships: []
       }
+      profiles: {
+        Row: {
+          ativo: boolean
+          created_at: string
+          email: string
+          id: string
+          lojista_id: string | null
+          nome: string
+          tipo_usuario: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          ativo?: boolean
+          created_at?: string
+          email: string
+          id?: string
+          lojista_id?: string | null
+          nome: string
+          tipo_usuario: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          ativo?: boolean
+          created_at?: string
+          email?: string
+          id?: string
+          lojista_id?: string | null
+          nome?: string
+          tipo_usuario?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "profiles_lojista_id_fkey"
+            columns: ["lojista_id"]
+            isOneToOne: false
+            referencedRelation: "lojistas"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "profiles_lojista_id_fkey"
+            columns: ["lojista_id"]
+            isOneToOne: false
+            referencedRelation: "mv_ranking_lojistas"
+            referencedColumns: ["lojista_id"]
+          },
+        ]
+      }
       query_history: {
         Row: {
           apenas_ativas: boolean | null
@@ -1243,6 +1294,19 @@ export type Database = {
           ultima_atribuicao: string
           ultima_atualizacao: string
           volume_vendas_geradas: number
+        }[]
+      }
+      get_user_profile: {
+        Args: { user_uuid: string }
+        Returns: {
+          ativo: boolean
+          email: string
+          id: string
+          lojista_id: string
+          lojista_info: Json
+          nome: string
+          tipo_usuario: string
+          user_id: string
         }[]
       }
       halfvec_avg: {
