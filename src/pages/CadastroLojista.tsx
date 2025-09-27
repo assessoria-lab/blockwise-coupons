@@ -146,48 +146,55 @@ export default function CadastroLojista() {
   // Mutation para salvar lojista
   const salvarLojistaMutation = useMutation({
     mutationFn: async (data: Lojista) => {
-      // 1. Criar usuário no Supabase Auth
-      const { data: authUser, error: authError } = await supabase.auth.signUp({
-        email: data.email!,
-        password: data.senha!,
-        options: {
-          emailRedirectTo: `${window.location.origin}/lojista`
-        }
-      });
-
-      if (authError) throw authError;
-      if (!authUser.user) throw new Error('Falha ao criar usuário');
-
-      // 2. Criar loja vinculada ao usuário (sem senha)
-      const { senha, confirmar_senha, ...lojistaData } = data;
-      const { data: novaLoja, error: lojaError } = await supabase
-        .from('lojistas')
-        .insert([{
-          ...lojistaData,
-          user_id: authUser.user.id
-        }])
-        .select()
-        .single();
-
-      if (lojaError) throw lojaError;
-
-      // 3. Criar perfil do usuário (sem referência à loja específica)
-      const { error: profileError } = await supabase
-        .from('profiles')
-        .insert([{
-          user_id: authUser.user.id,
-          nome: data.responsavel_nome || data.nome_loja,
+      try {
+        // 1. Criar usuário no Supabase Auth
+        const { data: authUser, error: authError } = await supabase.auth.signUp({
           email: data.email!,
-          tipo_usuario: 'lojista'
-        }]);
+          password: data.senha!,
+          options: {
+            emailRedirectTo: `${window.location.origin}/lojista`
+          }
+        });
 
-      if (profileError) {
-        // Se houver erro ao criar o perfil, tentar deletar o usuário criado
-        console.error('Erro ao criar perfil:', profileError);
-        throw profileError;
+        if (authError) throw authError;
+        if (!authUser.user) throw new Error('Falha ao criar usuário');
+
+        // 2. Criar loja vinculada ao usuário (sem senha)
+        const { senha, confirmar_senha, ...lojistaData } = data;
+        const { data: novaLoja, error: lojaError } = await supabase
+          .from('lojistas')
+          .insert([{
+            ...lojistaData,
+            user_id: authUser.user.id
+          }])
+          .select()
+          .single();
+
+        if (lojaError) {
+          console.error('Erro ao criar loja:', lojaError);
+          throw new Error(`Erro ao criar loja: ${lojaError.message}`);
+        }
+
+        // 3. Criar perfil do usuário (sem referência à loja específica)
+        const { error: profileError } = await supabase
+          .from('profiles')
+          .insert([{
+            user_id: authUser.user.id,
+            nome: data.responsavel_nome || data.nome_loja,
+            email: data.email!,
+            tipo_usuario: 'lojista'
+          }]);
+
+        if (profileError) {
+          console.error('Erro ao criar perfil:', profileError);
+          throw new Error(`Erro ao criar perfil: ${profileError.message}`);
+        }
+
+        return novaLoja;
+      } catch (error) {
+        console.error('Erro completo no cadastro:', error);
+        throw error;
       }
-
-      return novaLoja;
     },
     onSuccess: () => {
       queryClient.invalidateQueries({
