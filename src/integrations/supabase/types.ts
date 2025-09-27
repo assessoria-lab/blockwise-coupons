@@ -1201,6 +1201,10 @@ export type Database = {
           similaridade: number
         }[]
       }
+      confirm_user_email: {
+        Args: { p_user_id: string }
+        Returns: undefined
+      }
       consultar_logs_auditoria: {
         Args: {
           p_data_fim?: string
@@ -1224,6 +1228,15 @@ export type Database = {
       consultar_saldo_lojista: {
         Args: { p_whatsapp_lojista: string }
         Returns: Json
+      }
+      create_missing_profile: {
+        Args: {
+          p_email: string
+          p_nome: string
+          p_tipo_usuario: string
+          p_user_id: string
+        }
+        Returns: undefined
       }
       criar_blocos_pool: {
         Args: { p_quantidade_blocos: number }
