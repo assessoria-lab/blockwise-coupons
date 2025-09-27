@@ -6,10 +6,10 @@ interface AuthProviderProps {
 }
 
 export const CustomAuthProvider = ({ children }: AuthProviderProps) => {
-  const auth = useCustomAuthProvider();
+  const authValue = useCustomAuthProvider();
 
   return (
-    <AuthContext.Provider value={auth}>
+    <AuthContext.Provider value={authValue}>
       {children}
     </AuthContext.Provider>
   );

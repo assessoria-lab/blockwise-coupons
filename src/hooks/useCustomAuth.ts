@@ -29,13 +29,19 @@ interface AuthContextType {
   isLojista: boolean;
 }
 
-const AuthContext = createContext<AuthContextType | undefined>(undefined);
+// Create context with default values
+const AuthContext = createContext<AuthContextType>({
+  user: null,
+  loading: true,
+  signInAdmin: async () => ({ error: 'Not implemented' }),
+  signInLojista: async () => ({ error: 'Not implemented' }),
+  signOut: async () => {},
+  isAdmin: false,
+  isLojista: false,
+});
 
 export const useCustomAuth = () => {
   const context = useContext(AuthContext);
-  if (!context) {
-    throw new Error('useCustomAuth must be used within an AuthProvider');
-  }
   return context;
 };
 
