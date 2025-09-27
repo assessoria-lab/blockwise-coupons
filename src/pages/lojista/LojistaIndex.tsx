@@ -9,6 +9,7 @@ import { LogOut, Store, BarChart3, UserPlus, Building2, ShoppingCart, Ticket, Tr
 import { useToast } from '@/hooks/use-toast';
 import { AtribuirCuponsManual } from '@/components/lojistas/AtribuirCuponsManual';
 import { CompraBlocosModal } from '@/components/lojistas/CompraBlocosModal';
+import { HistoricoCompras } from '@/components/lojistas/HistoricoCompras';
 
 const LojistaIndex = () => {
   const { profile, signOut } = useAuth();
@@ -179,8 +180,8 @@ const LojistaIndex = () => {
             </div>
 
             {/* Ações Principais */}
-            <div className="grid gap-6 lg:grid-cols-3 mb-8">
-              <Card className="lg:col-span-2">
+            <div className="grid gap-6 lg:grid-cols-2 mb-8">
+              <Card>
                 <CardHeader>
                   <CardTitle className="flex items-center gap-2">
                     <UserPlus className="h-5 w-5" />
@@ -272,23 +273,12 @@ const LojistaIndex = () => {
                     </div>
                   </CardContent>
                 </Card>
-
-                <Card>
-                  <CardHeader>
-                    <CardTitle>Ações Rápidas</CardTitle>
-                  </CardHeader>
-                  <CardContent>
-                    <Button 
-                      variant="outline" 
-                      className="w-full"
-                      onClick={() => window.location.href = '/cadastro-lojista-publico'}
-                    >
-                      <Building2 className="h-4 w-4 mr-2" />
-                      Cadastrar Nova Loja
-                    </Button>
-                  </CardContent>
-                </Card>
               </div>
+            </div>
+
+            {/* Histórico de Compras */}
+            <div className="mb-8">
+              <HistoricoCompras lojistaId={loja.id} />
             </div>
           </>
         )}

@@ -62,6 +62,7 @@ export const CompraBlocosModal = ({ lojistaId, open, onOpenChange }: CompraBloco
       // Invalidar queries para atualizar dados
       queryClient.invalidateQueries({ queryKey: ['cupons-stats'] });
       queryClient.invalidateQueries({ queryKey: ['lojistas'] });
+      queryClient.invalidateQueries({ queryKey: ['historico-compras'] });
       
       onOpenChange(false);
       setQuantidade(1);
@@ -151,19 +152,12 @@ export const CompraBlocosModal = ({ lojistaId, open, onOpenChange }: CompraBloco
                       PIX
                     </div>
                   </SelectItem>
-                  <SelectItem value="cartao_credito">
+                  <SelectItem value="cartao">
                     <div className="flex items-center gap-2">
                       <CreditCard className="h-4 w-4" />
-                      Cartão de Crédito
+                      Cartão
                     </div>
                   </SelectItem>
-                  <SelectItem value="cartao_debito">
-                    <div className="flex items-center gap-2">
-                      <CreditCard className="h-4 w-4" />
-                      Cartão de Débito
-                    </div>
-                  </SelectItem>
-                  <SelectItem value="dinheiro">Dinheiro</SelectItem>
                 </SelectContent>
               </Select>
             </div>
