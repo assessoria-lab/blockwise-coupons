@@ -37,50 +37,103 @@ interface UtilizacaoBloco {
   clientes_atendidos: number;
 }
 
-// Real-time dashboard metrics
+// Optimized dashboard metrics with error handling and reduced polling
 const useDashboardMetrics = () => {
   const queryClient = useQueryClient();
   
-  const { data: metrics, isLoading } = useQuery({
+  const { data: metrics, isLoading, error } = useQuery({
     queryKey: ['dashboard-metrics'],
     queryFn: async () => {
-      const { data, error } = await supabase.rpc('get_dashboard_metrics');
-      if (error) throw error;
-      
-      const metricsData = data?.[0]; // RPC returns an array, take first element
-      
-      // Buscar dados de sequência de cupons
-      const { data: sequenceData, error: seqError } = await supabase
-        .from('cupons')
-        .select('numero_cupom')
-        .order('numero_cupom', { ascending: true });
-      
-      if (seqError) throw seqError;
-      
-      const numeros = sequenceData?.map(c => c.numero_cupom) || [];
-      const primeiro_numero = numeros.length > 0 ? Math.min(...numeros) : 1000001;
-      const ultimo_numero = numeros.length > 0 ? Math.max(...numeros) : 1000001;
-      const total_unicos = numeros.length;
-      const proximo_disponivel = ultimo_numero + 1;
-      
-      return {
-        blocos_disponiveis: metricsData?.blocos_pool_geral || 0,
-        blocos_com_lojistas: metricsData?.blocos_com_lojistas || 0,
-        cupons_nao_atribuidos: metricsData?.cupons_nao_atribuidos || 0,
-        cupons_atribuidos: metricsData?.cupons_atribuidos || 0,
-        blocos_vendidos_hoje: metricsData?.blocos_vendidos_hoje || 0,
-        cupons_atribuidos_hoje: metricsData?.cupons_atribuidos_hoje || 0,
-        primeiro_numero,
-        ultimo_numero,
-        total_unicos,
-        proximo_disponivel,
-        integridade_ok: true,
-        capacidade_maxima: {
-          cupons_suportados: 998999999999
+      try {
+        // Use the optimized function
+        const { data, error } = await supabase.rpc('get_dashboard_metrics_optimized');
+        if (error) {
+          console.error('Error fetching dashboard metrics:', error);
+          throw error;
         }
-      };
+        
+        const metricsData = data?.[0];
+        if (!metricsData) {
+          throw new Error('No metrics data returned');
+        }
+        
+        // Get sequence data with error handling - only get min/max for performance
+        let primeiro_numero = 1000001;
+        let ultimo_numero = 1000001;
+        let total_unicos = 0;
+        
+        try {
+          const { data: sequenceData, error: seqError } = await supabase
+            .from('cupons')
+            .select('numero_cupom')
+            .order('numero_cupom', { ascending: true })
+            .limit(1);
+            
+          const { data: maxData, error: maxError } = await supabase
+            .from('cupons')
+            .select('numero_cupom')
+            .order('numero_cupom', { ascending: false })
+            .limit(1);
+            
+          const { data: countData, error: countError } = await supabase
+            .from('cupons')
+            .select('numero_cupom', { count: 'exact', head: true });
+          
+          if (sequenceData && sequenceData.length > 0) {
+            primeiro_numero = sequenceData[0].numero_cupom;
+          }
+          if (maxData && maxData.length > 0) {
+            ultimo_numero = maxData[0].numero_cupom;
+          }
+          if (countData !== null) {
+            total_unicos = countData?.length || 0;
+          }
+        } catch (seqError) {
+          console.warn('Error fetching sequence data, using defaults:', seqError);
+        }
+        
+        const proximo_disponivel = ultimo_numero + 1;
+        
+        return {
+          blocos_disponiveis: metricsData.blocos_pool_geral || 0,
+          blocos_com_lojistas: metricsData.blocos_com_lojistas || 0,
+          cupons_nao_atribuidos: metricsData.cupons_nao_atribuidos || 0,
+          cupons_atribuidos: metricsData.cupons_atribuidos || 0,
+          blocos_vendidos_hoje: metricsData.blocos_vendidos_hoje || 0,
+          cupons_atribuidos_hoje: metricsData.cupons_atribuidos_hoje || 0,
+          primeiro_numero,
+          ultimo_numero,
+          total_unicos,
+          proximo_disponivel,
+          integridade_ok: true,
+          capacidade_maxima: {
+            cupons_suportados: 998999999999
+          }
+        };
+      } catch (error) {
+        console.error('Dashboard metrics error:', error);
+        // Return default values to prevent crashes
+        return {
+          blocos_disponiveis: 0,
+          blocos_com_lojistas: 0,
+          cupons_nao_atribuidos: 0,
+          cupons_atribuidos: 0,
+          blocos_vendidos_hoje: 0,
+          cupons_atribuidos_hoje: 0,
+          primeiro_numero: 1000001,
+          ultimo_numero: 1000001,
+          total_unicos: 0,
+          proximo_disponivel: 1000002,
+          integridade_ok: false,
+          capacidade_maxima: {
+            cupons_suportados: 998999999999
+          }
+        };
+      }
     },
-    refetchInterval: 5000 // Atualiza a cada 5 segundos
+    refetchInterval: 15000, // Reduced frequency to 15 seconds
+    retry: 3,
+    retryDelay: 1000
   });
 
   // Sistema de tempo real - atualiza quando há mudanças
@@ -108,7 +161,7 @@ const useDashboardMetrics = () => {
     };
   }, [queryClient]);
 
-  return { metrics, isLoading };
+  return { metrics, isLoading, error };
 };
 
 interface MetricCardProps {
@@ -164,33 +217,54 @@ const MetricCard = ({ title, value, subtitle, badge, icon, variant }: MetricCard
 };
 
 const DashboardBlocos = () => {
-  const { metrics, isLoading } = useDashboardMetrics();
+  const { metrics, isLoading, error } = useDashboardMetrics();
+  const queryClient = useQueryClient();
   const [lojistaFiltro, setLojistaFiltro] = useState<string>('all');
 
-  // Query para performance dos blocos
-  const { data: utilizacaoBlocos, isLoading: loadingPerformance } = useQuery<UtilizacaoBloco[]>({
+  // Query para performance dos blocos com error handling
+  const { data: utilizacaoBlocos, isLoading: loadingPerformance, error: performanceError } = useQuery<UtilizacaoBloco[]>({
     queryKey: ['utilizacao-blocos', lojistaFiltro],
     queryFn: async () => {
-      const { data, error } = await supabase.rpc('relatorio_utilizacao_blocos', {
-        p_lojista_id: (lojistaFiltro && lojistaFiltro !== 'all') ? lojistaFiltro : null
-      });
-      if (error) throw new Error(error.message);
-      return data || [];
-    }
+      try {
+        const { data, error } = await supabase.rpc('relatorio_utilizacao_blocos', {
+          p_lojista_id: (lojistaFiltro && lojistaFiltro !== 'all') ? lojistaFiltro : null
+        });
+        if (error) {
+          console.error('Error fetching block utilization:', error);
+          throw new Error(error.message);
+        }
+        return data || [];
+      } catch (error) {
+        console.error('Block utilization error:', error);
+        return []; // Return empty array to prevent crashes
+      }
+    },
+    refetchInterval: 30000, // Reduced frequency to 30 seconds
+    retry: 2
   });
 
-  // Query para lista de lojistas
-  const { data: lojistas } = useQuery({
+  // Query para lista de lojistas com error handling
+  const { data: lojistas, error: lojistasError } = useQuery({
     queryKey: ['lojistas-ativos'],
     queryFn: async () => {
-      const { data, error } = await supabase
-        .from('lojistas')
-        .select('id, nome_loja')
-        .eq('status', 'ativo')
-        .order('nome_loja');
-      if (error) throw error;
-      return data;
-    }
+      try {
+        const { data, error } = await supabase
+          .from('lojistas')
+          .select('id, nome_loja')
+          .eq('status', 'ativo')
+          .order('nome_loja');
+        if (error) {
+          console.error('Error fetching lojistas:', error);
+          throw error;
+        }
+        return data || [];
+      } catch (error) {
+        console.error('Lojistas fetch error:', error);
+        return []; // Return empty array to prevent crashes
+      }
+    },
+    refetchInterval: 60000, // Reduced frequency to 1 minute
+    retry: 2
   });
 
   // Calcular métricas de performance
@@ -204,7 +278,38 @@ const DashboardBlocos = () => {
   if (isLoading || loadingPerformance || !metrics) {
     return (
       <div className="flex justify-center items-center h-64">
-        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary"></div>
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary mx-auto mb-4"></div>
+          <p className="text-muted-foreground">Carregando dados do dashboard...</p>
+          {error && (
+            <p className="text-destructive text-sm mt-2">
+              Erro ao carregar métricas. Tentando novamente...
+            </p>
+          )}
+        </div>
+      </div>
+    );
+  }
+
+  // Show error state if critical data failed to load
+  if (error && !metrics) {
+    return (
+      <div className="flex justify-center items-center h-64">
+        <div className="text-center">
+          <div className="text-destructive mb-4">
+            <AlertCircle className="h-12 w-12 mx-auto mb-2" />
+            <p className="font-semibold">Erro ao carregar dados</p>
+          </div>
+          <p className="text-muted-foreground mb-4">
+            Não foi possível carregar as métricas do dashboard.
+          </p>
+          <Button 
+            onClick={() => queryClient.invalidateQueries({ queryKey: ['dashboard-metrics'] })}
+            variant="outline"
+          >
+            Tentar novamente
+          </Button>
+        </div>
       </div>
     );
   }

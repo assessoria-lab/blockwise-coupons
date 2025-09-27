@@ -1266,6 +1266,18 @@ export type Database = {
           ultima_atualizacao: string
         }[]
       }
+      get_dashboard_metrics_optimized: {
+        Args: Record<PropertyKey, never>
+        Returns: {
+          blocos_com_lojistas: number
+          blocos_pool_geral: number
+          blocos_vendidos_hoje: number
+          cupons_atribuidos: number
+          cupons_atribuidos_hoje: number
+          cupons_nao_atribuidos: number
+          ultima_atualizacao: string
+        }[]
+      }
       get_historico_cupons: {
         Args: {
           p_data_fim?: string

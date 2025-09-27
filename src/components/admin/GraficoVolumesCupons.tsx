@@ -13,41 +13,48 @@ interface DadosCupom {
 }
 
 const fetchDadosVolumesCupons = async (): Promise<DadosCupom[]> => {
-  // Buscar dados dos últimos 7 dias
-  const hoje = new Date();
-  const seteDiasAtras = subDays(hoje, 6);
+  try {
+    // Buscar dados dos últimos 7 dias
+    const hoje = new Date();
+    const seteDiasAtras = subDays(hoje, 6);
 
-  // Buscar compras de cupons (através de vendas de blocos)
-  const { data: vendasBlocos, error: errorVendas } = await supabase
-    .from('vendas_blocos')
-    .select('data_venda, quantidade_blocos')
-    .gte('data_venda', seteDiasAtras.toISOString());
+    // Buscar compras de cupons (através de vendas de blocos) com tratamento de erro
+    const { data: vendasBlocos, error: errorVendas } = await supabase
+      .from('vendas_blocos')
+      .select('data_venda, quantidade_blocos')
+      .gte('data_venda', seteDiasAtras.toISOString());
 
-  if (errorVendas) throw errorVendas;
+    if (errorVendas) {
+      console.error('Error fetching vendas blocos:', errorVendas);
+      throw new Error('Erro ao buscar dados de vendas de blocos');
+    }
 
-  // Buscar atribuições de cupons
-  const { data: cupons, error: errorCupons } = await supabase
-    .from('cupons')
-    .select('data_atribuicao')
-    .gte('data_atribuicao', seteDiasAtras.toISOString())
-    .eq('status', 'atribuido')
-    .not('data_atribuicao', 'is', null);
+    // Buscar atribuições de cupons com tratamento de erro
+    const { data: cupons, error: errorCupons } = await supabase
+      .from('cupons')
+      .select('data_atribuicao')
+      .gte('data_atribuicao', seteDiasAtras.toISOString())
+      .eq('status', 'atribuido')
+      .not('data_atribuicao', 'is', null);
 
-  if (errorCupons) throw errorCupons;
+    if (errorCupons) {
+      console.error('Error fetching cupons:', errorCupons);
+      throw new Error('Erro ao buscar dados de cupons atribuídos');
+    }
 
-  // Processar dados por dia
-  const dadosPorDia: Record<string, DadosCupom> = {};
+    // Processar dados por dia
+    const dadosPorDia: Record<string, DadosCupom> = {};
 
-  // Inicializar todos os dias com 0
-  for (let i = 0; i < 7; i++) {
-    const data = subDays(hoje, 6 - i);
-    const dataStr = format(startOfDay(data), 'yyyy-MM-dd');
-    const diasSemana = ['Dom', 'Seg', 'Ter', 'Qua', 'Qui', 'Sex', 'Sáb'];
-    const diaSemana = diasSemana[data.getDay()];
-    
-    dadosPorDia[dataStr] = {
-      data: diaSemana,
-      compras: 0,
+    // Inicializar todos os dias com 0
+    for (let i = 0; i < 7; i++) {
+      const data = subDays(hoje, 6 - i);
+      const dataStr = format(startOfDay(data), 'yyyy-MM-dd');
+      const diasSemana = ['Dom', 'Seg', 'Ter', 'Qua', 'Qui', 'Sex', 'Sáb'];
+      const diaSemana = diasSemana[data.getDay()];
+      
+      dadosPorDia[dataStr] = {
+        data: diaSemana,
+        compras: 0,
       atribuicoes: 0
     };
   }
@@ -68,9 +75,29 @@ const fetchDadosVolumesCupons = async (): Promise<DadosCupom[]> => {
     }
   });
 
-  const resultado = Object.values(dadosPorDia);
-  console.log('Dados do gráfico:', resultado);
-  return resultado;
+    const resultado = Object.values(dadosPorDia);
+    console.log('Dados do gráfico:', resultado);
+    return resultado;
+  } catch (error) {
+    console.error('Error in fetchDadosVolumesCupons:', error);
+    // Return empty data structure to prevent crashes
+    const hoje = new Date();
+    const dadosDefault: DadosCupom[] = [];
+    
+    for (let i = 0; i < 7; i++) {
+      const data = subDays(hoje, 6 - i);
+      const diasSemana = ['Dom', 'Seg', 'Ter', 'Qua', 'Qui', 'Sex', 'Sáb'];
+      const diaSemana = diasSemana[data.getDay()];
+      
+      dadosDefault.push({
+        data: diaSemana,
+        compras: 0,
+        atribuicoes: 0
+      });
+    }
+    
+    return dadosDefault;
+  }
 };
 
 const CustomTooltip = ({ active, payload, label }: any) => {
@@ -93,7 +120,10 @@ export function GraficoVolumesCupons() {
   const { data: dadosVolumes, isLoading, error } = useQuery({
     queryKey: ['volumes-cupons'],
     queryFn: fetchDadosVolumesCupons,
-    refetchInterval: 300000, // Atualiza a cada 5 minutos
+    refetchInterval: 600000, // Reduced to 10 minutes
+    staleTime: 300000, // Consider data fresh for 5 minutes
+    retry: 2,
+    retryDelay: 2000
   });
 
   if (error) {
