@@ -5,14 +5,27 @@ import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Package, Users, TrendingUp, RefreshCw } from 'lucide-react';
 
+interface DashboardMetrics {
+  total_blocos: number;
+  total_cupons: number;
+  cupons_disponiveis: number;
+  cupons_atribuidos: number;
+  cupons_usados: number;
+  total_lojistas: number;
+  total_clientes: number;
+}
+
 const DashboardBlocos = () => {
-  const { data: metricas, isLoading, refetch } = useQuery({
+  const { data: metricas, isLoading, refetch } = useQuery<DashboardMetrics>({
     queryKey: ['dashboard-metrics'],
     queryFn: async () => {
+      console.log('🔍 Buscando métricas do dashboard...');
       const { data, error } = await supabase.rpc('get_dashboard_metrics_optimized');
       
+      console.log('📊 Resposta do Supabase:', { data, error });
+      
       if (error) {
-        console.error('Erro ao buscar métricas:', error);
+        console.error('❌ Erro ao buscar métricas:', error);
         return {
           total_blocos: 0,
           total_cupons: 0,
@@ -24,16 +37,16 @@ const DashboardBlocos = () => {
         };
       }
 
-      // Cast the data to the expected type
-      const metrics = data as any;
-      return {
-        total_blocos: metrics?.total_blocos || 0,
-        total_cupons: metrics?.total_cupons || 0,
-        cupons_disponiveis: metrics?.cupons_disponiveis || 0,
-        cupons_atribuidos: metrics?.cupons_atribuidos || 0,
-        cupons_usados: metrics?.cupons_usados || 0,
-        total_lojistas: metrics?.total_lojistas || 0,
-        total_clientes: metrics?.total_clientes || 0
+      // O Supabase RPC retorna o objeto diretamente
+      console.log('✅ Métricas processadas:', data);
+      return (data as unknown as DashboardMetrics) || {
+        total_blocos: 0,
+        total_cupons: 0,
+        cupons_disponiveis: 0,
+        cupons_atribuidos: 0,
+        cupons_usados: 0,
+        total_lojistas: 0,
+        total_clientes: 0
       };
     },
     refetchInterval: 30000,
