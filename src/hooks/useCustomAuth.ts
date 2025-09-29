@@ -1,4 +1,5 @@
 import { createContext, useContext, useEffect, useState } from 'react';
+import { supabase } from '@/integrations/supabase/client';
 
 interface AdminUser {
   id: string;
@@ -60,20 +61,29 @@ export const useCustomAuthProvider = (): AuthContextType => {
   const signInAdmin = async (email: string, password: string) => {
     setLoading(true);
     try {
-      // Simulação de login para admin - aceita qualquer email que contenha 'admin'
-      if (email.toLowerCase().includes('admin') || email === 'admin@sistema.com') {
-        const adminUser: AdminUser = {
-          id: '1',
-          nome: 'Admin Sistema',
-          email: email,
-          tipo: 'admin'
-        };
-        setUser(adminUser);
-        localStorage.setItem('auth_user', JSON.stringify(adminUser));
-        return { success: true };
-      } else {
-        throw new Error('Email deve conter "admin" ou use admin@sistema.com');
+      // Usar a função do banco para validar login com estrutura completa
+      const { data, error } = await supabase.rpc('validar_login_admin_completo', {
+        p_email: email,
+        p_senha: password
+      });
+
+      if (error) throw error;
+
+      const result = data as any;
+      if (!result.success) {
+        throw new Error(result.message);
       }
+
+      // Se o login foi bem-sucedido, definir o usuário
+      const adminUser: AdminUser = {
+        id: result.user.id,
+        nome: result.user.nome,
+        email: result.user.email,
+        tipo: 'admin'
+      };
+      setUser(adminUser);
+      localStorage.setItem('auth_user', JSON.stringify(adminUser));
+      return { success: true };
     } catch (error) {
       throw error;
     } finally {
