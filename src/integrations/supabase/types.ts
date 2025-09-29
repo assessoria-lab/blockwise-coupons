@@ -749,6 +749,7 @@ export type Database = {
           p_nome_loja: string
           p_segmento?: string
           p_shopping?: string
+          p_user_id: string
         }
         Returns: Json
       }

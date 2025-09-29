@@ -186,6 +186,7 @@ export default function CadastroLojista() {
 
         // 3. Usar função segura para criar loja
         const { data: lojaResult, error: lojaError } = await supabase.rpc('criar_loja_apos_signup', {
+          p_user_id: authData.user.id,
           p_nome_loja: lojistaData.nome_loja,
           p_cnpj: lojistaData.cnpj,
           p_cidade: lojistaData.cidade,
