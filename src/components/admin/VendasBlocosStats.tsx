@@ -1,168 +1,93 @@
-import { useQuery, useQueryClient } from '@tanstack/react-query';
-import { useEffect } from 'react';
+import React from 'react';
+import { useQuery } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Badge } from '@/components/ui/badge';
-import { Package, Store, DollarSign, TrendingUp } from 'lucide-react';
+import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card';
+import { DollarSign, Package, TrendingUp, Calendar } from 'lucide-react';
 
-const fetchVendasStats = async () => {
-  const hoje = new Date().toISOString().split('T')[0];
-  
-  // Buscar vendas de hoje
-  const { data: vendasHoje, error: errorHoje } = await supabase
-    .from('blocos')
-    .select('id, data_venda, cupons_no_bloco')
-    .eq('status', 'vendido')
-    .gte('data_venda', hoje + ' 00:00:00')
-    .lte('data_venda', hoje + ' 23:59:59');
-
-  // Buscar total de blocos no pool disponível
-  const { data: poolBlocos, error: errorPool } = await supabase
-    .from('blocos')
-    .select('id')
-    .eq('status', 'disponivel')
-    .is('lojista_id', null);
-
-  // Buscar total de vendas realizadas
-  const { data: totalVendas, error: errorTotal } = await supabase
-    .from('blocos')
-    .select('id, cupons_no_bloco')
-    .eq('status', 'vendido');
-
-  // Buscar valor médio de vendas (usando pagamentos)
-  const { data: pagamentos, error: errorPagamentos } = await supabase
-    .from('pagamentos')
-    .select('valor, quantidade_blocos')
-    .eq('status_pagamento', 'aprovado');
-
-  if (errorHoje || errorPool || errorTotal || errorPagamentos) {
-    throw new Error('Erro ao carregar estatísticas de vendas');
-  }
-
-  const blocosVendidosHoje = vendasHoje?.length || 0;
-  const cuponsVendidosHoje = vendasHoje?.reduce((acc, bloco) => acc + (bloco.cupons_no_bloco || 100), 0) || 0;
-  const blocosDisponiveis = poolBlocos?.length || 0;
-  const totalBlocosVendidos = totalVendas?.length || 0;
-  const valorMedioPorBloco = pagamentos?.length 
-    ? (pagamentos.reduce((acc, p) => acc + (p.valor / p.quantidade_blocos), 0) / pagamentos.length)
-    : 100;
-
-  return {
-    blocosVendidosHoje,
-    cuponsVendidosHoje,
-    blocosDisponiveis,
-    totalBlocosVendidos,
-    valorMedioPorBloco
-  };
-};
-
-export const VendasBlocosStats = () => {
-  const queryClient = useQueryClient();
-  
-  const { data: stats, isLoading } = useQuery({
+const VendasBlocosStats = () => {
+  const { data: vendas = [] } = useQuery({
     queryKey: ['vendas-blocos-stats'],
-    queryFn: fetchVendasStats,
-    refetchInterval: 10000, // Atualiza a cada 10 segundos
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from('vendas_blocos')
+        .select('*');
+
+      if (error) {
+        console.error('Erro ao buscar vendas:', error);
+        return [];
+      }
+
+      return data || [];
+    },
   });
 
-  // Sistema de tempo real - atualiza quando há mudanças nos blocos ou pagamentos
-  useEffect(() => {
-    const channel = supabase
-      .channel('vendas-stats-realtime')
-      .on('postgres_changes', {
-        event: '*',
-        schema: 'public',
-        table: 'blocos'
-      }, () => {
-        queryClient.invalidateQueries({ queryKey: ['vendas-blocos-stats'] });
-      })
-      .on('postgres_changes', {
-        event: '*',
-        schema: 'public',
-        table: 'pagamentos'
-      }, () => {
-        queryClient.invalidateQueries({ queryKey: ['vendas-blocos-stats'] });
-      })
-      .subscribe();
-
-    return () => {
-      supabase.removeChannel(channel);
-    };
-  }, [queryClient]);
-
-  if (isLoading) {
-    return (
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-        {[...Array(4)].map((_, i) => (
-          <Card key={i} className="animate-pulse">
-            <CardHeader className="pb-2">
-              <div className="h-4 bg-muted rounded w-3/4"></div>
-            </CardHeader>
-            <CardContent>
-              <div className="h-8 bg-muted rounded w-1/2 mb-2"></div>
-              <div className="h-3 bg-muted rounded w-full"></div>
-            </CardContent>
-          </Card>
-        ))}
-      </div>
-    );
-  }
+  const receitaTotal = vendas.reduce((sum, v) => sum + Number(v.valor_total || 0), 0);
+  const cuponsVendidos = vendas.reduce((sum, v) => sum + Number(v.quantidade_cupons || 0), 0);
+  const ticketMedio = vendas.length > 0 ? receitaTotal / vendas.length : 0;
 
   return (
-    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-      <Card>
-        <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-          <CardTitle className="text-sm font-medium">Blocos Vendidos Hoje</CardTitle>
-          <Package className="h-4 w-4 text-muted-foreground" />
-        </CardHeader>
-        <CardContent>
-          <div className="text-2xl font-bold">{stats?.blocosVendidosHoje || 0}</div>
-          <p className="text-xs text-muted-foreground">
-            {stats?.cuponsVendidosHoje?.toLocaleString() || 0} cupons
-          </p>
-        </CardContent>
-      </Card>
+    <div className="space-y-6">
+      <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
+        <Card>
+          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+            <CardTitle className="text-sm font-medium">Total de Vendas</CardTitle>
+            <Calendar className="h-4 w-4 text-muted-foreground" />
+          </CardHeader>
+          <CardContent>
+            <div className="text-2xl font-bold">{vendas.length}</div>
+          </CardContent>
+        </Card>
+
+        <Card>
+          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+            <CardTitle className="text-sm font-medium">Receita Total</CardTitle>
+            <DollarSign className="h-4 w-4 text-muted-foreground" />
+          </CardHeader>
+          <CardContent>
+            <div className="text-2xl font-bold">
+              R$ {receitaTotal.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}
+            </div>
+          </CardContent>
+        </Card>
+
+        <Card>
+          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+            <CardTitle className="text-sm font-medium">Cupons Vendidos</CardTitle>
+            <Package className="h-4 w-4 text-muted-foreground" />
+          </CardHeader>
+          <CardContent>
+            <div className="text-2xl font-bold">{cuponsVendidos}</div>
+          </CardContent>
+        </Card>
+
+        <Card>
+          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+            <CardTitle className="text-sm font-medium">Ticket Médio</CardTitle>
+            <TrendingUp className="h-4 w-4 text-muted-foreground" />
+          </CardHeader>
+          <CardContent>
+            <div className="text-2xl font-bold">
+              R$ {ticketMedio.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}
+            </div>
+          </CardContent>
+        </Card>
+      </div>
 
       <Card>
-        <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-          <CardTitle className="text-sm font-medium">Blocos Disponíveis</CardTitle>
-          <Store className="h-4 w-4 text-muted-foreground" />
+        <CardHeader>
+          <CardTitle>Estatísticas de Vendas de Blocos</CardTitle>
         </CardHeader>
         <CardContent>
-          <div className="text-2xl font-bold">{stats?.blocosDisponiveis || 0}</div>
-          <p className="text-xs text-muted-foreground">
-            No pool para venda
-          </p>
-        </CardContent>
-      </Card>
-
-      <Card>
-        <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-          <CardTitle className="text-sm font-medium">Total Vendido</CardTitle>
-          <TrendingUp className="h-4 w-4 text-muted-foreground" />
-        </CardHeader>
-        <CardContent>
-          <div className="text-2xl font-bold">{stats?.totalBlocosVendidos || 0}</div>
-          <p className="text-xs text-muted-foreground">
-            Blocos vendidos
-          </p>
-        </CardContent>
-      </Card>
-
-      <Card>
-        <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-          <CardTitle className="text-sm font-medium">Valor Médio</CardTitle>
-          <DollarSign className="h-4 w-4 text-muted-foreground" />
-        </CardHeader>
-        <CardContent>
-          <div className="text-2xl font-bold">
-            R$ {stats?.valorMedioPorBloco?.toFixed(2) || '100.00'}
+          <div className="text-center py-8 text-muted-foreground">
+            {vendas.length === 0 
+              ? "Nenhuma venda registrada ainda."
+              : `${vendas.length} vendas registradas no sistema`
+            }
           </div>
-          <p className="text-xs text-muted-foreground">
-            Por bloco
-          </p>
         </CardContent>
       </Card>
     </div>
   );
 };
+
+export default VendasBlocosStats;

@@ -1,287 +1,122 @@
+import React from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { Skeleton } from '@/components/ui/skeleton';
-import { Trophy, Store, Package, Users, TrendingUp, Calendar } from 'lucide-react';
-import { format } from 'date-fns';
+import { Trophy, Store, MapPin } from 'lucide-react';
 
-interface RankingLojista {
-  lojista_id: string;
-  nome_loja: string;
-  cidade: string;
-  segmento: string | null;
-  total_blocos_comprados: number;
-  total_cupons_atribuidos: number;
-  cupons_disponiveis: number;
-  valor_total_gerado: number;
-  clientes_unicos: number;
-  data_ultima_atribuicao: string | null;
-  data_ultima_compra: string | null;
-  percentual_utilizacao: number;
-}
-
-const fetchRankingLojistas = async (): Promise<RankingLojista[]> => {
-  // Buscar lojistas ativos
-  const { data: lojistas, error: errorLojistas } = await supabase
-    .from('lojistas')
-    .select('id, nome_loja, cidade, segmento, data_ultima_compra')
-    .eq('status', 'ativo')
-    .order('nome_loja');
-
-  if (errorLojistas) throw errorLojistas;
-
-  // Buscar todos os blocos vendidos agrupados por lojista
-  const { data: blocos, error: errorBlocos } = await supabase
-    .from('blocos')
-    .select('lojista_id, cupons_atribuidos, cupons_disponiveis')
-    .eq('status', 'vendido')
-    .not('lojista_id', 'is', null);
-
-  if (errorBlocos) throw errorBlocos;
-
-  // Buscar todos os cupons atribuídos agrupados por lojista
-  const { data: cupons, error: errorCupons } = await supabase
-    .from('cupons')
-    .select('lojista_id, valor_compra, data_atribuicao, cliente_id')
-    .eq('status', 'atribuido')
-    .not('lojista_id', 'is', null);
-
-  if (errorCupons) throw errorCupons;
-
-  // Processar dados agrupando por lojista
-  const rankingData: RankingLojista[] = (lojistas || []).map(lojista => {
-    // Filtrar e agrupar blocos do lojista
-    const blocosLojista = (blocos || []).filter(b => b.lojista_id === lojista.id);
-    const cuponsLojista = (cupons || []).filter(c => c.lojista_id === lojista.id);
-    
-    // Somar todos os dados do lojista
-    const totalBlocosComprados = blocosLojista.length;
-    const totalCuponsAtribuidos = cuponsLojista.length;
-    const cuponsDisponiveis = blocosLojista.reduce((acc, b) => acc + (b.cupons_disponiveis || 0), 0);
-    const valorTotalGerado = cuponsLojista.reduce((acc, c) => acc + (c.valor_compra || 0), 0);
-    
-    // Contar clientes únicos
-    const clientesUnicos = new Set(cuponsLojista.map(c => c.cliente_id).filter(id => id)).size;
-    
-    // Encontrar a data da última atribuição
-    const datasAtribuicao = cuponsLojista
-      .map(c => c.data_atribuicao)
-      .filter(d => d)
-      .sort((a, b) => new Date(b).getTime() - new Date(a).getTime());
-    const ultimaAtribuicao = datasAtribuicao[0] || null;
-    
-    // Calcular percentual de utilização
-    const totalCuponsComprados = totalBlocosComprados * 100;
-    const percentualUtilizacao = totalCuponsComprados > 0 
-      ? (totalCuponsAtribuidos / totalCuponsComprados) * 100 
-      : 0;
-
-    return {
-      lojista_id: lojista.id,
-      nome_loja: lojista.nome_loja,
-      cidade: lojista.cidade,
-      segmento: lojista.segmento,
-      total_blocos_comprados: totalBlocosComprados,
-      total_cupons_atribuidos: totalCuponsAtribuidos,
-      cupons_disponiveis: cuponsDisponiveis,
-      valor_total_gerado: valorTotalGerado,
-      clientes_unicos: clientesUnicos,
-      data_ultima_atribuicao: ultimaAtribuicao,
-      data_ultima_compra: lojista.data_ultima_compra,
-      percentual_utilizacao: percentualUtilizacao
-    };
-  })
-  // Filtrar apenas lojistas que têm dados relevantes (compraram blocos ou atribuíram cupons)
-  .filter(lojista => lojista.total_blocos_comprados > 0 || lojista.total_cupons_atribuidos > 0)
-  // Ordenar por cupons atribuídos (maior para menor), depois por valor gerado
-  .sort((a, b) => {
-    if (b.total_cupons_atribuidos !== a.total_cupons_atribuidos) {
-      return b.total_cupons_atribuidos - a.total_cupons_atribuidos;
-    }
-    return b.valor_total_gerado - a.valor_total_gerado;
-  });
-
-  return rankingData;
-};
-
-const getRankingIcon = (posicao: number) => {
-  switch (posicao) {
-    case 1:
-      return '🥇';
-    case 2:
-      return '🥈';
-    case 3:
-      return '🥉';
-    default:
-      return `${posicao}º`;
-  }
-};
-
-const getUtilizacaoColor = (percentual: number) => {
-  if (percentual >= 80) return 'bg-green-100 text-green-800 border-green-200';
-  if (percentual >= 60) return 'bg-yellow-100 text-yellow-800 border-yellow-200';
-  if (percentual >= 40) return 'bg-orange-100 text-orange-800 border-orange-200';
-  return 'bg-red-100 text-red-800 border-red-200';
-};
-
-export function RankingLojistas() {
-  const { data: ranking, isLoading, error } = useQuery({
+const RankingLojistas = () => {
+  const { data: lojistas = [] } = useQuery({
     queryKey: ['ranking-lojistas'],
-    queryFn: fetchRankingLojistas,
-    refetchInterval: 60000, // Atualiza a cada 1 minuto
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from('lojistas')
+        .select('*')
+        .eq('ativo', true)
+        .order('created_at', { ascending: false });
+
+      if (error) {
+        console.error('Erro ao buscar lojistas:', error);
+        return [];
+      }
+
+      return data || [];
+    },
   });
 
-  if (error) {
-    return (
-      <Card>
-        <CardContent className="p-6">
-          <div className="text-center py-8 text-muted-foreground">
-            <Trophy className="h-12 w-12 mx-auto mb-4 opacity-50" />
-            <p>Erro ao carregar ranking de lojistas</p>
-          </div>
-        </CardContent>
-      </Card>
-    );
-  }
-
-  if (isLoading) {
-    return (
-      <Card>
-        <CardHeader>
-          <CardTitle className="flex items-center gap-2">
-            <Trophy className="h-5 w-5" />
-            Ranking de Lojistas
-          </CardTitle>
-        </CardHeader>
-        <CardContent>
-          <div className="space-y-4">
-            {[...Array(8)].map((_, i) => (
-              <div key={i} className="flex items-center space-x-4 p-4 border rounded-lg">
-                <Skeleton className="h-10 w-10 rounded-full" />
-                <div className="flex-1 space-y-2">
-                  <Skeleton className="h-4 w-[200px]" />
-                  <Skeleton className="h-3 w-[150px]" />
-                </div>
-                <div className="space-y-1">
-                  <Skeleton className="h-4 w-16" />
-                  <Skeleton className="h-3 w-12" />
-                </div>
-              </div>
-            ))}
-          </div>
-        </CardContent>
-      </Card>
-    );
-  }
-
-  if (!ranking || ranking.length === 0) {
-    return (
-      <Card>
-        <CardHeader>
-          <CardTitle className="flex items-center gap-2">
-            <Trophy className="h-5 w-5" />
-            Ranking de Lojistas
-          </CardTitle>
-        </CardHeader>
-        <CardContent>
-          <div className="text-center py-8 text-muted-foreground">
-            <Store className="h-12 w-12 mx-auto mb-4 opacity-50" />
-            <p>Nenhum lojista ativo encontrado</p>
-          </div>
-        </CardContent>
-      </Card>
-    );
-  }
+  const getPosicaoBadge = (posicao: number) => {
+    if (posicao === 1) return <Badge className="bg-yellow-500">🥇 1º</Badge>;
+    if (posicao === 2) return <Badge className="bg-gray-400">🥈 2º</Badge>;
+    if (posicao === 3) return <Badge className="bg-amber-600">🥉 3º</Badge>;
+    return <Badge variant="outline">{posicao}º</Badge>;
+  };
 
   return (
-    <Card>
-      <CardHeader>
-        <CardTitle className="flex items-center gap-2">
-          <Trophy className="h-5 w-5 text-yellow-600" />
-          Ranking de Lojistas
-        </CardTitle>
-        <p className="text-sm text-muted-foreground">
-          Classificados por cupons atribuídos a clientes
-        </p>
-      </CardHeader>
-      <CardContent>
-        <div className="space-y-3">
-          {ranking.slice(0, 10).map((lojista, index) => (
-            <div
-              key={lojista.lojista_id}
-              className={`flex items-center justify-between p-4 border rounded-lg transition-colors ${
-                index < 3 ? 'bg-gradient-to-r from-yellow-50 to-orange-50 border-yellow-200' : 'hover:bg-accent/50'
-              }`}
-            >
-              <div className="flex items-center space-x-4">
-                <div className={`flex items-center justify-center w-10 h-10 rounded-full ${
-                  index < 3 ? 'bg-yellow-100 text-yellow-800 font-bold' : 'bg-muted text-muted-foreground'
-                }`}>
-                  <span className="text-sm">
-                    {index < 3 ? getRankingIcon(index + 1) : `${index + 1}º`}
-                  </span>
-                </div>
-                <div className="flex-1">
-                  <div className="flex items-center gap-2 mb-1">
-                    <h4 className="font-medium text-sm">{lojista.nome_loja}</h4>
-                    <Badge variant="outline" className="text-xs">
-                      {lojista.cidade}
-                    </Badge>
-                    {lojista.segmento && (
-                      <Badge variant="secondary" className="text-xs">
-                        {lojista.segmento}
-                      </Badge>
-                    )}
-                    <Badge 
-                      variant="outline" 
-                      className={getUtilizacaoColor(lojista.percentual_utilizacao)}
-                    >
-                      {lojista.percentual_utilizacao.toFixed(1)}% utilização
-                    </Badge>
-                  </div>
-                  <div className="flex items-center gap-4 text-xs text-muted-foreground">
-                    <span className="flex items-center gap-1">
-                      <Package className="h-3 w-3" />
-                      {lojista.total_blocos_comprados} blocos
-                    </span>
-                    <span className="flex items-center gap-1">
-                      <Users className="h-3 w-3" />
-                      {lojista.clientes_unicos} clientes
-                    </span>
-                    {lojista.data_ultima_atribuicao && (
-                      <span className="flex items-center gap-1">
-                        <Calendar className="h-3 w-3" />
-                        Última: {format(new Date(lojista.data_ultima_atribuicao), 'dd/MM')}
-                      </span>
-                    )}
-                  </div>
-                </div>
-              </div>
-              <div className="text-right">
-                <div className="font-semibold text-primary text-lg">
-                  {lojista.total_cupons_atribuidos.toLocaleString('pt-BR')}
-                </div>
-                <div className="text-xs text-muted-foreground">cupons atribuídos</div>
-                <div className="text-xs text-green-600 font-medium mt-1">
-                  R$ {lojista.valor_total_gerado.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}
-                </div>
-                <div className="text-xs text-muted-foreground">
-                  {lojista.cupons_disponiveis} disponíveis
-                </div>
-              </div>
+    <div className="space-y-6">
+      <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+        <Card>
+          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+            <CardTitle className="text-sm font-medium">Lojistas Ativos</CardTitle>
+            <Store className="h-4 w-4 text-muted-foreground" />
+          </CardHeader>
+          <CardContent>
+            <div className="text-2xl font-bold">{lojistas.length}</div>
+          </CardContent>
+        </Card>
+
+        <Card>
+          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+            <CardTitle className="text-sm font-medium">Com Vendas</CardTitle>
+            <Trophy className="h-4 w-4 text-muted-foreground" />
+          </CardHeader>
+          <CardContent>
+            <div className="text-2xl font-bold">0</div>
+          </CardContent>
+        </Card>
+
+        <Card>
+          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+            <CardTitle className="text-sm font-medium">Cidades</CardTitle>
+            <MapPin className="h-4 w-4 text-muted-foreground" />
+          </CardHeader>
+          <CardContent>
+            <div className="text-2xl font-bold">
+              {new Set(lojistas.map(l => l.cidade).filter(Boolean)).size}
             </div>
-          ))}
-        </div>
-        
-        {ranking.length > 10 && (
-          <div className="text-center mt-4 pt-4 border-t">
-            <p className="text-sm text-muted-foreground">
-              Mostrando top 10 de {ranking.length} lojistas ativos
-            </p>
-          </div>
-        )}
-      </CardContent>
-    </Card>
+          </CardContent>
+        </Card>
+      </div>
+
+      <Card>
+        <CardHeader>
+          <CardTitle className="flex items-center gap-2">
+            <Trophy className="h-5 w-5" />
+            Ranking de Lojistas
+          </CardTitle>
+        </CardHeader>
+        <CardContent>
+          {lojistas.length === 0 ? (
+            <div className="text-center py-8 text-muted-foreground">
+              Nenhum lojista cadastrado ainda.
+            </div>
+          ) : (
+            <div className="space-y-4">
+              {lojistas.map((lojista: any, index: number) => (
+                <div 
+                  key={lojista.id} 
+                  className={`flex items-center justify-between p-4 border rounded-lg ${
+                    index < 3 ? 'bg-gradient-to-r from-yellow-50 to-orange-50 border-yellow-200' : ''
+                  }`}
+                >
+                  <div className="flex items-center gap-4">
+                    {getPosicaoBadge(index + 1)}
+                    <div className="flex-1">
+                      <div className="flex items-center gap-3">
+                        <h3 className="font-medium">{lojista.nome}</h3>
+                        {lojista.cidade && (
+                          <Badge variant="outline">
+                            <MapPin className="h-3 w-3 mr-1" />
+                            {lojista.cidade}
+                          </Badge>
+                        )}
+                      </div>
+                      <div className="text-sm text-muted-foreground mt-1">
+                        Cadastrado em: {new Date(lojista.created_at).toLocaleDateString('pt-BR')}
+                      </div>
+                    </div>
+                  </div>
+                  <div className="text-right">
+                    <div className="font-bold text-lg">R$ 0,00</div>
+                    <div className="text-sm text-muted-foreground">em vendas</div>
+                  </div>
+                </div>
+              ))}
+            </div>
+          )}
+        </CardContent>
+      </Card>
+    </div>
   );
-}
+};
+
+export default RankingLojistas;
