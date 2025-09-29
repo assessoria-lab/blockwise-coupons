@@ -40,23 +40,43 @@ const LoginLojista = () => {
   };
 
   return (
-    <div className="min-h-screen bg-cover bg-center bg-no-repeat flex items-center justify-center p-4" style={{backgroundImage: 'url(/assets/background-login.jpg)'}}>
-      <Card className="w-full max-w-md">
-        <CardHeader className="text-center">
-          <div className="flex justify-center mb-4">
-            <div className="p-3 bg-emerald-100 rounded-full">
-              <Store className="h-8 w-8 text-emerald-600" />
+    <div className="min-h-screen bg-[#034001] flex items-center justify-center p-4 relative overflow-hidden">
+      {/* Background Pattern */}
+      <div className="absolute inset-0 opacity-5">
+        <div className="absolute inset-0" style={{
+          backgroundImage: 'radial-gradient(circle at 2px 2px, white 1px, transparent 0)',
+          backgroundSize: '40px 40px'
+        }} />
+      </div>
+
+      {/* Animated Glow Effects */}
+      <div className="absolute top-20 left-20 w-96 h-96 bg-[#42A626] rounded-full blur-3xl opacity-10 animate-pulse" />
+      <div className="absolute bottom-20 right-20 w-96 h-96 bg-[#F2CB05] rounded-full blur-3xl opacity-10 animate-pulse" style={{ animationDelay: '1s' }} />
+
+      <Card className="w-full max-w-md relative z-10 border-0 shadow-2xl animate-fade-in">
+        <CardHeader className="text-center space-y-6 pb-8">
+          <div className="flex justify-center">
+            <div className="relative">
+              <div className="absolute inset-0 bg-[#42A626] blur-xl opacity-30 rounded-full" />
+              <div className="p-4 bg-gradient-to-br from-[#42A626] to-[#034001] rounded-full relative z-10">
+                <Store className="h-10 w-10 text-white" />
+              </div>
             </div>
           </div>
-          <CardTitle className="text-2xl font-bold text-emerald-800">Painel do Lojista</CardTitle>
-          <CardDescription>
-            Acesso Exclusivo para Lojistas Cadastrados
-          </CardDescription>
+          <div>
+            <CardTitle className="text-3xl font-bold text-[#034001] mb-2">
+              Painel do Lojista
+            </CardTitle>
+            <CardDescription className="text-base">
+              Gerencie seus cupons e vendas
+            </CardDescription>
+          </div>
         </CardHeader>
+        
         <CardContent>
-          <form onSubmit={handleSubmit} className="space-y-4">
+          <form onSubmit={handleSubmit} className="space-y-5">
             <div className="space-y-2">
-              <Label htmlFor="email">Email</Label>
+              <Label htmlFor="email" className="text-sm font-medium">Email</Label>
               <Input
                 id="email"
                 type="email"
@@ -65,11 +85,12 @@ const LoginLojista = () => {
                 onChange={(e) => setEmail(e.target.value)}
                 disabled={isLoading}
                 required
+                className="h-11 border-gray-300 focus:border-[#42A626] focus:ring-[#42A626]"
               />
             </div>
             
             <div className="space-y-2">
-              <Label htmlFor="password">Senha</Label>
+              <Label htmlFor="password" className="text-sm font-medium">Senha</Label>
               <div className="relative">
                 <Input
                   id="password"
@@ -79,19 +100,20 @@ const LoginLojista = () => {
                   onChange={(e) => setPassword(e.target.value)}
                   disabled={isLoading}
                   required
+                  className="h-11 pr-10 border-gray-300 focus:border-[#42A626] focus:ring-[#42A626]"
                 />
                 <Button
                   type="button"
                   variant="ghost"
                   size="sm"
-                  className="absolute right-0 top-0 h-full px-3 py-2 hover:bg-transparent"
+                  className="absolute right-0 top-0 h-full px-3 hover:bg-transparent"
                   onClick={() => setShowPassword(!showPassword)}
                   disabled={isLoading}
                 >
                   {showPassword ? (
-                    <EyeOff className="h-4 w-4" />
+                    <EyeOff className="h-4 w-4 text-gray-500" />
                   ) : (
-                    <Eye className="h-4 w-4" />
+                    <Eye className="h-4 w-4 text-gray-500" />
                   )}
                 </Button>
               </div>
@@ -99,18 +121,25 @@ const LoginLojista = () => {
             
             <Button 
               type="submit" 
-              className="w-full bg-emerald-600 hover:bg-emerald-700" 
+              className="w-full h-12 bg-[#42A626] hover:bg-[#368a1f] text-white font-medium text-base transition-all duration-200 shadow-lg hover:shadow-xl" 
               disabled={isLoading}
             >
-              {isLoading ? "Entrando..." : "Entrar"}
+              {isLoading ? (
+                <div className="flex items-center gap-2">
+                  <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
+                  Entrando...
+                </div>
+              ) : (
+                "Entrar"
+              )}
             </Button>
             
-            <div className="relative">
+            <div className="relative py-4">
               <div className="absolute inset-0 flex items-center">
-                <span className="w-full border-t" />
+                <span className="w-full border-t border-gray-200" />
               </div>
               <div className="relative flex justify-center text-xs uppercase">
-                <span className="bg-background px-2 text-muted-foreground">
+                <span className="bg-background px-3 text-muted-foreground font-medium">
                   Ou
                 </span>
               </div>
@@ -119,17 +148,17 @@ const LoginLojista = () => {
             <Button 
               type="button" 
               variant="outline"
-              className="w-full"
+              className="w-full h-12 border-2 border-[#034001] text-[#034001] hover:bg-[#034001] hover:text-white font-medium transition-all duration-200"
               onClick={() => navigate('/cadastro-lojista-publico')}
             >
               Cadastrar Nova Loja
             </Button>
             
-            <div className="text-center">
+            <div className="text-center pt-2">
               <Button 
                 type="button" 
                 variant="link"
-                className="text-sm text-muted-foreground"
+                className="text-sm text-gray-600 hover:text-[#034001]"
                 onClick={() => navigate('/login')}
               >
                 Área do Administrador
