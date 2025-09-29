@@ -20,8 +20,8 @@ type User = AdminUser | LojistaUser;
 interface AuthContextType {
   user: User | null;
   loading: boolean;
-  signInAdmin: (email: string, password: string) => Promise<void>;
-  signInLojista: (email: string, password: string) => Promise<void>;
+  signInAdmin: (email: string, password: string) => Promise<{ success: boolean }>;
+  signInLojista: (email: string, password: string) => Promise<{ success: boolean }>;
   signOut: () => void;
   isAdmin: boolean;
   isLojista: boolean;
@@ -30,8 +30,8 @@ interface AuthContextType {
 const AuthContext = createContext<AuthContextType>({
   user: null,
   loading: true,
-  signInAdmin: async () => {},
-  signInLojista: async () => {},
+  signInAdmin: async () => ({ success: false }),
+  signInLojista: async () => ({ success: false }),
   signOut: () => {},
   isAdmin: false,
   isLojista: false,
@@ -60,8 +60,8 @@ export const useCustomAuthProvider = (): AuthContextType => {
   const signInAdmin = async (email: string, password: string) => {
     setLoading(true);
     try {
-      // Simulação de login para admin
-      if (email === 'admin@sistema.com') {
+      // Simulação de login para admin - aceita qualquer email que contenha 'admin'
+      if (email.toLowerCase().includes('admin') || email === 'admin@sistema.com') {
         const adminUser: AdminUser = {
           id: '1',
           nome: 'Admin Sistema',
@@ -70,8 +70,9 @@ export const useCustomAuthProvider = (): AuthContextType => {
         };
         setUser(adminUser);
         localStorage.setItem('auth_user', JSON.stringify(adminUser));
+        return { success: true };
       } else {
-        throw new Error('Credenciais inválidas');
+        throw new Error('Email deve conter "admin" ou use admin@sistema.com');
       }
     } catch (error) {
       throw error;
@@ -83,8 +84,8 @@ export const useCustomAuthProvider = (): AuthContextType => {
   const signInLojista = async (email: string, password: string) => {
     setLoading(true);
     try {
-      // Simulação de login para lojista
-      if (email === 'loja@exemplo.com') {
+      // Simulação de login para lojista - aceita qualquer email que contenha 'loja' ou termine com '.com'
+      if (email.toLowerCase().includes('loja') || email.endsWith('.com')) {
         const lojistaUser: LojistaUser = {
           id: '1',
           nome_loja: 'Loja Exemplo',
@@ -94,8 +95,9 @@ export const useCustomAuthProvider = (): AuthContextType => {
         };
         setUser(lojistaUser);
         localStorage.setItem('auth_user', JSON.stringify(lojistaUser));
+        return { success: true };
       } else {
-        throw new Error('Credenciais inválidas');
+        throw new Error('Email deve conter "loja" ou ser um email válido (.com)');
       }
     } catch (error) {
       throw error;

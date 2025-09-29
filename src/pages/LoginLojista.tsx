@@ -72,8 +72,8 @@ const LoginLojista = () => {
       });
     } catch (error: any) {
       toast({
-        title: "Erro",
-        description: "Ocorreu um erro inesperado. Tente novamente.",
+        title: "Erro no login",
+        description: error.message || "Credenciais inválidas",
         variant: "destructive",
       });
     } finally {
@@ -92,7 +92,7 @@ const LoginLojista = () => {
           </div>
           <CardTitle className="text-2xl font-bold text-emerald-800">Painel do Lojista</CardTitle>
           <CardDescription>
-            Faça login para acessar seu painel
+            Use qualquer email com "loja" ou email válido (.com) - qualquer senha
           </CardDescription>
         </CardHeader>
         <CardContent>

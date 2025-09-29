@@ -63,8 +63,8 @@ const Login = () => {
       });
     } catch (error: any) {
       toast({
-        title: "Erro",
-        description: "Ocorreu um erro inesperado. Tente novamente.",
+        title: "Erro no login",
+        description: error.message || "Credenciais inválidas",
         variant: "destructive",
       });
     } finally {
@@ -85,7 +85,7 @@ const Login = () => {
           </div>
           <CardTitle className="text-2xl font-bold">Show de Prêmios</CardTitle>
           <CardDescription>
-            Painel Administrativo - Faça login para acessar
+            Painel Administrativo - Use admin@sistema.com ou qualquer email com "admin"
           </CardDescription>
         </CardHeader>
         <CardContent>
