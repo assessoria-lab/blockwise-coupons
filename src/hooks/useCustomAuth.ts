@@ -94,21 +94,30 @@ export const useCustomAuthProvider = (): AuthContextType => {
   const signInLojista = async (email: string, password: string) => {
     setLoading(true);
     try {
-      // Simulação de login para lojista - aceita qualquer email que contenha 'loja' ou termine com '.com'
-      if (email.toLowerCase().includes('loja') || email.endsWith('.com')) {
-        const lojistaUser: LojistaUser = {
-          id: '1',
-          nome_loja: 'Loja Exemplo',
-          nome_responsavel: 'Responsável Exemplo',
-          email: email,
-          tipo: 'lojista'
-        };
-        setUser(lojistaUser);
-        localStorage.setItem('auth_user', JSON.stringify(lojistaUser));
-        return { success: true };
-      } else {
-        throw new Error('Email deve conter "loja" ou ser um email válido (.com)');
+      // Usar a função específica do banco para validar login de lojista
+      const { data, error } = await supabase.rpc('validar_login_lojista_completo', {
+        p_email: email,
+        p_senha: password
+      });
+
+      if (error) throw error;
+
+      const result = data as any;
+      if (!result.success) {
+        throw new Error(result.message);
       }
+
+      // Se o login foi bem-sucedido, definir o usuário
+      const lojistaUser: LojistaUser = {
+        id: result.user.id,
+        nome_loja: result.user.nome_loja,
+        nome_responsavel: result.user.nome_responsavel,
+        email: result.user.email,
+        tipo: 'lojista'
+      };
+      setUser(lojistaUser);
+      localStorage.setItem('auth_user', JSON.stringify(lojistaUser));
+      return { success: true };
     } catch (error) {
       throw error;
     } finally {

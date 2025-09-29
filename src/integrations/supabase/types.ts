@@ -362,6 +362,7 @@ export type Database = {
       lojistas: {
         Row: {
           ativo: boolean | null
+          bloqueado_ate: string | null
           cidade: string | null
           cnpj: string | null
           created_at: string | null
@@ -372,12 +373,16 @@ export type Database = {
           nome: string
           nome_loja: string | null
           segmento: string | null
+          senha_hash: string | null
           shopping: string | null
           telefone: string | null
+          tentativas_login_falhadas: number | null
+          ultimo_login: string | null
           updated_at: string | null
         }
         Insert: {
           ativo?: boolean | null
+          bloqueado_ate?: string | null
           cidade?: string | null
           cnpj?: string | null
           created_at?: string | null
@@ -388,12 +393,16 @@ export type Database = {
           nome: string
           nome_loja?: string | null
           segmento?: string | null
+          senha_hash?: string | null
           shopping?: string | null
           telefone?: string | null
+          tentativas_login_falhadas?: number | null
+          ultimo_login?: string | null
           updated_at?: string | null
         }
         Update: {
           ativo?: boolean | null
+          bloqueado_ate?: string | null
           cidade?: string | null
           cnpj?: string | null
           created_at?: string | null
@@ -404,8 +413,11 @@ export type Database = {
           nome?: string
           nome_loja?: string | null
           segmento?: string | null
+          senha_hash?: string | null
           shopping?: string | null
           telefone?: string | null
+          tentativas_login_falhadas?: number | null
+          ultimo_login?: string | null
           updated_at?: string | null
         }
         Relationships: []
@@ -804,6 +816,10 @@ export type Database = {
         Returns: Json
       }
       validar_login_lojista: {
+        Args: { p_email: string; p_senha: string }
+        Returns: Json
+      }
+      validar_login_lojista_completo: {
         Args: { p_email: string; p_senha: string }
         Returns: Json
       }
