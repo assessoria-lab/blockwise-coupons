@@ -359,6 +359,59 @@ export type Database = {
         }
         Relationships: []
       }
+      lojas: {
+        Row: {
+          ativo: boolean | null
+          cidade: string | null
+          cnpj: string | null
+          created_at: string | null
+          endereco: string | null
+          estado: string | null
+          id: string
+          nome_loja: string
+          segmento: string | null
+          shopping: string | null
+          updated_at: string | null
+          usuario_lojista_id: string
+        }
+        Insert: {
+          ativo?: boolean | null
+          cidade?: string | null
+          cnpj?: string | null
+          created_at?: string | null
+          endereco?: string | null
+          estado?: string | null
+          id?: string
+          nome_loja: string
+          segmento?: string | null
+          shopping?: string | null
+          updated_at?: string | null
+          usuario_lojista_id: string
+        }
+        Update: {
+          ativo?: boolean | null
+          cidade?: string | null
+          cnpj?: string | null
+          created_at?: string | null
+          endereco?: string | null
+          estado?: string | null
+          id?: string
+          nome_loja?: string
+          segmento?: string | null
+          shopping?: string | null
+          updated_at?: string | null
+          usuario_lojista_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "lojas_usuario_lojista_id_fkey"
+            columns: ["usuario_lojista_id"]
+            isOneToOne: false
+            referencedRelation: "usuarios_lojistas"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       lojistas: {
         Row: {
           ativo: boolean | null
@@ -636,6 +689,48 @@ export type Database = {
           },
         ]
       }
+      usuarios_lojistas: {
+        Row: {
+          ativo: boolean | null
+          bloqueado_ate: string | null
+          created_at: string | null
+          email: string
+          id: string
+          nome: string
+          senha_hash: string | null
+          telefone: string | null
+          tentativas_login_falhadas: number | null
+          ultimo_login: string | null
+          updated_at: string | null
+        }
+        Insert: {
+          ativo?: boolean | null
+          bloqueado_ate?: string | null
+          created_at?: string | null
+          email: string
+          id?: string
+          nome: string
+          senha_hash?: string | null
+          telefone?: string | null
+          tentativas_login_falhadas?: number | null
+          ultimo_login?: string | null
+          updated_at?: string | null
+        }
+        Update: {
+          ativo?: boolean | null
+          bloqueado_ate?: string | null
+          created_at?: string | null
+          email?: string
+          id?: string
+          nome?: string
+          senha_hash?: string | null
+          telefone?: string | null
+          tentativas_login_falhadas?: number | null
+          ultimo_login?: string | null
+          updated_at?: string | null
+        }
+        Relationships: []
+      }
       vendas_blocos: {
         Row: {
           bloco_id: string
@@ -736,6 +831,10 @@ export type Database = {
       }
       buscar_detalhes_bloco: {
         Args: { p_numero_bloco: string }
+        Returns: Json
+      }
+      buscar_lojas_usuario: {
+        Args: { p_usuario_id: string }
         Returns: Json
       }
       consultar_logs_auditoria: {
