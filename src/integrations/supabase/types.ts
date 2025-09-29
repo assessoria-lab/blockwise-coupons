@@ -692,6 +692,21 @@ export type Database = {
         Args: { p_usuario_id: string }
         Returns: Json
       }
+      buscar_lojas_usuario_auth: {
+        Args: Record<PropertyKey, never>
+        Returns: {
+          ativo: boolean
+          cidade: string
+          cnpj: string
+          created_at: string
+          endereco: string
+          id: string
+          nome_loja: string
+          segmento: string
+          shopping: string
+          updated_at: string
+        }[]
+      }
       consultar_logs_auditoria: {
         Args: {
           p_busca?: string
