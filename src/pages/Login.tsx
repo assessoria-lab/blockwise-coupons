@@ -56,21 +56,12 @@ const Login = () => {
     setIsLoading(true);
     
     try {
-      const { error } = await signInAdmin(email, password);
-      
-      if (error) {
-        toast({
-          title: "Erro no login",
-          description: error,
-          variant: "destructive",
-        });
-      } else {
-        toast({
-          title: "Login realizado",
-          description: "Bem-vindo ao Show de Prêmios!",
-        });
-      }
-    } catch (error) {
+      await signInAdmin(email, password);
+      toast({
+        title: "Login realizado",
+        description: "Bem-vindo ao Show de Prêmios!",
+      });
+    } catch (error: any) {
       toast({
         title: "Erro",
         description: "Ocorreu um erro inesperado. Tente novamente.",

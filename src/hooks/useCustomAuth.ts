@@ -10,6 +10,7 @@ interface AdminUser {
 interface LojistaUser {
   id: string;
   nome_loja: string;
+  nome_responsavel?: string;
   email: string;
   tipo: 'lojista';
 }
@@ -87,6 +88,7 @@ export const useCustomAuthProvider = (): AuthContextType => {
         const lojistaUser: LojistaUser = {
           id: '1',
           nome_loja: 'Loja Exemplo',
+          nome_responsavel: 'Responsável Exemplo',
           email: email,
           tipo: 'lojista'
         };

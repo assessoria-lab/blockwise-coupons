@@ -1,8 +1,8 @@
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { LojistasTable } from '@/components/lojistas/LojistasTable';
-import { VendasBlocosStats } from '@/components/admin/VendasBlocosStats';
-import { LojistasStats } from '@/components/admin/LojistasStats';
-import { HistoricoVendasRecentes } from '@/components/admin/HistoricoVendasRecentes';
+import VendasBlocosStats from '@/components/admin/VendasBlocosStats';
+import LojistasStats from '@/components/admin/LojistasStats';
+import HistoricoVendasRecentes from '@/components/admin/HistoricoVendasRecentes';
 import { useRealTimeSync } from '@/hooks/useRealTimeSync';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';

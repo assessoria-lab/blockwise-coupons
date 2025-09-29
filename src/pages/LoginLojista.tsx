@@ -65,21 +65,12 @@ const LoginLojista = () => {
     setIsLoading(true);
     
     try {
-      const { error } = await signInLojista(email, password);
-      
-      if (error) {
-        toast({
-          title: "Erro no login",
-          description: error,
-          variant: "destructive",
-        });
-      } else {
-        toast({
-          title: "Login realizado",
-          description: "Bem-vindo ao painel do lojista!",
-        });
-      }
-    } catch (error) {
+      await signInLojista(email, password);
+      toast({
+        title: "Login realizado",
+        description: "Bem-vindo ao painel do lojista!",
+      });
+    } catch (error: any) {
       toast({
         title: "Erro",
         description: "Ocorreu um erro inesperado. Tente novamente.",

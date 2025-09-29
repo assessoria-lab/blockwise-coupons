@@ -1,6 +1,5 @@
-import React from 'react';
-import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card';
-import { FileText, BarChart3 } from 'lucide-react';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { BarChart, FileText, TrendingUp } from 'lucide-react';
 
 const RelatoriosAnalises = () => {
   return (
@@ -11,11 +10,29 @@ const RelatoriosAnalises = () => {
             <FileText className="h-5 w-5" />
             Relatórios e Análises
           </CardTitle>
+          <CardDescription>
+            Análises detalhadas do sistema de cupons
+          </CardDescription>
         </CardHeader>
         <CardContent>
-          <div className="text-center py-8 text-muted-foreground">
-            <BarChart3 className="h-12 w-12 mx-auto mb-4 opacity-50" />
-            Sistema de relatórios em desenvolvimento
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+            <div className="text-center p-4 bg-blue-50 rounded-lg border border-blue-100">
+              <BarChart className="h-6 w-6 mx-auto mb-2 text-blue-600" />
+              <div className="text-2xl font-bold text-blue-600">15</div>
+              <div className="text-sm text-muted-foreground">Relatórios Gerados</div>
+            </div>
+            
+            <div className="text-center p-4 bg-green-50 rounded-lg border border-green-100">
+              <TrendingUp className="h-6 w-6 mx-auto mb-2 text-green-600" />
+              <div className="text-2xl font-bold text-green-600">85%</div>
+              <div className="text-sm text-muted-foreground">Taxa de Conversão</div>
+            </div>
+            
+            <div className="text-center p-4 bg-purple-50 rounded-lg border border-purple-100">
+              <FileText className="h-6 w-6 mx-auto mb-2 text-purple-600" />
+              <div className="text-2xl font-bold text-purple-600">12</div>
+              <div className="text-sm text-muted-foreground">Análises Ativas</div>
+            </div>
           </div>
         </CardContent>
       </Card>

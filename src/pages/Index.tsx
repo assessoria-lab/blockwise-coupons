@@ -3,7 +3,7 @@ import AdminLayout from '@/components/admin/AdminLayout';
 import DashboardBlocos from '@/components/admin/DashboardBlocos';
 import ConfiguracoesSistema from '@/components/admin/ConfiguracoesSistema';
 import GestaoLojistas from './GestaoLojistas';
-import { RelatoriosAnalises } from '@/components/admin/RelatoriosAnalises';
+import RelatoriosAnalises from '@/components/admin/RelatoriosAnalises';
 import GestaoClientes from '@/components/admin/GestaoClientes';
 import GestaoSorteios from '@/components/admin/GestaoSorteios';
 import DashboardMonitoramento from '@/components/admin/DashboardMonitoramento';

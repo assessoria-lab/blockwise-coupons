@@ -8,8 +8,8 @@ interface Profile {
   nome: string;
   email: string;
   telefone?: string;
-  tipo_usuario: 'admin' | 'lojista' | 'user';
-  ativo: boolean;
+  tipo_usuario?: 'admin' | 'lojista' | 'user';
+  ativo?: boolean;
   created_at: string;
   updated_at: string;
 }
@@ -54,8 +54,8 @@ export const useAuthProvider = (): AuthContextType => {
       // Ensure the profile has the required fields
       return {
         ...data,
-        tipo_usuario: data.tipo_usuario || 'user',
-        ativo: data.ativo ?? true
+        tipo_usuario: (data as any).tipo_usuario || 'user',
+        ativo: (data as any).ativo ?? true
       } as Profile;
     } catch (error) {
       console.error('Error fetching profile:', error);
