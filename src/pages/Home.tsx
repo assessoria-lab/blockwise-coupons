@@ -51,7 +51,7 @@ const Home = () => {
                     admin@sistema.com
                   </code>
                   <p className="text-xs text-gray-500">
-                    Ou qualquer email que contenha "admin"
+                    Ou: superadmin@sistema.com
                   </p>
                   <p className="text-xs text-gray-500 mt-2">
                     Senha: qualquer uma

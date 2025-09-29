@@ -85,7 +85,7 @@ const Login = () => {
           </div>
           <CardTitle className="text-2xl font-bold">Show de Prêmios</CardTitle>
           <CardDescription>
-            Painel Administrativo - Use admin@sistema.com ou qualquer email com "admin"
+            Painel Administrativo - Use admin@sistema.com ou superadmin@sistema.com
           </CardDescription>
         </CardHeader>
         <CardContent>
