@@ -148,25 +148,37 @@ export default function CadastroLojista() {
       try {
         // 1. Criar usuário lojista na nova estrutura
         const { senha, confirmar_senha, ...lojistaData } = data;
-        const { data: novoUsuario, error: usuarioError } = await supabase
+        
+        // 1. Criar usuário lojista (sem retornar dados para evitar problemas de permissão)
+        const { error: usuarioError } = await supabase
           .from('usuarios_lojistas')
-          .insert([{
+          .insert({
             nome: lojistaData.responsavel_nome || lojistaData.nome_loja,
             email: lojistaData.email!,
             telefone: lojistaData.telefone
-          }])
-          .select()
-          .single();
+          });
 
         if (usuarioError) {
           console.error('Erro ao criar usuário lojista:', usuarioError);
           throw new Error(`Erro ao criar usuário: ${usuarioError.message}`);
         }
 
-        // 2. Criar loja vinculada ao usuário
-        const { data: novaLoja, error: lojaError } = await supabase
+        // 2. Buscar o usuário criado pelo email
+        const { data: novoUsuario, error: buscaUsuarioError } = await supabase
+          .from('usuarios_lojistas')
+          .select('id')
+          .eq('email', lojistaData.email!)
+          .single();
+
+        if (buscaUsuarioError || !novoUsuario) {
+          console.error('Erro ao buscar usuário criado:', buscaUsuarioError);
+          throw new Error('Erro ao localizar usuário criado');
+        }
+
+        // 3. Criar loja vinculada ao usuário
+        const { error: lojaError } = await supabase
           .from('lojas')
-          .insert([{
+          .insert({
             usuario_lojista_id: novoUsuario.id,
             nome_loja: lojistaData.nome_loja,
             cnpj: lojistaData.cnpj,
@@ -174,16 +186,14 @@ export default function CadastroLojista() {
             shopping: lojistaData.shopping,
             segmento: lojistaData.segmento,
             endereco: lojistaData.endereco
-          }])
-          .select()
-          .single();
+          });
 
         if (lojaError) {
           console.error('Erro ao criar loja:', lojaError);
           throw new Error(`Erro ao criar loja: ${lojaError.message}`);
         }
 
-        return { usuario: novoUsuario, loja: novaLoja };
+        return { success: true };
       } catch (error) {
         console.error('Erro completo no cadastro:', error);
         throw error;
