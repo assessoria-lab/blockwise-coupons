@@ -17,8 +17,8 @@ const GraficoRegioesLojistas = () => {
       <CardHeader>
         <CardTitle>Distribuição de Lojistas por Região</CardTitle>
       </CardHeader>
-      <CardContent>
-        <ResponsiveContainer width="100%" height={300}>
+      <CardContent className="h-[400px]">
+        <ResponsiveContainer width="100%" height="100%">
           <PieChart>
             <Pie
               data={data}
@@ -26,7 +26,7 @@ const GraficoRegioesLojistas = () => {
               cy="50%"
               labelLine={false}
               label={({ name, percent }) => `${name} (${(percent * 100).toFixed(0)}%)`}
-              outerRadius={80}
+              outerRadius={100}
               fill="#8884d8"
               dataKey="value"
             >

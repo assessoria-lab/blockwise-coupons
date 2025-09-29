@@ -115,24 +115,8 @@ const DashboardBlocos = () => {
         </Card>
       </div>
 
-      <Card>
-        <CardHeader>
-          <CardTitle>Status do Sistema</CardTitle>
-        </CardHeader>
-        <CardContent>
-          <div className="text-center py-8">
-            <p className="text-muted-foreground">
-              {metricas?.total_blocos === 0 
-                ? "Sistema pronto. Crie blocos de cupons em 'Configurações do Sistema' para começar."
-                : `Sistema funcionando com ${metricas.total_blocos} blocos e ${metricas.total_cupons} cupons.`
-              }
-            </p>
-          </div>
-        </CardContent>
-      </Card>
-
       {/* Gráficos e Rankings */}
-      <div className="grid gap-6 md:grid-cols-2">
+      <div className="grid gap-6 lg:grid-cols-2">
         <GraficoRegioesLojistas />
         <RankingCompraBlocos />
       </div>

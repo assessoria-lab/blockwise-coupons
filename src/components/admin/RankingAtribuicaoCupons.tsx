@@ -42,10 +42,10 @@ const RankingAtribuicaoCupons = () => {
             <p className="text-3xl font-bold text-primary">{totalCupons}</p>
           </div>
 
-          <ResponsiveContainer width="100%" height={250}>
+          <ResponsiveContainer width="100%" height={200}>
             <BarChart data={data.slice(0, 5)} layout="horizontal">
               <CartesianGrid strokeDasharray="3 3" />
-              <XAxis type="category" dataKey="nome" angle={-45} textAnchor="end" height={80} />
+              <XAxis type="category" dataKey="nome" angle={-45} textAnchor="end" height={60} fontSize={12} />
               <YAxis type="number" />
               <Tooltip 
                 content={({ active, payload }) => {
