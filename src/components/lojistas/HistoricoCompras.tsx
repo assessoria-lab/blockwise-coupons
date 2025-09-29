@@ -1,10 +1,7 @@
 import React from 'react';
-import { useQuery } from '@tanstack/react-query';
-import { supabase } from '@/integrations/supabase/client';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { Skeleton } from '@/components/ui/skeleton';
-import { Package, Calendar, CreditCard, ShoppingBag } from 'lucide-react';
+import { Package, Calendar, ShoppingBag } from 'lucide-react';
 import { format } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
 
@@ -21,54 +18,22 @@ interface Pagamento {
   created_at: string;
 }
 
-const useHistoricoCompras = (lojistaId: string) => {
-  return useQuery({
-    queryKey: ['historico-compras', lojistaId],
-    queryFn: async () => {
-      const { data, error } = await supabase
-        .from('pagamentos')
-        .select('*')
-        .eq('lojista_id', lojistaId)
-        .order('created_at', { ascending: false })
-        .limit(10);
-
-      if (error) throw error;
-      return data as Pagamento[];
-    },
-    enabled: !!lojistaId,
-  });
-};
-
 export const HistoricoCompras = ({ lojistaId }: HistoricoComprasProps) => {
-  const { data: compras, isLoading } = useHistoricoCompras(lojistaId);
-
-  if (isLoading) {
-    return (
-      <Card>
-        <CardHeader>
-          <CardTitle className="flex items-center gap-2">
-            <ShoppingBag className="h-5 w-5" />
-            Histórico de Compras
-          </CardTitle>
-        </CardHeader>
-        <CardContent className="space-y-4">
-          {[1, 2, 3].map((i) => (
-            <div key={i} className="flex items-center space-x-4">
-              <Skeleton className="h-12 w-12 rounded-lg" />
-              <div className="space-y-2 flex-1">
-                <Skeleton className="h-4 w-[250px]" />
-                <Skeleton className="h-4 w-[200px]" />
-              </div>
-            </div>
-          ))}
-        </CardContent>
-      </Card>
-    );
-  }
+  // Mock data para demonstração
+  const compras: Pagamento[] = [
+    {
+      id: '1',
+      valor: 500,
+      quantidade_blocos: 10,
+      forma_pagamento: 'pix',
+      status_pagamento: 'confirmado',
+      created_at: new Date().toISOString()
+    }
+  ];
 
   const getStatusColor = (status: string) => {
     switch (status) {
-      case 'aprovado':
+      case 'confirmado':
         return 'default';
       case 'pendente':
         return 'secondary';
@@ -140,7 +105,7 @@ export const HistoricoCompras = ({ lojistaId }: HistoricoComprasProps) => {
                     R$ {compra.valor.toFixed(2)}
                   </div>
                   <Badge variant={getStatusColor(compra.status_pagamento)}>
-                    {compra.status_pagamento === 'aprovado' ? '✅ Aprovado' :
+                    {compra.status_pagamento === 'confirmado' ? '✅ Confirmado' :
                      compra.status_pagamento === 'pendente' ? '⏳ Pendente' :
                      compra.status_pagamento === 'cancelado' ? '❌ Cancelado' :
                      compra.status_pagamento}

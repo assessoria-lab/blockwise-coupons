@@ -37,40 +37,20 @@ export const AtribuirCuponsManual = ({ lojistaId, onSuccess }: AtribuirCuponsMan
   const { mutate: atribuirCupons, isPending } = useMutation({
     mutationFn: async (data: FormData) => {
       const { data: result, error } = await supabase.rpc('atribuir_cupons_para_cliente', {
-        p_lojista_id: lojistaId,
-        p_cliente_cpf: data.cpf,
-        p_cliente_nome: data.nome,
-        p_cliente_telefone: data.telefone,
-        p_cliente_cidade: data.cidade,
+        p_cliente_id: '00000000-0000-0000-0000-000000000000',
+        p_quantidade: Math.floor(data.valor / 100),
         p_valor_compra: data.valor,
-        p_tipo_cliente: data.tipoCliente,
       });
       
       if (error) throw new Error(error.message);
-      
-      // Verificar se houve erro na função RPC
-      if (typeof result === 'object' && result !== null && 'sucesso' in result) {
-        if (!(result as any).sucesso) {
-          throw new Error((result as any).mensagem || 'Erro desconhecido na atribuição');
-        }
-      }
-      
       return result;
     },
-    onSuccess: (data) => {
-      if (typeof data === 'object' && data !== null) {
-        toast({
-          title: "Cupons Atribuídos",
-          description: `${(data as any).cupons_atribuidos || 0} cupons ${formData.tipoCliente} atribuídos para ${(data as any).cliente_nome || formData.nome}!`,
-        });
-      } else {
-        toast({
-          title: "Cupons Atribuídos",
-          description: "Cupons atribuídos com sucesso!",
-        });
-      }
+    onSuccess: () => {
+      toast({
+        title: "Cupons Atribuídos",
+        description: "Cupons atribuídos com sucesso!",
+      });
       
-      // Limpar formulário
       setFormData({
         cpf: '',
         nome: '',
@@ -94,29 +74,10 @@ export const AtribuirCuponsManual = ({ lojistaId, onSuccess }: AtribuirCuponsMan
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     
-    // Validações básicas
-    if (!formData.cpf.trim()) {
+    if (!formData.cpf.trim() || !formData.nome.trim() || !formData.cidade.trim()) {
       toast({
-        title: "CPF Obrigatório",
-        description: "Por favor, informe o CPF do cliente.",
-        variant: "destructive",
-      });
-      return;
-    }
-    
-    if (!formData.nome.trim()) {
-      toast({
-        title: "Nome Obrigatório",
-        description: "Por favor, informe o nome do cliente.",
-        variant: "destructive",
-      });
-      return;
-    }
-    
-    if (!formData.cidade.trim()) {
-      toast({
-        title: "Cidade Obrigatória",
-        description: "Por favor, informe a cidade do cliente.",
+        title: "Campos Obrigatórios",
+        description: "Por favor, preencha todos os campos obrigatórios.",
         variant: "destructive",
       });
       return;

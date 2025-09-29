@@ -1,5 +1,4 @@
 import { useMemo, useState, useEffect } from 'react';
-import { useQuery } from '@tanstack/react-query';
 import {
   flexRender,
   getCoreRowModel,
@@ -9,12 +8,11 @@ import {
   SortingState,
   ColumnFiltersState,
 } from '@tanstack/react-table';
-import { supabase } from '@/integrations/supabase/client';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Badge } from '@/components/ui/badge';
-import { Search, Plus, Eye, DollarSign, Edit } from 'lucide-react';
+import { Search, Plus, Edit, DollarSign } from 'lucide-react';
 import { VendaBlocosModal } from './VendaBlocosModal';
 import { LojistaModal } from './LojistaModal';
 
@@ -34,72 +32,34 @@ interface Lojista {
   endereco?: string;
 }
 
-const fetchLojistas = async (filters: { search?: string; status?: string }) => {
-  let query = supabase
-    .from('lojistas')
-    .select(`
-      id, nome_loja, cnpj, shopping, segmento, status, cupons_nao_atribuidos,
-      telefone, email, responsavel_nome, cidade, endereco, created_at
-    `);
-
-  if (filters.search && filters.search.length >= 2) {
-    query = query.or(`nome_loja.ilike.%${filters.search}%,cnpj.ilike.%${filters.search}%,shopping.ilike.%${filters.search}%`);
-  }
-
-  if (filters.status && filters.status !== 'todos') {
-    query = query.eq('status', filters.status);
-  }
-
-  const { data, error } = await query.order('created_at', { ascending: false });
-  if (error) throw new Error(error.message);
-  
-  // Buscar quantidade de blocos comprados para cada lojista
-  const lojistasWithBlocos = await Promise.all(
-    (data || []).map(async (lojista) => {
-      const { data: blocos, error: blocosError } = await supabase
-        .from('blocos')
-        .select('id')
-        .eq('lojista_id', lojista.id);
-      
-      return {
-        ...lojista,
-        blocos_comprados: blocosError ? 0 : (blocos?.length || 0)
-      };
-    })
-  );
-
-  return lojistasWithBlocos;
-};
-
 export const LojistasTable = () => {
   const [sorting, setSorting] = useState<SortingState>([]);
   const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>([]);
   const [searchInput, setSearchInput] = useState('');
-  const [debouncedSearch, setDebouncedSearch] = useState('');
   const [statusFilter, setStatusFilter] = useState('todos');
   const [selectedLojista, setSelectedLojista] = useState<Lojista | null>(null);
   const [showVendaModal, setShowVendaModal] = useState(false);
   const [showLojistaModal, setShowLojistaModal] = useState(false);
   const [editingLojista, setEditingLojista] = useState<Lojista | null>(null);
 
-  // Debounce search input
-  useEffect(() => {
-    const timer = setTimeout(() => {
-      setDebouncedSearch(searchInput);
-    }, 300);
-
-    return () => clearTimeout(timer);
-  }, [searchInput]);
-
-  const filters = useMemo(() => ({
-    search: debouncedSearch,
-    status: statusFilter
-  }), [debouncedSearch, statusFilter]);
-
-  const { data: lojistas = [], isLoading, refetch } = useQuery({
-    queryKey: ['lojistas', filters],
-    queryFn: () => fetchLojistas(filters),
-  });
+  // Mock data
+  const lojistas: Lojista[] = [
+    {
+      id: '1',
+      nome_loja: 'Loja Exemplo',
+      cnpj: '12345678000190',
+      shopping: 'Shopping Center',
+      segmento: 'Vestuário',
+      status: 'ativo',
+      cupons_nao_atribuidos: 150,
+      blocos_comprados: 5,
+      telefone: '(11) 99999-9999',
+      email: 'loja@exemplo.com',
+      responsavel_nome: 'João Silva',
+      cidade: 'São Paulo',
+      endereco: 'Rua Exemplo, 123'
+    }
+  ];
 
   const columns = useMemo(() => [
     {
@@ -219,14 +179,6 @@ export const LojistasTable = () => {
     },
   });
 
-  if (isLoading) {
-    return (
-      <div className="flex items-center justify-center p-8">
-        <div className="text-muted-foreground">Carregando lojistas...</div>
-      </div>
-    );
-  }
-
   return (
     <div className="space-y-4">
       <div className="flex items-center justify-between">
@@ -311,7 +263,7 @@ export const LojistasTable = () => {
             setSelectedLojista(null);
           }}
           onSuccess={() => {
-            refetch();
+            // Refresh data
           }}
         />
       )}
@@ -324,7 +276,7 @@ export const LojistasTable = () => {
           setEditingLojista(null);
         }}
         onSuccess={() => {
-          refetch();
+          // Refresh data
         }}
       />
     </div>

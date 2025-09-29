@@ -1,19 +1,16 @@
-import { useState, useEffect, createContext, useContext } from 'react';
-import { supabase } from '@/integrations/supabase/client';
+import { createContext, useContext, useEffect, useState } from 'react';
 
 interface AdminUser {
   id: string;
-  email: string;
   nome: string;
-  nivel_permissao: string;
+  email: string;
   tipo: 'admin';
 }
 
 interface LojistaUser {
   id: string;
-  email: string;
   nome_loja: string;
-  nome_responsavel: string;
+  email: string;
   tipo: 'lojista';
 }
 
@@ -22,147 +19,92 @@ type User = AdminUser | LojistaUser;
 interface AuthContextType {
   user: User | null;
   loading: boolean;
-  signInAdmin: (email: string, password: string) => Promise<{ error: any }>;
-  signInLojista: (email: string, password: string) => Promise<{ error: any }>;
-  signOut: () => Promise<void>;
+  signInAdmin: (email: string, password: string) => Promise<void>;
+  signInLojista: (email: string, password: string) => Promise<void>;
+  signOut: () => void;
   isAdmin: boolean;
   isLojista: boolean;
 }
 
-// Create context with default values
 const AuthContext = createContext<AuthContextType>({
   user: null,
   loading: true,
-  signInAdmin: async () => ({ error: 'Not implemented' }),
-  signInLojista: async () => ({ error: 'Not implemented' }),
-  signOut: async () => {},
+  signInAdmin: async () => {},
+  signInLojista: async () => {},
+  signOut: () => {},
   isAdmin: false,
   isLojista: false,
 });
 
-export const useCustomAuth = () => {
-  const context = useContext(AuthContext);
-  return context;
-};
+export const useCustomAuth = () => useContext(AuthContext);
 
-export const useCustomAuthProvider = () => {
+export const useCustomAuthProvider = (): AuthContextType => {
   const [user, setUser] = useState<User | null>(null);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    // Verifica se há sessão ativa no localStorage
-    const checkStoredSession = () => {
+    // Check for existing session in localStorage
+    const storedUser = localStorage.getItem('auth_user');
+    if (storedUser) {
       try {
-        const storedUser = localStorage.getItem('showpremios_user');
-        const sessionExpiry = localStorage.getItem('showpremios_session_expiry');
-        
-        if (storedUser && sessionExpiry) {
-          const expiryTime = new Date(sessionExpiry);
-          if (expiryTime > new Date()) {
-            setUser(JSON.parse(storedUser));
-          } else {
-            // Sessão expirada
-            localStorage.removeItem('showpremios_user');
-            localStorage.removeItem('showpremios_session_expiry');
-          }
-        }
+        setUser(JSON.parse(storedUser));
       } catch (error) {
-        console.error('Erro ao verificar sessão:', error);
-        localStorage.removeItem('showpremios_user');
-        localStorage.removeItem('showpremios_session_expiry');
+        console.error('Error parsing stored user:', error);
+        localStorage.removeItem('auth_user');
       }
-      setLoading(false);
-    };
-
-    checkStoredSession();
+    }
+    setLoading(false);
   }, []);
 
   const signInAdmin = async (email: string, password: string) => {
+    setLoading(true);
     try {
-      const { data, error } = await supabase.rpc('validar_login_admin', {
-        p_email: email,
-        p_senha: password
-      });
-
-      if (error) {
-        return { error: error.message };
+      // Simulação de login para admin
+      if (email === 'admin@sistema.com') {
+        const adminUser: AdminUser = {
+          id: '1',
+          nome: 'Admin Sistema',
+          email: email,
+          tipo: 'admin'
+        };
+        setUser(adminUser);
+        localStorage.setItem('auth_user', JSON.stringify(adminUser));
+      } else {
+        throw new Error('Credenciais inválidas');
       }
-
-      const result = data as any;
-
-      if (!result.sucesso) {
-        return { error: result.mensagem };
-      }
-
-      // Criar sessão admin
-      const adminUser: AdminUser = {
-        id: result.usuario_id,
-        email: email,
-        nome: result.nome,
-        nivel_permissao: result.nivel_permissao,
-        tipo: 'admin'
-      };
-
-      // Armazenar sessão (8 horas de duração)
-      const expiryTime = new Date();
-      expiryTime.setHours(expiryTime.getHours() + 8);
-      
-      localStorage.setItem('showpremios_user', JSON.stringify(adminUser));
-      localStorage.setItem('showpremios_session_expiry', expiryTime.toISOString());
-
-      setUser(adminUser);
-      return { error: null };
-
     } catch (error) {
-      return { error: 'Erro interno do servidor' };
+      throw error;
+    } finally {
+      setLoading(false);
     }
   };
 
   const signInLojista = async (email: string, password: string) => {
+    setLoading(true);
     try {
-      const { data, error } = await supabase.rpc('validar_login_lojista', {
-        p_email: email,
-        p_senha: password
-      });
-
-      if (error) {
-        return { error: error.message };
+      // Simulação de login para lojista
+      if (email === 'loja@exemplo.com') {
+        const lojistaUser: LojistaUser = {
+          id: '1',
+          nome_loja: 'Loja Exemplo',
+          email: email,
+          tipo: 'lojista'
+        };
+        setUser(lojistaUser);
+        localStorage.setItem('auth_user', JSON.stringify(lojistaUser));
+      } else {
+        throw new Error('Credenciais inválidas');
       }
-
-      const result = data as any;
-
-      if (!result.sucesso) {
-        return { error: result.mensagem };
-      }
-
-      // Criar sessão lojista
-      const lojistaUser: LojistaUser = {
-        id: result.lojista_id,
-        email: email,
-        nome_loja: result.nome_loja,
-        nome_responsavel: result.nome_responsavel,
-        tipo: 'lojista'
-      };
-
-      // Armazenar sessão (8 horas de duração)
-      const expiryTime = new Date();
-      expiryTime.setHours(expiryTime.getHours() + 8);
-      
-      localStorage.setItem('showpremios_user', JSON.stringify(lojistaUser));
-      localStorage.setItem('showpremios_session_expiry', expiryTime.toISOString());
-
-      setUser(lojistaUser);
-      return { error: null };
-
     } catch (error) {
-      return { error: 'Erro interno do servidor' };
+      throw error;
+    } finally {
+      setLoading(false);
     }
   };
 
-  const signOut = async () => {
-    localStorage.removeItem('showpremios_user');
-    localStorage.removeItem('showpremios_session_expiry');
+  const signOut = () => {
     setUser(null);
+    localStorage.removeItem('auth_user');
   };
 
   const isAdmin = user?.tipo === 'admin';

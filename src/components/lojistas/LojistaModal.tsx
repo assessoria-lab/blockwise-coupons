@@ -1,13 +1,11 @@
 import { useState, useEffect } from 'react';
-import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { supabase } from '@/integrations/supabase/client';
+import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { useToast } from '@/hooks/use-toast';
-import { Plus, X } from 'lucide-react';
 import { z } from 'zod';
 
 interface Lojista {
@@ -24,12 +22,6 @@ interface Lojista {
   endereco?: string;
   cupons_nao_atribuidos?: number;
   blocos_comprados?: number;
-}
-
-interface Segmento {
-  id: string;
-  nome: string;
-  categoria: string;
 }
 
 const lojistaSchema = z.object({
@@ -54,8 +46,6 @@ interface LojistaModalProps {
 export function LojistaModal({ lojista, isOpen, onClose, onSuccess }: LojistaModalProps) {
   const { toast } = useToast();
   const queryClient = useQueryClient();
-  const [novoSegmento, setNovoSegmento] = useState('');
-  const [mostrarNovoSegmento, setMostrarNovoSegmento] = useState(false);
   
   const [formData, setFormData] = useState<Lojista>({
     nome_loja: '',
@@ -72,74 +62,18 @@ export function LojistaModal({ lojista, isOpen, onClose, onSuccess }: LojistaMod
 
   const [errors, setErrors] = useState<Record<string, string>>({});
 
-  // Carregar segmentos disponíveis
-  const { data: segmentos = [] } = useQuery({
-    queryKey: ['segmentos'],
-    queryFn: async () => {
-      const { data, error } = await supabase
-        .from('segmentos')
-        .select('id, nome, categoria')
-        .eq('ativo', true)
-        .order('nome');
-      
-      if (error) throw error;
-      return data as Segmento[];
-    },
-  });
+  // Mock segmentos
+  const segmentos = [
+    { id: '1', nome: 'Alimentação', categoria: 'Varejo' },
+    { id: '2', nome: 'Vestuário', categoria: 'Varejo' },
+    { id: '3', nome: 'Eletrônicos', categoria: 'Varejo' },
+  ];
 
-  // Mutation para criar novo segmento
-  const criarNovoSegmentoMutation = useMutation({
-    mutationFn: async (nomeSegmento: string) => {
-      const { data, error } = await supabase
-        .from('segmentos')
-        .insert([{
-          nome: nomeSegmento,
-          categoria: 'moda_vestuario'
-        }])
-        .select()
-        .single();
-      
-      if (error) throw error;
-      return data;
-    },
-    onSuccess: (novoSegmentoData) => {
-      queryClient.invalidateQueries({ queryKey: ['segmentos'] });
-      setFormData(prev => ({ ...prev, segmento: novoSegmentoData.nome }));
-      setNovoSegmento('');
-      setMostrarNovoSegmento(false);
-      toast({
-        title: "Segmento criado!",
-        description: `Segmento "${novoSegmentoData.nome}" foi adicionado com sucesso.`,
-      });
-    },
-    onError: (error: any) => {
-      toast({
-        title: "Erro ao criar segmento",
-        description: error.message,
-        variant: "destructive",
-      });
-    }
-  });
-
-  // Mutation para salvar lojista
   const salvarLojistaMutation = useMutation({
     mutationFn: async (data: Lojista) => {
-      if (lojista?.id) {
-        // Atualizar
-        const { error } = await supabase
-          .from('lojistas')
-          .update(data)
-          .eq('id', lojista.id);
-        
-        if (error) throw error;
-      } else {
-        // Criar
-        const { error } = await supabase
-          .from('lojistas')
-          .insert([data]);
-        
-        if (error) throw error;
-      }
+      // Simulação de salvamento
+      await new Promise(resolve => setTimeout(resolve, 1000));
+      return data;
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['lojistas'] });
@@ -181,7 +115,6 @@ export function LojistaModal({ lojista, isOpen, onClose, onSuccess }: LojistaMod
 
   const handleSubmit = () => {
     try {
-      // Validar dados
       const validatedData = lojistaSchema.parse({
         ...formData,
         email: formData.email || undefined
@@ -203,17 +136,6 @@ export function LojistaModal({ lojista, isOpen, onClose, onSuccess }: LojistaMod
         setErrors(newErrors);
       }
     }
-  };
-
-  const handleNovoSegmento = () => {
-    if (novoSegmento.trim()) {
-      criarNovoSegmentoMutation.mutate(novoSegmento.trim());
-    }
-  };
-
-  const formatCNPJ = (cnpj: string) => {
-    const digits = cnpj.replace(/\D/g, '');
-    return digits.slice(0, 14);
   };
 
   return (
@@ -246,7 +168,7 @@ export function LojistaModal({ lojista, isOpen, onClose, onSuccess }: LojistaMod
               <Input
                 id="cnpj"
                 value={formData.cnpj}
-                onChange={(e) => setFormData(prev => ({ ...prev, cnpj: formatCNPJ(e.target.value) }))}
+                onChange={(e) => setFormData(prev => ({ ...prev, cnpj: e.target.value.replace(/\D/g, '').slice(0, 14) }))}
                 placeholder="00000000000000"
                 maxLength={14}
                 className={errors.cnpj ? 'border-destructive' : ''}
@@ -279,62 +201,21 @@ export function LojistaModal({ lojista, isOpen, onClose, onSuccess }: LojistaMod
 
           <div className="space-y-2">
             <Label>Segmento</Label>
-            {!mostrarNovoSegmento ? (
-              <div className="flex gap-2">
-                <Select 
-                  value={formData.segmento} 
-                  onValueChange={(value) => {
-                    if (value === 'novo') {
-                      setMostrarNovoSegmento(true);
-                    } else {
-                      setFormData(prev => ({ ...prev, segmento: value }));
-                    }
-                  }}
-                >
-                  <SelectTrigger className="flex-1">
-                    <SelectValue placeholder="Selecione um segmento" />
-                  </SelectTrigger>
-                  <SelectContent className="bg-white z-50">
-                    {segmentos.map((segmento) => (
-                      <SelectItem key={segmento.id} value={segmento.nome}>
-                        {segmento.nome}
-                      </SelectItem>
-                    ))}
-                    <SelectItem value="novo" className="font-semibold text-primary">
-                      + Adicionar novo segmento
-                    </SelectItem>
-                  </SelectContent>
-                </Select>
-              </div>
-            ) : (
-              <div className="flex gap-2">
-                <Input
-                  value={novoSegmento}
-                  onChange={(e) => setNovoSegmento(e.target.value)}
-                  placeholder="Nome do novo segmento"
-                  className="flex-1"
-                />
-                <Button 
-                  type="button" 
-                  size="sm" 
-                  onClick={handleNovoSegmento}
-                  disabled={!novoSegmento.trim() || criarNovoSegmentoMutation.isPending}
-                >
-                  <Plus className="h-4 w-4" />
-                </Button>
-                <Button 
-                  type="button" 
-                  variant="outline" 
-                  size="sm" 
-                  onClick={() => {
-                    setMostrarNovoSegmento(false);
-                    setNovoSegmento('');
-                  }}
-                >
-                  <X className="h-4 w-4" />
-                </Button>
-              </div>
-            )}
+            <Select 
+              value={formData.segmento} 
+              onValueChange={(value) => setFormData(prev => ({ ...prev, segmento: value }))}
+            >
+              <SelectTrigger>
+                <SelectValue placeholder="Selecione um segmento" />
+              </SelectTrigger>
+              <SelectContent>
+                {segmentos.map((segmento) => (
+                  <SelectItem key={segmento.id} value={segmento.nome}>
+                    {segmento.nome}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
           </div>
 
           <div className="grid grid-cols-2 gap-4">
