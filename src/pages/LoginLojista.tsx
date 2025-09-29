@@ -1,12 +1,10 @@
-import React, { useState, useEffect } from 'react';
-import { useAuth } from '@/hooks/useAuth';
-import { Navigate, useNavigate } from 'react-router-dom';
+import React, { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { useToast } from '@/hooks/use-toast';
-import { supabase } from '@/integrations/supabase/client';
 import { Eye, EyeOff, Store } from 'lucide-react';
 
 const LoginLojista = () => {
@@ -14,37 +12,8 @@ const LoginLojista = () => {
   const [password, setPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
-  const { user, profile, loading, signIn } = useAuth();
   const { toast } = useToast();
   const navigate = useNavigate();
-
-  // Redirect if already authenticated
-  useEffect(() => {
-    if (!loading && user && profile) {
-      if (profile.tipo_usuario === 'lojista') {
-        navigate('/lojista');
-      } else if (profile.tipo_usuario === 'admin') {
-        navigate('/admin');
-      }
-    }
-  }, [user, profile, loading, navigate]);
-
-  if (loading) {
-    return (
-      <div className="min-h-screen flex items-center justify-center">
-        <div className="animate-spin rounded-full h-32 w-32 border-b-2 border-primary"></div>
-      </div>
-    );
-  }
-
-  // Redirect based on user type
-  if (user && profile) {
-    if (profile.tipo_usuario === 'lojista') {
-      return <Navigate to="/lojista" replace />;
-    } else if (profile.tipo_usuario === 'admin') {
-      return <Navigate to="/admin" replace />;
-    }
-  }
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -60,21 +29,14 @@ const LoginLojista = () => {
 
     setIsLoading(true);
     
-    try {
-      await signIn(email, password);
+    // Simular delay de login
+    setTimeout(() => {
       toast({
         title: "Login realizado",
         description: "Bem-vindo ao painel do lojista!",
       });
-    } catch (error: any) {
-      toast({
-        title: "Erro no login",
-        description: error.message || "Credenciais inválidas",
-        variant: "destructive",
-      });
-    } finally {
-      setIsLoading(false);
-    }
+      navigate('/lojista');
+    }, 500);
   };
 
   return (

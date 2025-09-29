@@ -39,107 +39,55 @@ const App = () => (
             <Route path="/cadastro-lojista-publico" element={<CadastroLojista />} />
             <Route 
               path="/admin" 
-              element={
-                <ProtectedRoute requiredRole="admin">
-                  <Index />
-                </ProtectedRoute>
-              }
+              element={<Index />}
             />
             <Route 
               path="/lojista" 
-              element={
-                <ProtectedRoute requiredRole="lojista">
-                  <LojistaIndex />
-                </ProtectedRoute>
-              } 
+              element={<LojistaIndex />}
             />
             <Route 
               path="/cadastro-lojista" 
-              element={
-                <ProtectedRoute requiredRole="admin">
-                  <CadastroLojista />
-                </ProtectedRoute>
-              } 
+              element={<CadastroLojista />}
             />
             <Route 
               path="/registro-vendas" 
-              element={
-                <ProtectedRoute requiredRole="admin">
-                  <RegistroVendas />
-                </ProtectedRoute>
-              } 
+              element={<RegistroVendas />}
             />
             <Route 
               path="/admin/relatorios" 
-              element={
-                <ProtectedRoute requiredRole="admin">
-                  <RelatoriosAnalises />
-                </ProtectedRoute>
-              } 
+              element={<RelatoriosAnalises />}
             />
             <Route 
               path="/admin/historico" 
-              element={
-                <ProtectedRoute requiredRole="admin">
-                  <HistoricoCupons />
-                </ProtectedRoute>
-              } 
+              element={<HistoricoCupons />}
             />
             <Route 
               path="/admin/financeiro" 
-              element={
-                <ProtectedRoute requiredRole="admin">
-                  <DashboardFinanceiro />
-                </ProtectedRoute>
-              } 
+              element={<DashboardFinanceiro />}
             />
             <Route 
               path="/admin/lojistas" 
-              element={
-                <ProtectedRoute requiredRole="admin">
-                  <GestaoLojistas />
-                </ProtectedRoute>
-              } 
+              element={<GestaoLojistas />}
             />
             <Route 
               path="/admin/rastreamento" 
-              element={
-                <ProtectedRoute requiredRole="admin">
-                  <RastreamentoPorBloco />
-                </ProtectedRoute>
-              } 
+              element={<RastreamentoPorBloco />}
             />
             <Route 
               path="/admin/monitoramento" 
-              element={
-                <ProtectedRoute requiredRole="admin">
-                  <DashboardMonitoramento />
-                </ProtectedRoute>
-              } 
+              element={<DashboardMonitoramento />}
             />
             <Route 
               path="/admin/business-intelligence" 
-              element={
-                <ProtectedRoute requiredRole="admin">
-                  <BusinessIntelligence />
-                </ProtectedRoute>
-              } 
+              element={<BusinessIntelligence />}
             />
             <Route 
               path="/admin/auditoria" 
-              element={
-                <ProtectedRoute requiredRole="admin">
-                  <AuditoriaCompliance />
-                </ProtectedRoute>
-              } 
+              element={<AuditoriaCompliance />}
             />
             <Route 
               path="/admin/configuracoes" 
-              element={
-                <ProtectedRoute requiredRole="admin">
-                  <ConfiguracoesSistema />
-                </ProtectedRoute>
-              } 
+              element={<ConfiguracoesSistema />}
             />
             <Route path="/" element={<Home />} />
             {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
