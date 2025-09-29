@@ -16,16 +16,42 @@ interface DashboardMetrics {
 }
 
 const DashboardBlocos = () => {
-  const { data: metricas, isLoading, refetch } = useQuery<DashboardMetrics>({
+  const { data: metricas, isLoading, error, refetch } = useQuery<DashboardMetrics>({
     queryKey: ['dashboard-metrics'],
     queryFn: async () => {
       console.log('🔍 Buscando métricas do dashboard...');
-      const { data, error } = await supabase.rpc('get_dashboard_metrics_optimized');
       
-      console.log('📊 Resposta do Supabase:', { data, error });
-      
-      if (error) {
-        console.error('❌ Erro ao buscar métricas:', error);
+      try {
+        // Tentar com timeout
+        const timeoutPromise = new Promise((_, reject) => 
+          setTimeout(() => reject(new Error('Timeout')), 10000)
+        );
+        
+        const queryPromise = supabase.rpc('get_dashboard_metrics_optimized');
+        
+        const { data, error } = await Promise.race([queryPromise, timeoutPromise]) as any;
+        
+        console.log('📊 Resposta do Supabase:', { data, error });
+        
+        if (error) {
+          console.error('❌ Erro ao buscar métricas:', error);
+          throw error;
+        }
+
+        // O Supabase RPC retorna o objeto diretamente
+        console.log('✅ Métricas processadas:', data);
+        return (data as unknown as DashboardMetrics) || {
+          total_blocos: 0,
+          total_cupons: 0,
+          cupons_disponiveis: 0,
+          cupons_atribuidos: 0,
+          cupons_usados: 0,
+          total_lojistas: 0,
+          total_clientes: 0
+        };
+      } catch (err) {
+        console.error('❌ Erro na busca:', err);
+        // Retornar dados vazios em caso de erro
         return {
           total_blocos: 0,
           total_cupons: 0,
@@ -36,20 +62,9 @@ const DashboardBlocos = () => {
           total_clientes: 0
         };
       }
-
-      // O Supabase RPC retorna o objeto diretamente
-      console.log('✅ Métricas processadas:', data);
-      return (data as unknown as DashboardMetrics) || {
-        total_blocos: 0,
-        total_cupons: 0,
-        cupons_disponiveis: 0,
-        cupons_atribuidos: 0,
-        cupons_usados: 0,
-        total_lojistas: 0,
-        total_clientes: 0
-      };
     },
-    refetchInterval: 30000,
+    retry: 2,
+    retryDelay: 1000,
   });
 
   if (isLoading) {
@@ -58,6 +73,17 @@ const DashboardBlocos = () => {
         <div className="text-center">
           <RefreshCw className="h-8 w-8 animate-spin mx-auto mb-2" />
           <p>Carregando dashboard...</p>
+        </div>
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="flex items-center justify-center h-64">
+        <div className="text-center">
+          <p className="text-red-500 mb-4">Erro ao carregar dashboard</p>
+          <Button onClick={() => refetch()}>Tentar novamente</Button>
         </div>
       </div>
     );
