@@ -15,7 +15,7 @@ import LojistaIndex from "./pages/lojista/LojistaIndex";
 import { CustomAuthProvider } from "./components/auth/CustomAuthProvider";
 import { CustomProtectedRoute } from "./components/auth/CustomProtectedRoute";
 import { HistoricoCupons } from "./components/admin/HistoricoCupons";
-import { DashboardFinanceiro } from "./components/admin/DashboardFinanceiro";
+import DashboardFinanceiro from "./components/admin/DashboardFinanceiro";
 import { RelatoriosAnalises } from "./components/admin/RelatoriosAnalises";
 import RastreamentoPorBloco from "./components/admin/RastreamentoPorBloco";
 import DashboardMonitoramento from "./components/admin/DashboardMonitoramento";
