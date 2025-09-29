@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { useCustomAuth } from '@/hooks/useCustomAuth';
+import { useAuth } from '@/hooks/useAuth';
 import { Navigate, useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -13,16 +13,20 @@ const Login = () => {
   const [password, setPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
-  const { signInAdmin, user, loading } = useCustomAuth();
+  const { user, profile, loading, signIn } = useAuth();
   const { toast } = useToast();
   const navigate = useNavigate();
 
   // Redirect if already authenticated
   useEffect(() => {
-    if (!loading && user) {
-      // Don't redirect here, let the component handle it below
+    if (!loading && user && profile) {
+      if (profile.tipo_usuario === 'admin') {
+        navigate('/admin');
+      } else if (profile.tipo_usuario === 'lojista') {
+        navigate('/lojista');
+      }
     }
-  }, [user, loading]);
+  }, [user, profile, loading, navigate]);
 
   if (loading) {
     return (
@@ -32,11 +36,11 @@ const Login = () => {
     );
   }
 
-  // Redirect based on user type - Only admin access here
-  if (user) {
-    if (user.tipo === 'admin') {
+  // Redirect based on user type
+  if (user && profile) {
+    if (profile.tipo_usuario === 'admin') {
       return <Navigate to="/admin" replace />;
-    } else if (user.tipo === 'lojista') {
+    } else if (profile.tipo_usuario === 'lojista') {
       return <Navigate to="/lojista" replace />;
     }
   }
@@ -56,7 +60,7 @@ const Login = () => {
     setIsLoading(true);
     
     try {
-      await signInAdmin(email, password);
+      await signIn(email, password);
       toast({
         title: "Login realizado",
         description: "Bem-vindo ao Show de Prêmios!",

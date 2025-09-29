@@ -43,20 +43,50 @@ export const useAuthProvider = (): AuthContextType => {
 
   const fetchProfile = async (userId: string): Promise<Profile | null> => {
     try {
-      const { data, error } = await supabase
-        .from('profiles')
+      // First try to find in usuarios_admin
+      const { data: adminData, error: adminError } = await supabase
+        .from('usuarios_admin')
         .select('*')
         .eq('user_id', userId)
-        .single();
+        .eq('ativo', true)
+        .maybeSingle();
 
-      if (error) throw error;
-      
-      // Ensure the profile has the required fields
-      return {
-        ...data,
-        tipo_usuario: (data as any).tipo_usuario || 'user',
-        ativo: (data as any).ativo ?? true
-      } as Profile;
+      if (adminData) {
+        return {
+          id: adminData.id,
+          user_id: userId,
+          nome: adminData.nome,
+          email: adminData.email,
+          tipo_usuario: 'admin',
+          ativo: adminData.ativo,
+          created_at: adminData.created_at,
+          updated_at: adminData.updated_at,
+        } as Profile;
+      }
+
+      // If not admin, try usuarios_lojistas
+      const { data: lojistaData, error: lojistaError } = await supabase
+        .from('usuarios_lojistas')
+        .select('*')
+        .eq('id', userId)
+        .eq('ativo', true)
+        .maybeSingle();
+
+      if (lojistaData) {
+        return {
+          id: lojistaData.id,
+          user_id: userId,
+          nome: lojistaData.nome,
+          email: lojistaData.email,
+          telefone: lojistaData.telefone,
+          tipo_usuario: 'lojista',
+          ativo: lojistaData.ativo,
+          created_at: lojistaData.created_at,
+          updated_at: lojistaData.updated_at,
+        } as Profile;
+      }
+
+      return null;
     } catch (error) {
       console.error('Error fetching profile:', error);
       return null;
