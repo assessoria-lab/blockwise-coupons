@@ -8,13 +8,13 @@ const Home = () => {
 
   return (
     <div className="min-h-screen bg-[#034001] flex items-center justify-center p-4 relative overflow-hidden">
-      {/* Background Pattern */}
-      <div className="absolute inset-0 opacity-5">
-        <div className="absolute inset-0" style={{
-          backgroundImage: 'radial-gradient(circle at 2px 2px, white 1px, transparent 0)',
-          backgroundSize: '40px 40px'
-        }} />
-      </div>
+      {/* Background Image */}
+      <div 
+        className="absolute inset-0 bg-cover bg-center bg-no-repeat opacity-40"
+        style={{
+          backgroundImage: 'url(/assets/background-home.jpg)'
+        }}
+      />
 
       {/* Animated Glow Effects */}
       <div className="absolute top-20 left-20 w-96 h-96 bg-[#42A626] rounded-full blur-3xl opacity-10 animate-pulse" />
