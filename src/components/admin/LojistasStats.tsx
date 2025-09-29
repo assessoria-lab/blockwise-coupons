@@ -5,21 +5,20 @@ import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card';
 import { Store, TrendingUp, Users, MapPin } from 'lucide-react';
 
 const LojistasStats = () => {
-  const { data: lojistas = [] } = useQuery({
-    queryKey: ['lojas-stats'],
-    queryFn: async () => {
-      const { data, error } = await supabase
-        .from('lojas')
-        .select('*');
-
-      if (error) {
-        console.error('Erro ao buscar lojas:', error);
-        return [];
-      }
-
-      return data || [];
-    },
-  });
+  // Dados de demonstração
+  const lojistas = [
+    { id: '1', nome_loja: 'Bella Moda', ativo: true, cidade: 'São Paulo' },
+    { id: '2', nome_loja: 'Fashion Style', ativo: true, cidade: 'Rio de Janeiro' },
+    { id: '3', nome_loja: 'Trend Boutique', ativo: true, cidade: 'São Paulo' },
+    { id: '4', nome_loja: 'Chic Fashion', ativo: true, cidade: 'Curitiba' },
+    { id: '5', nome_loja: 'Look Moderno', ativo: true, cidade: 'Belo Horizonte' },
+    { id: '6', nome_loja: 'Glamour Store', ativo: true, cidade: 'Porto Alegre' },
+    { id: '7', nome_loja: 'Vogue Boutique', ativo: true, cidade: 'Rio de Janeiro' },
+    { id: '8', nome_loja: 'Elite Fashion', ativo: true, cidade: 'Belo Horizonte' },
+    { id: '9', nome_loja: 'Style Mania', ativo: true, cidade: 'Curitiba' },
+    { id: '10', nome_loja: 'Urban Chic', ativo: true, cidade: 'São Paulo' },
+    { id: '11', nome_loja: 'Loja Canal Abelha', ativo: true, cidade: 'Rio de Janeiro' },
+  ];
 
   const lojistasAtivos = lojistas.filter(l => l.ativo);
   const cidades = new Set(lojistas.map(l => l.cidade).filter(Boolean));

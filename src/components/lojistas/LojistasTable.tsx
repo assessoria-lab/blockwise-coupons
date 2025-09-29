@@ -58,50 +58,25 @@ export const LojistasTable = () => {
   const [showLojistaModal, setShowLojistaModal] = useState(false);
   const [editingLojista, setEditingLojista] = useState<Lojista | null>(null);
 
-  // Buscar lojas do banco de dados
-  const { data: lojasDB = [], isLoading, error, refetch } = useQuery({
-    queryKey: ['lojas', searchInput, statusFilter],
-    queryFn: async () => {
-      console.log('🔍 Buscando lojas do banco de dados...');
-      
-      try {
-        // Criar promise com timeout
-        const timeoutPromise = new Promise((_, reject) => 
-          setTimeout(() => reject(new Error('Timeout ao buscar lojas')), 10000)
-        );
-        
-        let query = supabase
-          .from('lojas')
-          .select('*')
-          .order('created_at', { ascending: false });
+  // Dados de demonstração
+  const lojasDemo: LojaDB[] = [
+    { id: '1', nome_loja: 'Bella Moda', cnpj: '10000000000001', cidade: 'São Paulo', shopping: 'Shopping Ibirapuera', segmento: 'Moda e Vestuário', ativo: true, endereco: 'Rua das Lojas, 100', user_id: 'demo', created_at: new Date().toISOString(), updated_at: new Date().toISOString() },
+    { id: '2', nome_loja: 'Fashion Style', cnpj: '10000000000002', cidade: 'Rio de Janeiro', shopping: 'Barra Shopping', segmento: 'Moda e Vestuário', ativo: true, endereco: 'Rua das Lojas, 200', user_id: 'demo', created_at: new Date().toISOString(), updated_at: new Date().toISOString() },
+    { id: '3', nome_loja: 'Trend Boutique', cnpj: '10000000000003', cidade: 'São Paulo', shopping: 'Shopping Morumbi', segmento: 'Moda e Vestuário', ativo: true, endereco: 'Rua das Lojas, 300', user_id: 'demo', created_at: new Date().toISOString(), updated_at: new Date().toISOString() },
+    { id: '4', nome_loja: 'Chic Fashion', cnpj: '10000000000004', cidade: 'Curitiba', shopping: 'Shopping JK Iguatemi', segmento: 'Moda e Vestuário', ativo: true, endereco: 'Rua das Lojas, 400', user_id: 'demo', created_at: new Date().toISOString(), updated_at: new Date().toISOString() },
+    { id: '5', nome_loja: 'Look Moderno', cnpj: '10000000000005', cidade: 'Belo Horizonte', shopping: 'Shopping Pátio Savassi', segmento: 'Moda e Vestuário', ativo: true, endereco: 'Rua das Lojas, 500', user_id: 'demo', created_at: new Date().toISOString(), updated_at: new Date().toISOString() },
+    { id: '6', nome_loja: 'Glamour Store', cnpj: '10000000000006', cidade: 'Porto Alegre', shopping: 'Shopping Iguatemi Porto Alegre', segmento: 'Moda e Vestuário', ativo: true, endereco: 'Rua das Lojas, 600', user_id: 'demo', created_at: new Date().toISOString(), updated_at: new Date().toISOString() },
+    { id: '7', nome_loja: 'Vogue Boutique', cnpj: '10000000000007', cidade: 'Rio de Janeiro', shopping: 'Shopping Morumbi', segmento: 'Moda e Vestuário', ativo: true, endereco: 'Rua das Lojas, 700', user_id: 'demo', created_at: new Date().toISOString(), updated_at: new Date().toISOString() },
+    { id: '8', nome_loja: 'Elite Fashion', cnpj: '10000000000008', cidade: 'Belo Horizonte', shopping: 'Shopping Cidade Jardim', segmento: 'Moda e Vestuário', ativo: true, endereco: 'Rua das Lojas, 800', user_id: 'demo', created_at: new Date().toISOString(), updated_at: new Date().toISOString() },
+    { id: '9', nome_loja: 'Style Mania', cnpj: '10000000000009', cidade: 'Curitiba', shopping: 'Shopping JK Iguatemi', segmento: 'Moda e Vestuário', ativo: true, endereco: 'Rua das Lojas, 900', user_id: 'demo', created_at: new Date().toISOString(), updated_at: new Date().toISOString() },
+    { id: '10', nome_loja: 'Urban Chic', cnpj: '10000000000010', cidade: 'São Paulo', shopping: 'Shopping Eldorado', segmento: 'Moda e Vestuário', ativo: true, endereco: 'Rua das Lojas, 1000', user_id: 'demo', created_at: new Date().toISOString(), updated_at: new Date().toISOString() },
+  ];
 
-        // Filtrar por status
-        if (statusFilter !== 'todos') {
-          query = query.eq('ativo', statusFilter === 'ativo');
-        }
-
-        // Buscar por nome
-        if (searchInput) {
-          query = query.ilike('nome_loja', `%${searchInput}%`);
-        }
-
-        const result = await Promise.race([query, timeoutPromise]) as any;
-
-        if (result.error) {
-          console.error('❌ Erro ao buscar lojas:', result.error);
-          throw result.error;
-        }
-
-        console.log('✅ Lojas carregadas:', result.data?.length);
-        return (result.data || []) as LojaDB[];
-      } catch (err) {
-        console.error('❌ Erro na busca de lojas:', err);
-        return [];
-      }
-    },
-    retry: 2,
-    retryDelay: 1000,
-  });
+  // Usar dados mockados
+  const lojasDB = lojasDemo;
+  const isLoading = false;
+  const error = null;
+  const refetch = () => console.log('Refetch simulado');
 
   // Converter dados do banco para o formato da interface
   const lojistas: Lojista[] = useMemo(() => {
