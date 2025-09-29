@@ -59,36 +59,48 @@ export const LojistasTable = () => {
   const [editingLojista, setEditingLojista] = useState<Lojista | null>(null);
 
   // Buscar lojas do banco de dados
-  const { data: lojasDB = [], isLoading, refetch } = useQuery({
+  const { data: lojasDB = [], isLoading, error, refetch } = useQuery({
     queryKey: ['lojas', searchInput, statusFilter],
     queryFn: async () => {
       console.log('🔍 Buscando lojas do banco de dados...');
       
-      let query = supabase
-        .from('lojas')
-        .select('*')
-        .order('created_at', { ascending: false });
+      try {
+        // Criar promise com timeout
+        const timeoutPromise = new Promise((_, reject) => 
+          setTimeout(() => reject(new Error('Timeout ao buscar lojas')), 10000)
+        );
+        
+        let query = supabase
+          .from('lojas')
+          .select('*')
+          .order('created_at', { ascending: false });
 
-      // Filtrar por status
-      if (statusFilter !== 'todos') {
-        query = query.eq('ativo', statusFilter === 'ativo');
-      }
+        // Filtrar por status
+        if (statusFilter !== 'todos') {
+          query = query.eq('ativo', statusFilter === 'ativo');
+        }
 
-      // Buscar por nome
-      if (searchInput) {
-        query = query.ilike('nome_loja', `%${searchInput}%`);
-      }
+        // Buscar por nome
+        if (searchInput) {
+          query = query.ilike('nome_loja', `%${searchInput}%`);
+        }
 
-      const { data, error } = await query;
+        const result = await Promise.race([query, timeoutPromise]) as any;
 
-      if (error) {
-        console.error('❌ Erro ao buscar lojas:', error);
+        if (result.error) {
+          console.error('❌ Erro ao buscar lojas:', result.error);
+          throw result.error;
+        }
+
+        console.log('✅ Lojas carregadas:', result.data?.length);
+        return (result.data || []) as LojaDB[];
+      } catch (err) {
+        console.error('❌ Erro na busca de lojas:', err);
         return [];
       }
-
-      console.log('✅ Lojas carregadas:', data?.length);
-      return (data || []) as LojaDB[];
     },
+    retry: 2,
+    retryDelay: 1000,
   });
 
   // Converter dados do banco para o formato da interface
@@ -262,7 +274,19 @@ export const LojistasTable = () => {
             {isLoading ? (
               <TableRow>
                 <TableCell colSpan={columns.length} className="h-24 text-center">
-                  Carregando lojas...
+                  <div className="flex flex-col items-center gap-2">
+                    <div className="animate-spin h-6 w-6 border-2 border-primary border-t-transparent rounded-full"></div>
+                    <p>Carregando lojas...</p>
+                  </div>
+                </TableCell>
+              </TableRow>
+            ) : error ? (
+              <TableRow>
+                <TableCell colSpan={columns.length} className="h-24 text-center">
+                  <div className="flex flex-col items-center gap-2">
+                    <p className="text-red-500">Erro ao carregar lojas</p>
+                    <Button onClick={() => refetch()} size="sm">Tentar novamente</Button>
+                  </div>
                 </TableCell>
               </TableRow>
             ) : table.getRowModel().rows?.length ? (
