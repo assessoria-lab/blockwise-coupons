@@ -23,7 +23,7 @@ export const useLojistas = () => {
     queryFn: async () => {
       if (!user?.id || user.tipo !== 'lojista') return null;
       
-      // Buscar lojas do usuário usando a nova função
+      // Buscar lojas do usuário logado
       const { data, error } = await supabase.rpc('buscar_lojas_usuario', {
         p_usuario_id: user.id
       });
@@ -38,8 +38,8 @@ export const useLojistas = () => {
     enabled: !!user?.id && user?.tipo === 'lojista'
   });
 
-  // Converter dados para array de lojas tipado
-  const lojas: Loja[] = Array.isArray(lojasData) ? lojasData as unknown as Loja[] : [];
+  // Converter dados para array de lojas
+  const lojas: Loja[] = Array.isArray(lojasData) ? (lojasData as unknown as Loja[]) : [];
 
   // Selecionar primeira loja automaticamente
   useEffect(() => {

@@ -110,7 +110,7 @@ export const useCustomAuthProvider = (): AuthContextType => {
       // Se o login foi bem-sucedido, definir o usuário
       const lojistaUser: LojistaUser = {
         id: result.user.id,
-        nome_loja: result.user.nome_loja,
+        nome_loja: result.user.nome_loja || '', // Será preenchido ao selecionar loja
         nome_responsavel: result.user.nome_responsavel,
         email: result.user.email,
         tipo: 'lojista'
