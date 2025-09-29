@@ -14,16 +14,618 @@ export type Database = {
   }
   public: {
     Tables: {
-      [_ in never]: never
+      blocos: {
+        Row: {
+          created_at: string | null
+          cupons_atribuidos: number | null
+          cupons_disponiveis: number
+          cupons_totais: number
+          cupons_usados: number | null
+          id: string
+          lojista_id: string | null
+          numero_bloco: string
+          status: Database["public"]["Enums"]["status_bloco"] | null
+          updated_at: string | null
+        }
+        Insert: {
+          created_at?: string | null
+          cupons_atribuidos?: number | null
+          cupons_disponiveis: number
+          cupons_totais: number
+          cupons_usados?: number | null
+          id?: string
+          lojista_id?: string | null
+          numero_bloco: string
+          status?: Database["public"]["Enums"]["status_bloco"] | null
+          updated_at?: string | null
+        }
+        Update: {
+          created_at?: string | null
+          cupons_atribuidos?: number | null
+          cupons_disponiveis?: number
+          cupons_totais?: number
+          cupons_usados?: number | null
+          id?: string
+          lojista_id?: string | null
+          numero_bloco?: string
+          status?: Database["public"]["Enums"]["status_bloco"] | null
+          updated_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "blocos_lojista_id_fkey"
+            columns: ["lojista_id"]
+            isOneToOne: false
+            referencedRelation: "lojistas"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "blocos_lojista_id_fkey"
+            columns: ["lojista_id"]
+            isOneToOne: false
+            referencedRelation: "mv_ranking_lojistas"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      clientes: {
+        Row: {
+          cidade: string | null
+          cpf: string | null
+          created_at: string | null
+          data_nascimento: string | null
+          email: string | null
+          endereco: string | null
+          estado: string | null
+          id: string
+          lojista_id: string | null
+          nome: string
+          status: Database["public"]["Enums"]["status_cliente"] | null
+          telefone: string | null
+          total_cupons_recebidos: number | null
+          total_valor_compras: number | null
+          updated_at: string | null
+        }
+        Insert: {
+          cidade?: string | null
+          cpf?: string | null
+          created_at?: string | null
+          data_nascimento?: string | null
+          email?: string | null
+          endereco?: string | null
+          estado?: string | null
+          id?: string
+          lojista_id?: string | null
+          nome: string
+          status?: Database["public"]["Enums"]["status_cliente"] | null
+          telefone?: string | null
+          total_cupons_recebidos?: number | null
+          total_valor_compras?: number | null
+          updated_at?: string | null
+        }
+        Update: {
+          cidade?: string | null
+          cpf?: string | null
+          created_at?: string | null
+          data_nascimento?: string | null
+          email?: string | null
+          endereco?: string | null
+          estado?: string | null
+          id?: string
+          lojista_id?: string | null
+          nome?: string
+          status?: Database["public"]["Enums"]["status_cliente"] | null
+          telefone?: string | null
+          total_cupons_recebidos?: number | null
+          total_valor_compras?: number | null
+          updated_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "clientes_lojista_id_fkey"
+            columns: ["lojista_id"]
+            isOneToOne: false
+            referencedRelation: "lojistas"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "clientes_lojista_id_fkey"
+            columns: ["lojista_id"]
+            isOneToOne: false
+            referencedRelation: "mv_ranking_lojistas"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      configuracoes_sistema: {
+        Row: {
+          chave: string
+          created_at: string | null
+          descricao: string | null
+          id: string
+          updated_at: string | null
+          valor: string
+        }
+        Insert: {
+          chave: string
+          created_at?: string | null
+          descricao?: string | null
+          id?: string
+          updated_at?: string | null
+          valor: string
+        }
+        Update: {
+          chave?: string
+          created_at?: string | null
+          descricao?: string | null
+          id?: string
+          updated_at?: string | null
+          valor?: string
+        }
+        Relationships: []
+      }
+      cupons: {
+        Row: {
+          bloco_id: string
+          cliente_id: string | null
+          created_at: string | null
+          data_atribuicao: string | null
+          data_uso: string | null
+          id: string
+          lojista_id: string | null
+          numero_cupom: string
+          status: Database["public"]["Enums"]["status_cupom"] | null
+          updated_at: string | null
+          valor_compra: number | null
+        }
+        Insert: {
+          bloco_id: string
+          cliente_id?: string | null
+          created_at?: string | null
+          data_atribuicao?: string | null
+          data_uso?: string | null
+          id?: string
+          lojista_id?: string | null
+          numero_cupom: string
+          status?: Database["public"]["Enums"]["status_cupom"] | null
+          updated_at?: string | null
+          valor_compra?: number | null
+        }
+        Update: {
+          bloco_id?: string
+          cliente_id?: string | null
+          created_at?: string | null
+          data_atribuicao?: string | null
+          data_uso?: string | null
+          id?: string
+          lojista_id?: string | null
+          numero_cupom?: string
+          status?: Database["public"]["Enums"]["status_cupom"] | null
+          updated_at?: string | null
+          valor_compra?: number | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "cupons_bloco_id_fkey"
+            columns: ["bloco_id"]
+            isOneToOne: false
+            referencedRelation: "blocos"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "cupons_cliente_id_fkey"
+            columns: ["cliente_id"]
+            isOneToOne: false
+            referencedRelation: "clientes"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "cupons_lojista_id_fkey"
+            columns: ["lojista_id"]
+            isOneToOne: false
+            referencedRelation: "lojistas"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "cupons_lojista_id_fkey"
+            columns: ["lojista_id"]
+            isOneToOne: false
+            referencedRelation: "mv_ranking_lojistas"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      ganhadores_sorteios: {
+        Row: {
+          created_at: string | null
+          cupom_id: string
+          data_sorteio: string | null
+          id: string
+          numero_cupom: string
+          observacoes: string | null
+          premio: string
+          valor_premio: number | null
+        }
+        Insert: {
+          created_at?: string | null
+          cupom_id: string
+          data_sorteio?: string | null
+          id?: string
+          numero_cupom: string
+          observacoes?: string | null
+          premio: string
+          valor_premio?: number | null
+        }
+        Update: {
+          created_at?: string | null
+          cupom_id?: string
+          data_sorteio?: string | null
+          id?: string
+          numero_cupom?: string
+          observacoes?: string | null
+          premio?: string
+          valor_premio?: number | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "ganhadores_sorteios_cupom_id_fkey"
+            columns: ["cupom_id"]
+            isOneToOne: false
+            referencedRelation: "cupons"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      logs_sistema: {
+        Row: {
+          contexto: Json | null
+          created_at: string | null
+          descricao: string | null
+          evento: string
+          id: string
+          ip_address: unknown | null
+          nivel: string | null
+          user_agent: string | null
+          usuario_id: string | null
+        }
+        Insert: {
+          contexto?: Json | null
+          created_at?: string | null
+          descricao?: string | null
+          evento: string
+          id?: string
+          ip_address?: unknown | null
+          nivel?: string | null
+          user_agent?: string | null
+          usuario_id?: string | null
+        }
+        Update: {
+          contexto?: Json | null
+          created_at?: string | null
+          descricao?: string | null
+          evento?: string
+          id?: string
+          ip_address?: unknown | null
+          nivel?: string | null
+          user_agent?: string | null
+          usuario_id?: string | null
+        }
+        Relationships: []
+      }
+      lojistas: {
+        Row: {
+          ativo: boolean | null
+          cidade: string | null
+          cnpj: string | null
+          created_at: string | null
+          email: string
+          endereco: string | null
+          estado: string | null
+          id: string
+          nome: string
+          telefone: string | null
+          updated_at: string | null
+        }
+        Insert: {
+          ativo?: boolean | null
+          cidade?: string | null
+          cnpj?: string | null
+          created_at?: string | null
+          email: string
+          endereco?: string | null
+          estado?: string | null
+          id?: string
+          nome: string
+          telefone?: string | null
+          updated_at?: string | null
+        }
+        Update: {
+          ativo?: boolean | null
+          cidade?: string | null
+          cnpj?: string | null
+          created_at?: string | null
+          email?: string
+          endereco?: string | null
+          estado?: string | null
+          id?: string
+          nome?: string
+          telefone?: string | null
+          updated_at?: string | null
+        }
+        Relationships: []
+      }
+      pagamentos: {
+        Row: {
+          created_at: string | null
+          data_pagamento: string | null
+          forma_pagamento: Database["public"]["Enums"]["forma_pagamento"]
+          id: string
+          status: string | null
+          valor: number
+          venda_id: string
+        }
+        Insert: {
+          created_at?: string | null
+          data_pagamento?: string | null
+          forma_pagamento: Database["public"]["Enums"]["forma_pagamento"]
+          id?: string
+          status?: string | null
+          valor: number
+          venda_id: string
+        }
+        Update: {
+          created_at?: string | null
+          data_pagamento?: string | null
+          forma_pagamento?: Database["public"]["Enums"]["forma_pagamento"]
+          id?: string
+          status?: string | null
+          valor?: number
+          venda_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "pagamentos_venda_id_fkey"
+            columns: ["venda_id"]
+            isOneToOne: false
+            referencedRelation: "vendas_blocos"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      profiles: {
+        Row: {
+          created_at: string | null
+          email: string | null
+          id: string
+          nome: string | null
+          telefone: string | null
+          updated_at: string | null
+          user_id: string
+        }
+        Insert: {
+          created_at?: string | null
+          email?: string | null
+          id?: string
+          nome?: string | null
+          telefone?: string | null
+          updated_at?: string | null
+          user_id: string
+        }
+        Update: {
+          created_at?: string | null
+          email?: string | null
+          id?: string
+          nome?: string | null
+          telefone?: string | null
+          updated_at?: string | null
+          user_id?: string
+        }
+        Relationships: []
+      }
+      user_roles: {
+        Row: {
+          created_at: string | null
+          id: string
+          role: Database["public"]["Enums"]["app_role"]
+          user_id: string
+        }
+        Insert: {
+          created_at?: string | null
+          id?: string
+          role: Database["public"]["Enums"]["app_role"]
+          user_id: string
+        }
+        Update: {
+          created_at?: string | null
+          id?: string
+          role?: Database["public"]["Enums"]["app_role"]
+          user_id?: string
+        }
+        Relationships: []
+      }
+      usuarios_admin: {
+        Row: {
+          ativo: boolean | null
+          created_at: string | null
+          email: string
+          id: string
+          nome: string
+          updated_at: string | null
+          user_id: string
+        }
+        Insert: {
+          ativo?: boolean | null
+          created_at?: string | null
+          email: string
+          id?: string
+          nome: string
+          updated_at?: string | null
+          user_id: string
+        }
+        Update: {
+          ativo?: boolean | null
+          created_at?: string | null
+          email?: string
+          id?: string
+          nome?: string
+          updated_at?: string | null
+          user_id?: string
+        }
+        Relationships: []
+      }
+      vendas_blocos: {
+        Row: {
+          bloco_id: string
+          created_at: string | null
+          data_venda: string | null
+          forma_pagamento: Database["public"]["Enums"]["forma_pagamento"]
+          id: string
+          lojista_id: string
+          observacoes: string | null
+          quantidade_cupons: number
+          valor_total: number
+        }
+        Insert: {
+          bloco_id: string
+          created_at?: string | null
+          data_venda?: string | null
+          forma_pagamento: Database["public"]["Enums"]["forma_pagamento"]
+          id?: string
+          lojista_id: string
+          observacoes?: string | null
+          quantidade_cupons: number
+          valor_total: number
+        }
+        Update: {
+          bloco_id?: string
+          created_at?: string | null
+          data_venda?: string | null
+          forma_pagamento?: Database["public"]["Enums"]["forma_pagamento"]
+          id?: string
+          lojista_id?: string
+          observacoes?: string | null
+          quantidade_cupons?: number
+          valor_total?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "vendas_blocos_bloco_id_fkey"
+            columns: ["bloco_id"]
+            isOneToOne: false
+            referencedRelation: "blocos"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "vendas_blocos_lojista_id_fkey"
+            columns: ["lojista_id"]
+            isOneToOne: false
+            referencedRelation: "lojistas"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "vendas_blocos_lojista_id_fkey"
+            columns: ["lojista_id"]
+            isOneToOne: false
+            referencedRelation: "mv_ranking_lojistas"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
     }
     Views: {
-      [_ in never]: never
+      mv_ranking_lojistas: {
+        Row: {
+          blocos_comprados: number | null
+          cidade: string | null
+          created_at: string | null
+          cupons_utilizados: number | null
+          id: string | null
+          nome: string | null
+          total_cupons: number | null
+          valor_total_compras: number | null
+        }
+        Relationships: []
+      }
     }
     Functions: {
-      [_ in never]: never
+      analise_demanda_cupons: {
+        Args: Record<PropertyKey, never>
+        Returns: Json
+      }
+      analise_padroes_temporais: {
+        Args: Record<PropertyKey, never>
+        Returns: Json
+      }
+      atribuir_cupons_para_cliente: {
+        Args: {
+          p_cliente_id: string
+          p_quantidade: number
+          p_valor_compra?: number
+        }
+        Returns: Json
+      }
+      consultar_logs_auditoria: {
+        Args: {
+          p_busca?: string
+          p_data_fim?: string
+          p_data_inicio?: string
+          p_nivel?: string
+          p_tabela?: string
+        }
+        Returns: {
+          contexto: Json
+          created_at: string
+          descricao: string
+          evento: string
+          id: string
+          ip_address: unknown
+          nivel: string
+          user_agent: string
+          usuario_id: string
+        }[]
+      }
+      criar_blocos_pool: {
+        Args: { p_cupons_por_bloco?: number; p_quantidade: number }
+        Returns: Json
+      }
+      dummy_function: {
+        Args: Record<PropertyKey, never>
+        Returns: string
+      }
+      get_dashboard_metrics_optimized: {
+        Args: Record<PropertyKey, never>
+        Returns: Json
+      }
+      has_role: {
+        Args: {
+          _role: Database["public"]["Enums"]["app_role"]
+          _user_id: string
+        }
+        Returns: boolean
+      }
+      is_admin: {
+        Args: { _user_id: string }
+        Returns: boolean
+      }
+      relatorio_utilizacao_blocos: {
+        Args: Record<PropertyKey, never>
+        Returns: {
+          bloco_id: string
+          cupons_totais: number
+          cupons_usados: number
+          lojista_nome: string
+          numero_bloco: string
+          percentual_uso: number
+          ultima_atividade: string
+        }[]
+      }
     }
     Enums: {
-      [_ in never]: never
+      app_role: "admin" | "moderator" | "user"
+      forma_pagamento: "dinheiro" | "pix" | "cartao_credito" | "cartao_debito"
+      status_bloco: "disponivel" | "vendido" | "em_uso"
+      status_cliente: "ativo" | "inativo" | "suspenso"
+      status_cupom: "disponivel" | "atribuido" | "usado" | "expirado"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -150,6 +752,12 @@ export type CompositeTypes<
 
 export const Constants = {
   public: {
-    Enums: {},
+    Enums: {
+      app_role: ["admin", "moderator", "user"],
+      forma_pagamento: ["dinheiro", "pix", "cartao_credito", "cartao_debito"],
+      status_bloco: ["disponivel", "vendido", "em_uso"],
+      status_cliente: ["ativo", "inativo", "suspenso"],
+      status_cupom: ["disponivel", "atribuido", "usado", "expirado"],
+    },
   },
 } as const
