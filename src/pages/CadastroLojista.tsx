@@ -171,25 +171,37 @@ export default function CadastroLojista() {
           throw new Error('Erro: usuário não foi criado');
         }
 
-        // 2. Aguardar um momento para o trigger criar o perfil
-        await new Promise(resolve => setTimeout(resolve, 1000));
+        // 2. Wait for session to be established
+        let attempts = 0;
+        const maxAttempts = 10;
+        
+        while (attempts < maxAttempts) {
+          const { data: { session } } = await supabase.auth.getSession();
+          if (session?.user) {
+            break;
+          }
+          await new Promise(resolve => setTimeout(resolve, 500));
+          attempts++;
+        }
 
-        // 3. Criar loja vinculada ao usuário
-        const { error: lojaError } = await supabase
-          .from('lojas')
-          .insert({
-            user_id: authData.user.id,
-            nome_loja: lojistaData.nome_loja,
-            cnpj: lojistaData.cnpj,
-            cidade: lojistaData.cidade,
-            shopping: lojistaData.shopping,
-            segmento: lojistaData.segmento,
-            endereco: lojistaData.endereco
-          });
+        // 3. Usar função segura para criar loja
+        const { data: lojaResult, error: lojaError } = await supabase.rpc('criar_loja_apos_signup', {
+          p_nome_loja: lojistaData.nome_loja,
+          p_cnpj: lojistaData.cnpj,
+          p_cidade: lojistaData.cidade,
+          p_shopping: lojistaData.shopping,
+          p_segmento: lojistaData.segmento,
+          p_endereco: lojistaData.endereco
+        });
 
         if (lojaError) {
           console.error('Erro ao criar loja:', lojaError);
           throw new Error(`Erro ao criar loja: ${lojaError.message}`);
+        }
+
+        const result = lojaResult as any;
+        if (!result?.success) {
+          throw new Error(result?.message || 'Erro ao criar loja');
         }
 
         return { success: true, user: authData.user };

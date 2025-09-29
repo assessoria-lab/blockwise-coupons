@@ -741,6 +741,17 @@ export type Database = {
         Args: { p_cupons_por_bloco?: number; p_quantidade: number }
         Returns: Json
       }
+      criar_loja_apos_signup: {
+        Args: {
+          p_cidade: string
+          p_cnpj: string
+          p_endereco?: string
+          p_nome_loja: string
+          p_segmento?: string
+          p_shopping?: string
+        }
+        Returns: Json
+      }
       dummy_function: {
         Args: Record<PropertyKey, never>
         Returns: string
