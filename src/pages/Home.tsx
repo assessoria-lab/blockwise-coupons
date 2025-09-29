@@ -70,10 +70,10 @@ const Home = () => {
                 <div className="space-y-2">
                   <p className="text-sm font-medium">Email:</p>
                   <code className="text-xs bg-gray-100 px-2 py-1 rounded block">
-                    loja@exemplo.com
+                    loja1@exemplo.com
                   </code>
                   <p className="text-xs text-gray-500">
-                    Ou qualquer email com "loja" ou terminado em .com
+                    Ou: loja2@exemplo.com, boutique@fashion.com
                   </p>
                   <p className="text-xs text-gray-500 mt-2">
                     Senha: qualquer uma

@@ -92,7 +92,7 @@ const LoginLojista = () => {
           </div>
           <CardTitle className="text-2xl font-bold text-emerald-800">Painel do Lojista</CardTitle>
           <CardDescription>
-            Use qualquer email com "loja" ou email válido (.com) - qualquer senha
+            Acesso Exclusivo para Lojistas Cadastrados - Use loja1@exemplo.com, loja2@exemplo.com ou boutique@fashion.com
           </CardDescription>
         </CardHeader>
         <CardContent>
