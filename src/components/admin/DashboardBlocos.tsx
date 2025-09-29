@@ -5,6 +5,7 @@ import { Package, Users, TrendingUp, RefreshCw } from 'lucide-react';
 import GraficoRegioesLojistas from './GraficoRegioesLojistas';
 import RankingCompraBlocos from './RankingCompraBlocos';
 import RankingAtribuicaoCupons from './RankingAtribuicaoCupons';
+import GraficoDistribuicaoClientes from './GraficoDistribuicaoClientes';
 
 interface DashboardMetrics {
   total_blocos: number;
@@ -118,10 +119,13 @@ const DashboardBlocos = () => {
       {/* Gráficos e Rankings */}
       <div className="grid gap-6 lg:grid-cols-2">
         <GraficoRegioesLojistas />
-        <RankingCompraBlocos />
+        <GraficoDistribuicaoClientes />
       </div>
 
-      <RankingAtribuicaoCupons />
+      <div className="grid gap-6 lg:grid-cols-2">
+        <RankingCompraBlocos />
+        <RankingAtribuicaoCupons />
+      </div>
     </div>
   );
 };
