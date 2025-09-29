@@ -43,6 +43,8 @@ export const useAuthProvider = (): AuthContextType => {
 
   const fetchProfile = async (userId: string): Promise<Profile | null> => {
     try {
+      console.log('🔍 Buscando perfil para userId:', userId);
+      
       // First try to find in usuarios_admin
       const { data: adminData, error: adminError } = await supabase
         .from('usuarios_admin')
@@ -51,7 +53,10 @@ export const useAuthProvider = (): AuthContextType => {
         .eq('ativo', true)
         .maybeSingle();
 
+      console.log('👤 Admin query result:', { adminData, adminError });
+
       if (adminData) {
+        console.log('✅ Perfil admin encontrado');
         return {
           id: adminData.id,
           user_id: userId,
@@ -72,7 +77,10 @@ export const useAuthProvider = (): AuthContextType => {
         .eq('ativo', true)
         .maybeSingle();
 
+      console.log('🏪 Lojista query result:', { lojistaData, lojistaError });
+
       if (lojistaData) {
+        console.log('✅ Perfil lojista encontrado');
         return {
           id: lojistaData.id,
           user_id: userId,
@@ -86,41 +94,54 @@ export const useAuthProvider = (): AuthContextType => {
         } as Profile;
       }
 
+      console.log('❌ Nenhum perfil encontrado');
       return null;
     } catch (error) {
-      console.error('Error fetching profile:', error);
+      console.error('❌ Erro ao buscar perfil:', error);
       return null;
     }
   };
 
   useEffect(() => {
+    console.log('🚀 Iniciando useAuth');
+    
     const getSession = async () => {
+      console.log('📋 Buscando sessão existente...');
       const { data: { session } } = await supabase.auth.getSession();
+      console.log('📋 Sessão:', session ? 'Encontrada' : 'Não encontrada');
+      
       setSession(session);
       setUser(session?.user ?? null);
       
       if (session?.user) {
+        console.log('👤 Buscando perfil do usuário...');
         const userProfile = await fetchProfile(session.user.id);
+        console.log('👤 Perfil retornado:', userProfile);
         setProfile(userProfile);
       }
       
+      console.log('✅ Loading finalizado');
       setLoading(false);
     };
 
     getSession();
 
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
-      async (_event, session) => {
+      async (event, session) => {
+        console.log('🔄 Auth state changed:', event);
         setSession(session);
         setUser(session?.user ?? null);
         
         if (session?.user) {
+          console.log('👤 Buscando perfil após auth change...');
           const userProfile = await fetchProfile(session.user.id);
+          console.log('👤 Perfil retornado:', userProfile);
           setProfile(userProfile);
         } else {
           setProfile(null);
         }
         
+        console.log('✅ Loading finalizado após auth change');
         setLoading(false);
       }
     );
