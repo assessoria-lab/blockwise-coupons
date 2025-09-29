@@ -45,31 +45,7 @@ export const useAuthProvider = (): AuthContextType => {
     try {
       console.log('🔍 Buscando perfil para userId:', userId);
       
-      // First try to find in usuarios_admin
-      const { data: adminData, error: adminError } = await supabase
-        .from('usuarios_admin')
-        .select('*')
-        .eq('user_id', userId)
-        .eq('ativo', true)
-        .maybeSingle();
-
-      console.log('👤 Admin query result:', { adminData, adminError });
-
-      if (adminData) {
-        console.log('✅ Perfil admin encontrado');
-        return {
-          id: adminData.id,
-          user_id: userId,
-          nome: adminData.nome,
-          email: adminData.email,
-          tipo_usuario: 'admin',
-          ativo: adminData.ativo,
-          created_at: adminData.created_at,
-          updated_at: adminData.updated_at,
-        } as Profile;
-      }
-
-      // If not admin, try usuarios_lojistas
+      // First try to find in usuarios_lojistas (usa id diretamente)
       const { data: lojistaData, error: lojistaError } = await supabase
         .from('usuarios_lojistas')
         .select('*')
@@ -91,6 +67,30 @@ export const useAuthProvider = (): AuthContextType => {
           ativo: lojistaData.ativo,
           created_at: lojistaData.created_at,
           updated_at: lojistaData.updated_at,
+        } as Profile;
+      }
+
+      // If not lojista, try usuarios_admin (usa user_id)
+      const { data: adminData, error: adminError } = await supabase
+        .from('usuarios_admin')
+        .select('*')
+        .eq('user_id', userId)
+        .eq('ativo', true)
+        .maybeSingle();
+
+      console.log('👤 Admin query result:', { adminData, adminError });
+
+      if (adminData) {
+        console.log('✅ Perfil admin encontrado');
+        return {
+          id: adminData.id,
+          user_id: userId,
+          nome: adminData.nome,
+          email: adminData.email,
+          tipo_usuario: 'admin',
+          ativo: adminData.ativo,
+          created_at: adminData.created_at,
+          updated_at: adminData.updated_at,
         } as Profile;
       }
 
@@ -118,6 +118,14 @@ export const useAuthProvider = (): AuthContextType => {
         const userProfile = await fetchProfile(session.user.id);
         console.log('👤 Perfil retornado:', userProfile);
         setProfile(userProfile);
+        
+        // Se não encontrou perfil, fazer logout automático
+        if (!userProfile) {
+          console.log('⚠️ Perfil não encontrado, fazendo logout...');
+          await supabase.auth.signOut();
+          setUser(null);
+          setSession(null);
+        }
       }
       
       console.log('✅ Loading finalizado');
@@ -137,6 +145,15 @@ export const useAuthProvider = (): AuthContextType => {
           const userProfile = await fetchProfile(session.user.id);
           console.log('👤 Perfil retornado:', userProfile);
           setProfile(userProfile);
+          
+          // Se não encontrou perfil, fazer logout automático
+          if (!userProfile) {
+            console.log('⚠️ Perfil não encontrado após auth change, fazendo logout...');
+            await supabase.auth.signOut();
+            setUser(null);
+            setSession(null);
+            setProfile(null);
+          }
         } else {
           setProfile(null);
         }
