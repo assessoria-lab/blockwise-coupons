@@ -585,7 +585,9 @@ export type Database = {
         }[]
       }
       criar_blocos_pool: {
-        Args: { p_cupons_por_bloco?: number; p_quantidade: number }
+        Args:
+          | { p_cupons_por_bloco?: number; p_quantidade: number }
+          | { p_quantidade: number }
         Returns: Json
       }
       dummy_function: {
