@@ -10,12 +10,12 @@ const RankingShopping = () => {
     queryKey: ['ranking-cidades'],
     queryFn: async () => {
       const { data, error } = await supabase
-        .from('lojistas')
+        .from('lojas')
         .select('*')
         .eq('ativo', true);
 
       if (error) {
-        console.error('Erro ao buscar lojistas:', error);
+        console.error('Erro ao buscar lojas:', error);
         return [];
       }
 

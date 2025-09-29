@@ -10,6 +10,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Loader2, Store, ChevronLeft, Plus, X, CheckCircle, ShoppingCart, UserPlus } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
+import { useAuth } from '@/hooks/useAuth';
 import { z } from 'zod';
 interface Lojista {
   id?: string;
@@ -142,44 +143,42 @@ export default function CadastroLojista() {
     }
   });
 
-  // Mutation para salvar lojista
+  // Mutation para salvar lojista usando Supabase Auth
   const salvarLojistaMutation = useMutation({
     mutationFn: async (data: Lojista) => {
       try {
-        // 1. Criar usuário lojista na nova estrutura
         const { senha, confirmar_senha, ...lojistaData } = data;
         
-        // 1. Criar usuário lojista (sem retornar dados para evitar problemas de permissão)
-        const { error: usuarioError } = await supabase
-          .from('usuarios_lojistas')
-          .insert({
-            nome: lojistaData.responsavel_nome || lojistaData.nome_loja,
-            email: lojistaData.email!,
-            telefone: lojistaData.telefone
-          });
+        // 1. Criar usuário no Supabase Auth
+        const { data: authData, error: authError } = await supabase.auth.signUp({
+          email: lojistaData.email!,
+          password: senha!,
+          options: {
+            emailRedirectTo: `${window.location.origin}/login-lojista`,
+            data: {
+              nome: lojistaData.responsavel_nome || lojistaData.nome_loja,
+              telefone: lojistaData.telefone
+            }
+          }
+        });
 
-        if (usuarioError) {
-          console.error('Erro ao criar usuário lojista:', usuarioError);
-          throw new Error(`Erro ao criar usuário: ${usuarioError.message}`);
+        if (authError) {
+          console.error('Erro ao criar usuário:', authError);
+          throw new Error(`Erro ao criar usuário: ${authError.message}`);
         }
 
-        // 2. Buscar o usuário criado pelo email
-        const { data: novoUsuario, error: buscaUsuarioError } = await supabase
-          .from('usuarios_lojistas')
-          .select('id')
-          .eq('email', lojistaData.email!)
-          .single();
-
-        if (buscaUsuarioError || !novoUsuario) {
-          console.error('Erro ao buscar usuário criado:', buscaUsuarioError);
-          throw new Error('Erro ao localizar usuário criado');
+        if (!authData.user) {
+          throw new Error('Erro: usuário não foi criado');
         }
+
+        // 2. Aguardar um momento para o trigger criar o perfil
+        await new Promise(resolve => setTimeout(resolve, 1000));
 
         // 3. Criar loja vinculada ao usuário
         const { error: lojaError } = await supabase
           .from('lojas')
           .insert({
-            usuario_lojista_id: novoUsuario.id,
+            user_id: authData.user.id,
             nome_loja: lojistaData.nome_loja,
             cnpj: lojistaData.cnpj,
             cidade: lojistaData.cidade,
@@ -193,7 +192,7 @@ export default function CadastroLojista() {
           throw new Error(`Erro ao criar loja: ${lojaError.message}`);
         }
 
-        return { success: true };
+        return { success: true, user: authData.user };
       } catch (error) {
         console.error('Erro completo no cadastro:', error);
         throw error;

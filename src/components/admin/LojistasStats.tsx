@@ -6,14 +6,14 @@ import { Store, TrendingUp, Users, MapPin } from 'lucide-react';
 
 const LojistasStats = () => {
   const { data: lojistas = [] } = useQuery({
-    queryKey: ['lojistas-stats'],
+    queryKey: ['lojas-stats'],
     queryFn: async () => {
       const { data, error } = await supabase
-        .from('lojistas')
+        .from('lojas')
         .select('*');
 
       if (error) {
-        console.error('Erro ao buscar lojistas:', error);
+        console.error('Erro ao buscar lojas:', error);
         return [];
       }
 

@@ -13,8 +13,8 @@ import RegistroVendas from "./pages/RegistroVendas";
 import Login from "./pages/Login";
 import LoginLojista from "./pages/LoginLojista";
 import LojistaIndex from "./pages/lojista/LojistaIndex";
-import { CustomAuthProvider } from "./components/auth/CustomAuthProvider";
-import { CustomProtectedRoute } from "./components/auth/CustomProtectedRoute";
+import { AuthProvider } from "./components/auth/AuthProvider";
+import { ProtectedRoute } from "./components/auth/ProtectedRoute";
 import HistoricoCupons from "./components/admin/HistoricoCupons";
 import DashboardFinanceiro from "./components/admin/DashboardFinanceiro";
 import RelatoriosAnalises from "./components/admin/RelatoriosAnalises";
@@ -28,7 +28,7 @@ const queryClient = new QueryClient();
 
 const App = () => (
   <QueryClientProvider client={queryClient}>
-    <CustomAuthProvider>
+    <AuthProvider>
       <TooltipProvider>
         <Toaster />
         <Sonner />
@@ -40,105 +40,105 @@ const App = () => (
             <Route 
               path="/admin" 
               element={
-                <CustomProtectedRoute requiredType="admin">
+                <ProtectedRoute requiredRole="admin">
                   <Index />
-                </CustomProtectedRoute>
+                </ProtectedRoute>
               }
             />
             <Route 
               path="/lojista" 
               element={
-                <CustomProtectedRoute requiredType="lojista">
+                <ProtectedRoute requiredRole="lojista">
                   <LojistaIndex />
-                </CustomProtectedRoute>
+                </ProtectedRoute>
               } 
             />
             <Route 
               path="/cadastro-lojista" 
               element={
-                <CustomProtectedRoute requiredType="admin">
+                <ProtectedRoute requiredRole="admin">
                   <CadastroLojista />
-                </CustomProtectedRoute>
+                </ProtectedRoute>
               } 
             />
             <Route 
               path="/registro-vendas" 
               element={
-                <CustomProtectedRoute requiredType="admin">
+                <ProtectedRoute requiredRole="admin">
                   <RegistroVendas />
-                </CustomProtectedRoute>
+                </ProtectedRoute>
               } 
             />
             <Route 
               path="/admin/relatorios" 
               element={
-                <CustomProtectedRoute requiredType="admin">
+                <ProtectedRoute requiredRole="admin">
                   <RelatoriosAnalises />
-                </CustomProtectedRoute>
+                </ProtectedRoute>
               } 
             />
             <Route 
               path="/admin/historico" 
               element={
-                <CustomProtectedRoute requiredType="admin">
+                <ProtectedRoute requiredRole="admin">
                   <HistoricoCupons />
-                </CustomProtectedRoute>
+                </ProtectedRoute>
               } 
             />
             <Route 
               path="/admin/financeiro" 
               element={
-                <CustomProtectedRoute requiredType="admin">
+                <ProtectedRoute requiredRole="admin">
                   <DashboardFinanceiro />
-                </CustomProtectedRoute>
+                </ProtectedRoute>
               } 
             />
             <Route 
               path="/admin/lojistas" 
               element={
-                <CustomProtectedRoute requiredType="admin">
+                <ProtectedRoute requiredRole="admin">
                   <GestaoLojistas />
-                </CustomProtectedRoute>
+                </ProtectedRoute>
               } 
             />
             <Route 
               path="/admin/rastreamento" 
               element={
-                <CustomProtectedRoute requiredType="admin">
+                <ProtectedRoute requiredRole="admin">
                   <RastreamentoPorBloco />
-                </CustomProtectedRoute>
+                </ProtectedRoute>
               } 
             />
             <Route 
               path="/admin/monitoramento" 
               element={
-                <CustomProtectedRoute requiredType="admin">
+                <ProtectedRoute requiredRole="admin">
                   <DashboardMonitoramento />
-                </CustomProtectedRoute>
+                </ProtectedRoute>
               } 
             />
             <Route 
               path="/admin/business-intelligence" 
               element={
-                <CustomProtectedRoute requiredType="admin">
+                <ProtectedRoute requiredRole="admin">
                   <BusinessIntelligence />
-                </CustomProtectedRoute>
+                </ProtectedRoute>
               } 
             />
             <Route 
               path="/admin/auditoria" 
               element={
-                <CustomProtectedRoute requiredType="admin">
+                <ProtectedRoute requiredRole="admin">
                   <AuditoriaCompliance />
-                </CustomProtectedRoute>
+                </ProtectedRoute>
               } 
             />
             <Route 
               path="/admin/configuracoes" 
               element={
-                <CustomProtectedRoute requiredType="admin">
+                <ProtectedRoute requiredRole="admin">
                   <ConfiguracoesSistema />
-                </CustomProtectedRoute>
+                </ProtectedRoute>
               } 
             />
             <Route path="/" element={<Home />} />
@@ -147,7 +147,7 @@ const App = () => (
           </Routes>
         </BrowserRouter>
       </TooltipProvider>
-    </CustomAuthProvider>
+    </AuthProvider>
   </QueryClientProvider>
 );
 

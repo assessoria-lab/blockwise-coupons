@@ -61,24 +61,35 @@ export const useCustomAuthProvider = (): AuthContextType => {
   const signInAdmin = async (email: string, password: string) => {
     setLoading(true);
     try {
-      // Usar a função do banco para validar login com estrutura completa
-      const { data, error } = await supabase.rpc('validar_login_admin_completo', {
-        p_email: email,
-        p_senha: password
+      // Using standard Supabase Auth for admin too
+      const { data, error } = await supabase.auth.signInWithPassword({
+        email: email,
+        password: password
       });
 
       if (error) throw error;
 
-      const result = data as any;
-      if (!result.success) {
-        throw new Error(result.message);
+      if (!data.user) {
+        throw new Error('Login failed');
+      }
+
+      // Check if user is admin
+      const { data: adminProfile, error: adminError } = await supabase
+        .from('usuarios_admin')
+        .select('*')
+        .eq('email', data.user.email!)
+        .eq('ativo', true)
+        .single();
+
+      if (adminError || !adminProfile) {
+        throw new Error('Admin access denied');
       }
 
       // Se o login foi bem-sucedido, definir o usuário
       const adminUser: AdminUser = {
-        id: result.user.id,
-        nome: result.user.nome,
-        email: result.user.email,
+        id: data.user.id,
+        nome: adminProfile.nome,
+        email: data.user.email!,
         tipo: 'admin'
       };
       setUser(adminUser);
@@ -94,25 +105,35 @@ export const useCustomAuthProvider = (): AuthContextType => {
   const signInLojista = async (email: string, password: string) => {
     setLoading(true);
     try {
-      // Usar a função específica do banco para validar login de lojista
-      const { data, error } = await supabase.rpc('validar_login_lojista_completo', {
-        p_email: email,
-        p_senha: password
+      // Now using standard Supabase Auth instead of custom function
+      const { data, error } = await supabase.auth.signInWithPassword({
+        email: email,
+        password: password
       });
 
       if (error) throw error;
 
-      const result = data as any;
-      if (!result.success) {
-        throw new Error(result.message);
+      if (!data.user) {
+        throw new Error('Login failed');
+      }
+
+      // Fetch user profile to get additional info
+      const { data: profile, error: profileError } = await supabase
+        .from('usuarios_lojistas')
+        .select('*')
+        .eq('id', data.user.id)
+        .single();
+
+      if (profileError) {
+        throw new Error('Profile not found');
       }
 
       // Se o login foi bem-sucedido, definir o usuário
       const lojistaUser: LojistaUser = {
-        id: result.user.id,
-        nome_loja: result.user.nome_loja || '', // Será preenchido ao selecionar loja
-        nome_responsavel: result.user.nome_responsavel,
-        email: result.user.email,
+        id: data.user.id,
+        nome_loja: '', // Será preenchido ao selecionar loja
+        nome_responsavel: profile.nome,
+        email: data.user.email!,
         tipo: 'lojista'
       };
       setUser(lojistaUser);
@@ -125,7 +146,8 @@ export const useCustomAuthProvider = (): AuthContextType => {
     }
   };
 
-  const signOut = () => {
+  const signOut = async () => {
+    await supabase.auth.signOut();
     setUser(null);
     localStorage.removeItem('auth_user');
   };

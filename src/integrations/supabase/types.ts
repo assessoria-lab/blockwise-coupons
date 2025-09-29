@@ -51,22 +51,7 @@ export type Database = {
           status?: Database["public"]["Enums"]["status_bloco"] | null
           updated_at?: string | null
         }
-        Relationships: [
-          {
-            foreignKeyName: "blocos_lojista_id_fkey"
-            columns: ["lojista_id"]
-            isOneToOne: false
-            referencedRelation: "lojistas"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "blocos_lojista_id_fkey"
-            columns: ["lojista_id"]
-            isOneToOne: false
-            referencedRelation: "mv_ranking_lojistas"
-            referencedColumns: ["id"]
-          },
-        ]
+        Relationships: []
       }
       clientes: {
         Row: {
@@ -123,22 +108,7 @@ export type Database = {
           total_valor_compras?: number | null
           updated_at?: string | null
         }
-        Relationships: [
-          {
-            foreignKeyName: "clientes_lojista_id_fkey"
-            columns: ["lojista_id"]
-            isOneToOne: false
-            referencedRelation: "lojistas"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "clientes_lojista_id_fkey"
-            columns: ["lojista_id"]
-            isOneToOne: false
-            referencedRelation: "mv_ranking_lojistas"
-            referencedColumns: ["id"]
-          },
-        ]
+        Relationships: []
       }
       configuracoes_sistema: {
         Row: {
@@ -223,20 +193,6 @@ export type Database = {
             columns: ["cliente_id"]
             isOneToOne: false
             referencedRelation: "clientes"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "cupons_lojista_id_fkey"
-            columns: ["lojista_id"]
-            isOneToOne: false
-            referencedRelation: "lojistas"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "cupons_lojista_id_fkey"
-            columns: ["lojista_id"]
-            isOneToOne: false
-            referencedRelation: "mv_ranking_lojistas"
             referencedColumns: ["id"]
           },
         ]
@@ -372,7 +328,7 @@ export type Database = {
           segmento: string | null
           shopping: string | null
           updated_at: string | null
-          usuario_lojista_id: string
+          user_id: string
         }
         Insert: {
           ativo?: boolean | null
@@ -386,7 +342,7 @@ export type Database = {
           segmento?: string | null
           shopping?: string | null
           updated_at?: string | null
-          usuario_lojista_id: string
+          user_id: string
         }
         Update: {
           ativo?: boolean | null
@@ -400,78 +356,7 @@ export type Database = {
           segmento?: string | null
           shopping?: string | null
           updated_at?: string | null
-          usuario_lojista_id?: string
-        }
-        Relationships: [
-          {
-            foreignKeyName: "lojas_usuario_lojista_id_fkey"
-            columns: ["usuario_lojista_id"]
-            isOneToOne: false
-            referencedRelation: "usuarios_lojistas"
-            referencedColumns: ["id"]
-          },
-        ]
-      }
-      lojistas: {
-        Row: {
-          ativo: boolean | null
-          bloqueado_ate: string | null
-          cidade: string | null
-          cnpj: string | null
-          created_at: string | null
-          email: string
-          endereco: string | null
-          estado: string | null
-          id: string
-          nome: string
-          nome_loja: string | null
-          segmento: string | null
-          senha_hash: string | null
-          shopping: string | null
-          telefone: string | null
-          tentativas_login_falhadas: number | null
-          ultimo_login: string | null
-          updated_at: string | null
-        }
-        Insert: {
-          ativo?: boolean | null
-          bloqueado_ate?: string | null
-          cidade?: string | null
-          cnpj?: string | null
-          created_at?: string | null
-          email: string
-          endereco?: string | null
-          estado?: string | null
-          id?: string
-          nome: string
-          nome_loja?: string | null
-          segmento?: string | null
-          senha_hash?: string | null
-          shopping?: string | null
-          telefone?: string | null
-          tentativas_login_falhadas?: number | null
-          ultimo_login?: string | null
-          updated_at?: string | null
-        }
-        Update: {
-          ativo?: boolean | null
-          bloqueado_ate?: string | null
-          cidade?: string | null
-          cnpj?: string | null
-          created_at?: string | null
-          email?: string
-          endereco?: string | null
-          estado?: string | null
-          id?: string
-          nome?: string
-          nome_loja?: string | null
-          segmento?: string | null
-          senha_hash?: string | null
-          shopping?: string | null
-          telefone?: string | null
-          tentativas_login_falhadas?: number | null
-          ultimo_login?: string | null
-          updated_at?: string | null
+          user_id?: string
         }
         Relationships: []
       }
@@ -776,41 +661,11 @@ export type Database = {
             referencedRelation: "blocos"
             referencedColumns: ["id"]
           },
-          {
-            foreignKeyName: "vendas_blocos_lojista_id_fkey"
-            columns: ["lojista_id"]
-            isOneToOne: false
-            referencedRelation: "lojistas"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "vendas_blocos_lojista_id_fkey"
-            columns: ["lojista_id"]
-            isOneToOne: false
-            referencedRelation: "mv_ranking_lojistas"
-            referencedColumns: ["id"]
-          },
         ]
       }
     }
     Views: {
-      mv_ranking_lojistas: {
-        Row: {
-          blocos_comprados: number | null
-          cidade: string | null
-          created_at: string | null
-          cupons_utilizados: number | null
-          data_ultima_compra: string | null
-          id: string | null
-          nome: string | null
-          nome_loja: string | null
-          segmento: string | null
-          shopping: string | null
-          total_cupons: number | null
-          valor_total_compras: number | null
-        }
-        Relationships: []
-      }
+      [_ in never]: never
     }
     Functions: {
       analise_demanda_cupons: {
@@ -911,14 +766,6 @@ export type Database = {
         Returns: Json
       }
       validar_login_admin_completo: {
-        Args: { p_email: string; p_senha: string }
-        Returns: Json
-      }
-      validar_login_lojista: {
-        Args: { p_email: string; p_senha: string }
-        Returns: Json
-      }
-      validar_login_lojista_completo: {
         Args: { p_email: string; p_senha: string }
         Returns: Json
       }

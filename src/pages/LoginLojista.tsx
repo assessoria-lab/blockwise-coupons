@@ -1,11 +1,12 @@
 import React, { useState, useEffect } from 'react';
-import { useCustomAuth } from '@/hooks/useCustomAuth';
+import { useAuth } from '@/hooks/useAuth';
 import { Navigate, useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { useToast } from '@/hooks/use-toast';
+import { supabase } from '@/integrations/supabase/client';
 import { Eye, EyeOff, Store } from 'lucide-react';
 
 const LoginLojista = () => {
@@ -13,25 +14,20 @@ const LoginLojista = () => {
   const [password, setPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
-  const { signInLojista, user, loading } = useCustomAuth();
+  const { user, profile, loading, signIn } = useAuth();
   const { toast } = useToast();
   const navigate = useNavigate();
 
   // Redirect if already authenticated
   useEffect(() => {
-    if (!loading && user) {
-      if (user.tipo === 'lojista') {
-        // Already a lojista, stay here or redirect to lojista dashboard
-      } else if (user.tipo === 'admin') {
-        // Admin user trying to access lojista login, redirect to admin login
-        toast({
-          title: "Acesso negado",
-          description: "Você é um administrador. Use o login de administrador.",
-          variant: "destructive",
-        });
+    if (!loading && user && profile) {
+      if (profile.tipo_usuario === 'lojista') {
+        navigate('/lojista');
+      } else if (profile.tipo_usuario === 'admin') {
+        navigate('/admin');
       }
     }
-  }, [user, loading, toast]);
+  }, [user, profile, loading, navigate]);
 
   if (loading) {
     return (
@@ -42,11 +38,11 @@ const LoginLojista = () => {
   }
 
   // Redirect based on user type
-  if (user) {
-    if (user.tipo === 'lojista') {
+  if (user && profile) {
+    if (profile.tipo_usuario === 'lojista') {
       return <Navigate to="/lojista" replace />;
-    } else if (user.tipo === 'admin') {
-      return <Navigate to="/login" replace />; // Redirect admin to admin login
+    } else if (profile.tipo_usuario === 'admin') {
+      return <Navigate to="/admin" replace />;
     }
   }
 
@@ -65,7 +61,7 @@ const LoginLojista = () => {
     setIsLoading(true);
     
     try {
-      await signInLojista(email, password);
+      await signIn(email, password);
       toast({
         title: "Login realizado",
         description: "Bem-vindo ao painel do lojista!",
@@ -92,7 +88,7 @@ const LoginLojista = () => {
           </div>
           <CardTitle className="text-2xl font-bold text-emerald-800">Painel do Lojista</CardTitle>
           <CardDescription>
-            Acesso Exclusivo para Lojistas Cadastrados - Use loja1@exemplo.com, loja2@exemplo.com ou boutique@fashion.com
+            Acesso Exclusivo para Lojistas Cadastrados
           </CardDescription>
         </CardHeader>
         <CardContent>

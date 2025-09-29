@@ -7,16 +7,16 @@ import { Trophy, Store, MapPin } from 'lucide-react';
 
 const RankingLojistas = () => {
   const { data: lojistas = [] } = useQuery({
-    queryKey: ['ranking-lojistas'],
+    queryKey: ['ranking-lojas'],
     queryFn: async () => {
       const { data, error } = await supabase
-        .from('lojistas')
+        .from('lojas')
         .select('*')
         .eq('ativo', true)
         .order('created_at', { ascending: false });
 
       if (error) {
-        console.error('Erro ao buscar lojistas:', error);
+        console.error('Erro ao buscar lojas:', error);
         return [];
       }
 
@@ -92,7 +92,7 @@ const RankingLojistas = () => {
                     {getPosicaoBadge(index + 1)}
                     <div className="flex-1">
                       <div className="flex items-center gap-3">
-                        <h3 className="font-medium">{lojista.nome}</h3>
+                        <h3 className="font-medium">{lojista.nome_loja}</h3>
                         {lojista.cidade && (
                           <Badge variant="outline">
                             <MapPin className="h-3 w-3 mr-1" />
