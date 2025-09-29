@@ -104,15 +104,16 @@ const AuditoriaCompliance = () => {
       success: <CheckCircle className="h-3 w-3" />
     };
 
-    const variants = {
-      info: 'default',
-      warning: 'warning',
-      error: 'destructive',
-      success: 'default'
+    const getVariant = (nivel: string) => {
+      switch (nivel) {
+        case 'error': return 'destructive';
+        case 'warning': return 'secondary';
+        default: return 'default';
+      }
     };
 
     return (
-      <Badge variant={variants[nivel as keyof typeof variants] || 'default'} className="flex items-center gap-1">
+      <Badge variant={getVariant(nivel)} className="flex items-center gap-1">
         {icons[nivel as keyof typeof icons]}
         {nivel.toUpperCase()}
       </Badge>
