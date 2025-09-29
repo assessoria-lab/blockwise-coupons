@@ -1,6 +1,5 @@
-import { useMemo, useState } from 'react';
+import { useMemo, useState, useEffect } from 'react';
 import { useQuery } from '@tanstack/react-query';
-import { supabase } from '@/integrations/supabase/client';
 import {
   flexRender,
   getCoreRowModel,
@@ -10,27 +9,14 @@ import {
   SortingState,
   ColumnFiltersState,
 } from '@tanstack/react-table';
+import { supabase } from '@/integrations/supabase/client';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Badge } from '@/components/ui/badge';
-import { Search, Plus, Edit, DollarSign } from 'lucide-react';
+import { Search, Plus, Eye, DollarSign, Edit } from 'lucide-react';
 import { VendaBlocosModal } from './VendaBlocosModal';
 import { LojistaModal } from './LojistaModal';
-
-interface LojaDB {
-  id: string;
-  nome_loja: string;
-  cnpj?: string;
-  shopping?: string;
-  segmento?: string;
-  ativo: boolean;
-  cidade?: string;
-  endereco?: string;
-  user_id?: string;
-  created_at?: string;
-  updated_at?: string;
-}
 
 interface Lojista {
   id: string;
@@ -39,60 +25,81 @@ interface Lojista {
   shopping?: string;
   segmento?: string;
   status: string;
-  cidade: string;
-  endereco?: string;
+  cupons_nao_atribuidos: number;
+  blocos_comprados?: number;
   telefone?: string;
   email?: string;
   responsavel_nome?: string;
-  cupons_nao_atribuidos?: number;
-  blocos_comprados?: number;
+  cidade: string;
+  endereco?: string;
 }
+
+const fetchLojistas = async (filters: { search?: string; status?: string }) => {
+  let query = supabase
+    .from('lojistas')
+    .select(`
+      id, nome_loja, cnpj, shopping, segmento, status, cupons_nao_atribuidos,
+      telefone, email, responsavel_nome, cidade, endereco, created_at
+    `);
+
+  if (filters.search && filters.search.length >= 2) {
+    query = query.or(`nome_loja.ilike.%${filters.search}%,cnpj.ilike.%${filters.search}%,shopping.ilike.%${filters.search}%`);
+  }
+
+  if (filters.status && filters.status !== 'todos') {
+    query = query.eq('status', filters.status);
+  }
+
+  const { data, error } = await query.order('created_at', { ascending: false });
+  if (error) throw new Error(error.message);
+  
+  // Buscar quantidade de blocos comprados para cada lojista
+  const lojistasWithBlocos = await Promise.all(
+    (data || []).map(async (lojista) => {
+      const { data: blocos, error: blocosError } = await supabase
+        .from('blocos')
+        .select('id')
+        .eq('lojista_id', lojista.id);
+      
+      return {
+        ...lojista,
+        blocos_comprados: blocosError ? 0 : (blocos?.length || 0)
+      };
+    })
+  );
+
+  return lojistasWithBlocos;
+};
 
 export const LojistasTable = () => {
   const [sorting, setSorting] = useState<SortingState>([]);
   const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>([]);
   const [searchInput, setSearchInput] = useState('');
+  const [debouncedSearch, setDebouncedSearch] = useState('');
   const [statusFilter, setStatusFilter] = useState('todos');
   const [selectedLojista, setSelectedLojista] = useState<Lojista | null>(null);
   const [showVendaModal, setShowVendaModal] = useState(false);
   const [showLojistaModal, setShowLojistaModal] = useState(false);
   const [editingLojista, setEditingLojista] = useState<Lojista | null>(null);
 
-  // Dados de demonstração
-  const lojasDemo: LojaDB[] = [
-    { id: '1', nome_loja: 'Bella Moda', cnpj: '10000000000001', cidade: 'São Paulo', shopping: 'Shopping Ibirapuera', segmento: 'Moda e Vestuário', ativo: true, endereco: 'Rua das Lojas, 100', user_id: 'demo', created_at: new Date().toISOString(), updated_at: new Date().toISOString() },
-    { id: '2', nome_loja: 'Fashion Style', cnpj: '10000000000002', cidade: 'Rio de Janeiro', shopping: 'Barra Shopping', segmento: 'Moda e Vestuário', ativo: true, endereco: 'Rua das Lojas, 200', user_id: 'demo', created_at: new Date().toISOString(), updated_at: new Date().toISOString() },
-    { id: '3', nome_loja: 'Trend Boutique', cnpj: '10000000000003', cidade: 'São Paulo', shopping: 'Shopping Morumbi', segmento: 'Moda e Vestuário', ativo: true, endereco: 'Rua das Lojas, 300', user_id: 'demo', created_at: new Date().toISOString(), updated_at: new Date().toISOString() },
-    { id: '4', nome_loja: 'Chic Fashion', cnpj: '10000000000004', cidade: 'Curitiba', shopping: 'Shopping JK Iguatemi', segmento: 'Moda e Vestuário', ativo: true, endereco: 'Rua das Lojas, 400', user_id: 'demo', created_at: new Date().toISOString(), updated_at: new Date().toISOString() },
-    { id: '5', nome_loja: 'Look Moderno', cnpj: '10000000000005', cidade: 'Belo Horizonte', shopping: 'Shopping Pátio Savassi', segmento: 'Moda e Vestuário', ativo: true, endereco: 'Rua das Lojas, 500', user_id: 'demo', created_at: new Date().toISOString(), updated_at: new Date().toISOString() },
-    { id: '6', nome_loja: 'Glamour Store', cnpj: '10000000000006', cidade: 'Porto Alegre', shopping: 'Shopping Iguatemi Porto Alegre', segmento: 'Moda e Vestuário', ativo: true, endereco: 'Rua das Lojas, 600', user_id: 'demo', created_at: new Date().toISOString(), updated_at: new Date().toISOString() },
-    { id: '7', nome_loja: 'Vogue Boutique', cnpj: '10000000000007', cidade: 'Rio de Janeiro', shopping: 'Shopping Morumbi', segmento: 'Moda e Vestuário', ativo: true, endereco: 'Rua das Lojas, 700', user_id: 'demo', created_at: new Date().toISOString(), updated_at: new Date().toISOString() },
-    { id: '8', nome_loja: 'Elite Fashion', cnpj: '10000000000008', cidade: 'Belo Horizonte', shopping: 'Shopping Cidade Jardim', segmento: 'Moda e Vestuário', ativo: true, endereco: 'Rua das Lojas, 800', user_id: 'demo', created_at: new Date().toISOString(), updated_at: new Date().toISOString() },
-    { id: '9', nome_loja: 'Style Mania', cnpj: '10000000000009', cidade: 'Curitiba', shopping: 'Shopping JK Iguatemi', segmento: 'Moda e Vestuário', ativo: true, endereco: 'Rua das Lojas, 900', user_id: 'demo', created_at: new Date().toISOString(), updated_at: new Date().toISOString() },
-    { id: '10', nome_loja: 'Urban Chic', cnpj: '10000000000010', cidade: 'São Paulo', shopping: 'Shopping Eldorado', segmento: 'Moda e Vestuário', ativo: true, endereco: 'Rua das Lojas, 1000', user_id: 'demo', created_at: new Date().toISOString(), updated_at: new Date().toISOString() },
-  ];
+  // Debounce search input
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      setDebouncedSearch(searchInput);
+    }, 300);
 
-  // Usar dados mockados
-  const lojasDB = lojasDemo;
-  const isLoading = false;
-  const error = null;
-  const refetch = () => console.log('Refetch simulado');
+    return () => clearTimeout(timer);
+  }, [searchInput]);
 
-  // Converter dados do banco para o formato da interface
-  const lojistas: Lojista[] = useMemo(() => {
-    return lojasDB.map(loja => ({
-      id: loja.id,
-      nome_loja: loja.nome_loja,
-      cnpj: loja.cnpj || '',
-      shopping: loja.shopping,
-      segmento: loja.segmento,
-      status: loja.ativo ? 'ativo' : 'inativo',
-      cidade: loja.cidade || '',
-      endereco: loja.endereco,
-      cupons_nao_atribuidos: 0,
-      blocos_comprados: 0,
-    }));
-  }, [lojasDB]);
+  const filters = useMemo(() => ({
+    search: debouncedSearch,
+    status: statusFilter
+  }), [debouncedSearch, statusFilter]);
+
+  const { data: lojistas = [], isLoading, refetch } = useQuery({
+    queryKey: ['lojistas', filters],
+    queryFn: () => fetchLojistas(filters),
+  });
 
   const columns = useMemo(() => [
     {
@@ -126,10 +133,27 @@ export const LojistasTable = () => {
       ),
     },
     {
-      accessorKey: 'cidade',
-      header: 'Cidade',
+      accessorKey: 'responsavel_nome',
+      header: 'Responsável',
+    },
+    {
+      accessorKey: 'blocos_comprados',
+      header: 'Blocos Comprados',
       cell: ({ row }: any) => (
-        <div>{row.getValue('cidade') || 'Não informado'}</div>
+        <div className="text-center font-semibold">
+          {row.getValue('blocos_comprados') || 0}
+        </div>
+      ),
+    },
+    {
+      accessorKey: 'cupons_nao_atribuidos',
+      header: 'Cupons Disponíveis',
+      cell: ({ row }: any) => (
+        <div className="text-center">
+          <Badge variant="outline" className="font-mono">
+            {(row.getValue('cupons_nao_atribuidos') || 0).toLocaleString()}
+          </Badge>
+        </div>
       ),
     },
     {
@@ -137,9 +161,10 @@ export const LojistasTable = () => {
       header: 'Status',
       cell: ({ row }: any) => {
         const status = row.getValue('status');
+        const variant = status === 'ativo' ? 'default' : status === 'inativo' ? 'secondary' : 'destructive';
         return (
-          <Badge variant={status === 'ativo' ? 'default' : 'secondary'}>
-            {status === 'ativo' ? 'Ativo' : 'Inativo'}
+          <Badge variant={variant}>
+            {status}
           </Badge>
         );
       },
@@ -194,6 +219,14 @@ export const LojistasTable = () => {
     },
   });
 
+  if (isLoading) {
+    return (
+      <div className="flex items-center justify-center p-8">
+        <div className="text-muted-foreground">Carregando lojistas...</div>
+      </div>
+    );
+  }
+
   return (
     <div className="space-y-4">
       <div className="flex items-center justify-between">
@@ -246,25 +279,7 @@ export const LojistasTable = () => {
             ))}
           </TableHeader>
           <TableBody>
-            {isLoading ? (
-              <TableRow>
-                <TableCell colSpan={columns.length} className="h-24 text-center">
-                  <div className="flex flex-col items-center gap-2">
-                    <div className="animate-spin h-6 w-6 border-2 border-primary border-t-transparent rounded-full"></div>
-                    <p>Carregando lojas...</p>
-                  </div>
-                </TableCell>
-              </TableRow>
-            ) : error ? (
-              <TableRow>
-                <TableCell colSpan={columns.length} className="h-24 text-center">
-                  <div className="flex flex-col items-center gap-2">
-                    <p className="text-red-500">Erro ao carregar lojas</p>
-                    <Button onClick={() => refetch()} size="sm">Tentar novamente</Button>
-                  </div>
-                </TableCell>
-              </TableRow>
-            ) : table.getRowModel().rows?.length ? (
+            {table.getRowModel().rows?.length ? (
               table.getRowModel().rows.map((row) => (
                 <TableRow
                   key={row.id}
@@ -280,7 +295,7 @@ export const LojistasTable = () => {
             ) : (
               <TableRow>
                 <TableCell colSpan={columns.length} className="h-24 text-center">
-                  Nenhuma loja encontrada.
+                  Nenhum lojista encontrado.
                 </TableCell>
               </TableRow>
             )}

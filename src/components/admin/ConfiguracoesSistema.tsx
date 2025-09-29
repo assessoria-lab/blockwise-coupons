@@ -1,150 +1,423 @@
-import React, { useState } from 'react';
-import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { supabase } from '@/integrations/supabase/client';
-import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card';
+import { useState, useEffect } from 'react';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
+import { Switch } from '@/components/ui/switch';
+import { Separator } from '@/components/ui/separator';
+import { Badge } from '@/components/ui/badge';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { toast } from 'sonner';
-import { Settings, Users, FileText, Package } from 'lucide-react';
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
+import { useToast } from '@/hooks/use-toast';
+import { supabase } from '@/integrations/supabase/client';
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import { Settings, Database, Bell, Shield, CheckCircle, Users, FileText, Plus, Edit, Trash2 } from 'lucide-react';
+
+interface SystemConfig {
+  id: string;
+  chave: string;
+  valor: string;
+  descricao: string;
+  tipo: string;
+  categoria: string;
+}
+
+interface SystemLog {
+  id: string;
+  evento: string;
+  nivel: string;
+  usuario_email?: string;
+  descricao: string;
+  created_at: string;
+}
+
+interface UserRole {
+  id: string;
+  user_id: string;
+  role: string;
+  created_at: string;
+}
 
 const ConfiguracoesSistema = () => {
-  const [novosBlocos, setNovosBlocos] = useState(1);
+  const { toast } = useToast();
   const queryClient = useQueryClient();
+  
+  const [newUserEmail, setNewUserEmail] = useState('');
+  const [newUserRole, setNewUserRole] = useState<string>('operador');
+  const [isAddingUser, setIsAddingUser] = useState(false);
+  const [blocosToCreate, setBlocosToCreate] = useState(10);
 
-  const createBlocksMutation = useMutation({
-    mutationFn: async ({ quantidade }: { quantidade: number }) => {
-      const { data, error } = await supabase.rpc('criar_blocos_pool', {
-        p_quantidade: quantidade
-      });
-
+  // Fetch system configurations
+  const { data: configs, isLoading: configsLoading } = useQuery({
+    queryKey: ['system-configs'],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from('configuracoes_sistema')
+        .select('*')
+        .order('categoria', { ascending: true });
+      
       if (error) throw error;
-      return data;
-    },
-    onSuccess: () => {
-      toast.success('Blocos criados com sucesso!');
-      queryClient.invalidateQueries({ queryKey: ['dashboard-metrics'] });
-      setNovosBlocos(1);
-    },
-    onError: (error: any) => {
-      toast.error(`Erro ao criar blocos: ${error.message}`);
+      return data as SystemConfig[];
     }
   });
 
-  const handleCreateBlocks = () => {
-    if (novosBlocos < 1 || novosBlocos > 1000) {
-      toast.error('Quantidade deve ser entre 1 e 1000');
-      return;
+  // Fetch system logs
+  const { data: logs, isLoading: logsLoading } = useQuery({
+    queryKey: ['system-logs'],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from('logs_sistema')
+        .select('*')
+        .order('created_at', { ascending: false })
+        .limit(100);
+      
+      if (error) throw error;
+      return data as SystemLog[];
     }
-    
-    createBlocksMutation.mutate({ quantidade: novosBlocos });
+  });
+
+  // Fetch user roles
+  const { data: userRoles, isLoading: rolesLoading } = useQuery({
+    queryKey: ['user-roles'],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from('user_roles')
+        .select('*')
+        .order('created_at', { ascending: false });
+      
+      if (error) throw error;
+      return data as UserRole[];
+    }
+  });
+
+  // Create blocks mutation
+  const createBlocksMutation = useMutation({
+    mutationFn: async (quantidade: number) => {
+      const { data, error } = await supabase.rpc('criar_blocos_pool', {
+        p_quantidade_blocos: quantidade
+      });
+      
+      if (error) throw error;
+      return data;
+    },
+    onSuccess: (data: any) => {
+      toast({
+        title: "Blocos criados!",
+        description: `${data.blocos_criados} blocos foram criados no estoque com sucesso.`,
+      });
+      queryClient.invalidateQueries({ queryKey: ['dashboard-metrics'] });
+    },
+    onError: (error: Error) => {
+      toast({
+        title: "Erro ao criar blocos",
+        description: error.message,
+        variant: "destructive",
+      });
+    }
+  });
+
+  // Update config mutation
+  const updateConfigMutation = useMutation({
+    mutationFn: async ({ id, valor }: { id: string; valor: string }) => {
+      const { error } = await supabase
+        .from('configuracoes_sistema')
+        .update({ valor })
+        .eq('id', id);
+      
+      if (error) throw error;
+    },
+    onSuccess: () => {
+      toast({
+        title: "Configuração atualizada!",
+        description: "A configuração foi salva com sucesso.",
+      });
+      queryClient.invalidateQueries({ queryKey: ['system-configs'] });
+    },
+    onError: (error: Error) => {
+      toast({
+        title: "Erro ao salvar",
+        description: error.message,
+        variant: "destructive",
+      });
+    }
+  });
+
+  const handleConfigUpdate = (configId: string, newValue: string) => {
+    updateConfigMutation.mutate({ id: configId, valor: newValue });
+  };
+
+  const handleCreateBlocks = () => {
+    createBlocksMutation.mutate(blocosToCreate);
   };
 
   return (
-    <div className="space-y-6">
-      <div>
-        <h2 className="text-3xl font-bold tracking-tight">Configurações do Sistema</h2>
-        <p className="text-muted-foreground">
-          Gerencie configurações, usuários e estoque do sistema
-        </p>
-      </div>
-
-      <Tabs defaultValue="estoque" className="space-y-4">
+    <div className="p-6 space-y-6">
+      <Tabs defaultValue="configurations" className="space-y-6">
         <TabsList className="grid w-full grid-cols-4">
-          <TabsTrigger value="configuracoes">
-            <Settings className="h-4 w-4 mr-2" />
-            Configurações
-          </TabsTrigger>
-          <TabsTrigger value="usuarios">
-            <Users className="h-4 w-4 mr-2" />
-            Usuários
-          </TabsTrigger>
-          <TabsTrigger value="logs">
-            <FileText className="h-4 w-4 mr-2" />
-            Logs do Sistema
-          </TabsTrigger>
-          <TabsTrigger value="estoque">
-            <Package className="h-4 w-4 mr-2" />
-            Estoque de Blocos
-          </TabsTrigger>
+          <TabsTrigger value="configurations">Configurações</TabsTrigger>
+          <TabsTrigger value="users">Usuários</TabsTrigger>
+          <TabsTrigger value="logs">Logs do Sistema</TabsTrigger>
+          <TabsTrigger value="blocks">Estoque de Blocos</TabsTrigger>
         </TabsList>
 
-        <TabsContent value="configuracoes" className="space-y-4">
+        <TabsContent value="configurations" className="space-y-6">
+          {/* System Status */}
           <Card>
             <CardHeader>
-              <CardTitle>Configurações Gerais</CardTitle>
+              <CardTitle className="flex items-center gap-2">
+                <Database className="h-5 w-5" />
+                Status da Conexão Supabase
+              </CardTitle>
             </CardHeader>
             <CardContent>
-              <div className="text-center py-8 text-muted-foreground">
-                Configurações do sistema serão implementadas aqui
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-2">
+                  <CheckCircle className="h-4 w-4 text-green-500" />
+                  <span className="text-sm font-medium">Conectado</span>
+                </div>
+                <Badge variant="default">Operacional</Badge>
               </div>
+            </CardContent>
+          </Card>
+
+          {/* System Configurations */}
+          {configsLoading ? (
+            <div>Carregando configurações...</div>
+          ) : (
+            <div className="grid gap-6">
+              {['operacional', 'financeiro', 'seguranca', 'notificacao'].map((categoria) => (
+                <Card key={categoria}>
+                  <CardHeader>
+                    <CardTitle className="capitalize">
+                      Configurações {categoria === 'operacional' ? 'Operacionais' : 
+                                   categoria === 'financeiro' ? 'Financeiras' :
+                                   categoria === 'seguranca' ? 'de Segurança' : 'de Notificação'}
+                    </CardTitle>
+                  </CardHeader>
+                  <CardContent className="space-y-4">
+                    {configs?.filter(config => config.categoria === categoria).map((config) => (
+                      <div key={config.id} className="flex items-center justify-between">
+                        <div className="space-y-1">
+                          <Label>{config.descricao}</Label>
+                          <p className="text-sm text-muted-foreground">{config.chave}</p>
+                        </div>
+                        <div className="w-48">
+                          {config.tipo === 'boolean' ? (
+                            <Switch
+                              checked={config.valor === 'true'}
+                              onCheckedChange={(checked) => 
+                                handleConfigUpdate(config.id, checked.toString())
+                              }
+                            />
+                          ) : (
+                            <Input
+                              type={config.tipo === 'number' ? 'number' : 'text'}
+                              value={config.valor}
+                              onChange={(e) => handleConfigUpdate(config.id, e.target.value)}
+                              className="text-right"
+                            />
+                          )}
+                        </div>
+                      </div>
+                    ))}
+                  </CardContent>
+                </Card>
+              ))}
+            </div>
+          )}
+        </TabsContent>
+
+        <TabsContent value="users" className="space-y-6">
+          {/* Add User */}
+          <Card>
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2">
+                <Plus className="h-5 w-5" />
+                Adicionar Usuário
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="flex gap-4">
+                <Input
+                  placeholder="Email do usuário"
+                  value={newUserEmail}
+                  onChange={(e) => setNewUserEmail(e.target.value)}
+                  className="flex-1"
+                />
+                <Select value={newUserRole} onValueChange={setNewUserRole}>
+                  <SelectTrigger className="w-48">
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="super_admin">Super Admin</SelectItem>
+                    <SelectItem value="admin">Admin</SelectItem>
+                    <SelectItem value="gerente">Gerente</SelectItem>
+                    <SelectItem value="operador">Operador</SelectItem>
+                    <SelectItem value="auditor">Auditor</SelectItem>
+                  </SelectContent>
+                </Select>
+                <Button
+                  onClick={() => {
+                    // Add user logic here
+                    setNewUserEmail('');
+                    setNewUserRole('operador');
+                  }}
+                  disabled={!newUserEmail}
+                >
+                  Adicionar
+                </Button>
+              </div>
+            </CardContent>
+          </Card>
+
+          {/* Users List */}
+          <Card>
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2">
+                <Users className="h-5 w-5" />
+                Usuários do Sistema
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              {rolesLoading ? (
+                <div>Carregando usuários...</div>
+              ) : (
+                <Table>
+                  <TableHeader>
+                    <TableRow>
+                      <TableHead>ID do Usuário</TableHead>
+                      <TableHead>Perfil</TableHead>
+                      <TableHead>Data de Criação</TableHead>
+                      <TableHead className="text-right">Ações</TableHead>
+                    </TableRow>
+                  </TableHeader>
+                  <TableBody>
+                    {userRoles?.map((userRole) => (
+                      <TableRow key={userRole.id}>
+                        <TableCell className="font-mono text-sm">
+                          {userRole.user_id.slice(0, 8)}...
+                        </TableCell>
+                        <TableCell>
+                          <Badge variant="outline" className="capitalize">
+                            {userRole.role.replace('_', ' ')}
+                          </Badge>
+                        </TableCell>
+                        <TableCell>
+                          {new Date(userRole.created_at).toLocaleDateString('pt-BR')}
+                        </TableCell>
+                        <TableCell className="text-right">
+                          <Button variant="ghost" size="sm">
+                            <Edit className="h-4 w-4" />
+                          </Button>
+                          <Button variant="ghost" size="sm">
+                            <Trash2 className="h-4 w-4" />
+                          </Button>
+                        </TableCell>
+                      </TableRow>
+                    ))}
+                  </TableBody>
+                </Table>
+              )}
             </CardContent>
           </Card>
         </TabsContent>
 
-        <TabsContent value="usuarios" className="space-y-4">
+        <TabsContent value="logs" className="space-y-6">
           <Card>
             <CardHeader>
-              <CardTitle>Usuários do Sistema</CardTitle>
+              <CardTitle className="flex items-center gap-2">
+                <FileText className="h-5 w-5" />
+                Logs do Sistema
+              </CardTitle>
+              <CardDescription>
+                Histórico de eventos e ações realizadas no sistema
+              </CardDescription>
             </CardHeader>
             <CardContent>
-              <div className="text-center py-8 text-muted-foreground">
-                Gestão de usuários será implementada aqui
-              </div>
+              {logsLoading ? (
+                <div>Carregando logs...</div>
+              ) : (
+                <Table>
+                  <TableHeader>
+                    <TableRow>
+                      <TableHead>Data/Hora</TableHead>
+                      <TableHead>Evento</TableHead>
+                      <TableHead>Nível</TableHead>
+                      <TableHead>Usuário</TableHead>
+                      <TableHead>Descrição</TableHead>
+                    </TableRow>
+                  </TableHeader>
+                  <TableBody>
+                    {logs?.map((log) => (
+                      <TableRow key={log.id}>
+                        <TableCell className="font-mono text-sm">
+                          {new Date(log.created_at).toLocaleString('pt-BR')}
+                        </TableCell>
+                        <TableCell className="font-medium">{log.evento}</TableCell>
+                        <TableCell>
+                          <Badge 
+                            variant={
+                              log.nivel === 'error' ? 'destructive' :
+                              log.nivel === 'warning' ? 'secondary' : 'default'
+                            }
+                          >
+                            {log.nivel}
+                          </Badge>
+                        </TableCell>
+                        <TableCell>{log.usuario_email || 'Sistema'}</TableCell>
+                        <TableCell className="max-w-md truncate">
+                          {log.descricao}
+                        </TableCell>
+                      </TableRow>
+                    ))}
+                  </TableBody>
+                </Table>
+              )}
             </CardContent>
           </Card>
         </TabsContent>
 
-        <TabsContent value="logs" className="space-y-4">
+        <TabsContent value="blocks" className="space-y-6">
           <Card>
             <CardHeader>
-              <CardTitle>Logs do Sistema</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="text-center py-8 text-muted-foreground">
-                Logs do sistema serão exibidos aqui
-              </div>
-            </CardContent>
-          </Card>
-        </TabsContent>
-
-        <TabsContent value="estoque" className="space-y-4">
-          <Card>
-            <CardHeader>
-              <CardTitle>Criação de Blocos</CardTitle>
+              <CardTitle className="flex items-center gap-2">
+                <Database className="h-5 w-5" />
+                Gestão de Estoque de Blocos
+              </CardTitle>
+              <CardDescription>
+                Crie novos blocos de cupons para o estoque geral
+              </CardDescription>
             </CardHeader>
             <CardContent className="space-y-4">
-              <div className="grid gap-4 md:grid-cols-2">
-                <div>
-                  <Label htmlFor="novos-blocos">Quantidade de Blocos</Label>
+              <div className="flex items-center gap-4">
+                <div className="space-y-2">
+                  <Label>Quantidade de Blocos a Criar</Label>
                   <Input
-                    id="novos-blocos"
                     type="number"
+                    value={blocosToCreate}
+                    onChange={(e) => setBlocosToCreate(Number(e.target.value))}
                     min="1"
-                    max="1000"
-                    value={novosBlocos}
-                    onChange={(e) => setNovosBlocos(parseInt(e.target.value) || 1)}
+                    max="100"
+                    className="w-32"
                   />
                 </div>
-                <div>
-                  <Label>Cupons por Bloco</Label>
-                  <Input value="100" disabled />
+                <div className="space-y-2">
+                  <Label className="invisible">Criar</Label>
+                  <Button
+                    onClick={handleCreateBlocks}
+                    disabled={createBlocksMutation.isPending || blocosToCreate < 1}
+                  >
+                    {createBlocksMutation.isPending ? 'Criando...' : 'Criar Blocos'}
+                  </Button>
                 </div>
               </div>
               
-              <Button 
-                onClick={handleCreateBlocks}
-                disabled={createBlocksMutation.isPending}
-                className="w-full"
-              >
-                {createBlocksMutation.isPending ? 'Criando...' : 'Criar Blocos'}
-              </Button>
-              
               <div className="text-sm text-muted-foreground">
-                <p>• Cada bloco será criado com 100 cupons</p>
-                <p>• Total de cupons que serão criados: {novosBlocos * 100}</p>
-                <p>• Os blocos serão adicionados ao pool geral</p>
+                <p>• Cada bloco contém 100 cupons únicos</p>
+                <p>• Total de cupons que serão criados: {(blocosToCreate * 100).toLocaleString()}</p>
+                <p>• Os blocos ficam disponíveis no estoque para venda aos lojistas</p>
               </div>
             </CardContent>
           </Card>

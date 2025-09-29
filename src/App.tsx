@@ -4,7 +4,6 @@ import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
-import Home from "./pages/Home";
 import Index from "./pages/Index";
 import NotFound from "./pages/NotFound";
 import GestaoLojistas from "./pages/GestaoLojistas";
@@ -13,11 +12,11 @@ import RegistroVendas from "./pages/RegistroVendas";
 import Login from "./pages/Login";
 import LoginLojista from "./pages/LoginLojista";
 import LojistaIndex from "./pages/lojista/LojistaIndex";
-import { AuthProvider } from "./components/auth/AuthProvider";
-import { ProtectedRoute } from "./components/auth/ProtectedRoute";
-import HistoricoCupons from "./components/admin/HistoricoCupons";
-import DashboardFinanceiro from "./components/admin/DashboardFinanceiro";
-import RelatoriosAnalises from "./components/admin/RelatoriosAnalises";
+import { CustomAuthProvider } from "./components/auth/CustomAuthProvider";
+import { CustomProtectedRoute } from "./components/auth/CustomProtectedRoute";
+import { HistoricoCupons } from "./components/admin/HistoricoCupons";
+import { DashboardFinanceiro } from "./components/admin/DashboardFinanceiro";
+import { RelatoriosAnalises } from "./components/admin/RelatoriosAnalises";
 import RastreamentoPorBloco from "./components/admin/RastreamentoPorBloco";
 import DashboardMonitoramento from "./components/admin/DashboardMonitoramento";
 import BusinessIntelligence from "./components/admin/BusinessIntelligence";
@@ -28,7 +27,7 @@ const queryClient = new QueryClient();
 
 const App = () => (
   <QueryClientProvider client={queryClient}>
-    <AuthProvider>
+    <CustomAuthProvider>
       <TooltipProvider>
         <Toaster />
         <Sonner />
@@ -39,63 +38,115 @@ const App = () => (
             <Route path="/cadastro-lojista-publico" element={<CadastroLojista />} />
             <Route 
               path="/admin" 
-              element={<Index />}
+              element={
+                <CustomProtectedRoute requiredType="admin">
+                  <Index />
+                </CustomProtectedRoute>
+              } 
             />
             <Route 
               path="/lojista" 
-              element={<LojistaIndex />}
+              element={
+                <CustomProtectedRoute requiredType="lojista">
+                  <LojistaIndex />
+                </CustomProtectedRoute>
+              } 
             />
             <Route 
               path="/cadastro-lojista" 
-              element={<CadastroLojista />}
+              element={
+                <CustomProtectedRoute requiredType="admin">
+                  <CadastroLojista />
+                </CustomProtectedRoute>
+              } 
             />
             <Route 
               path="/registro-vendas" 
-              element={<RegistroVendas />}
+              element={
+                <CustomProtectedRoute requiredType="admin">
+                  <RegistroVendas />
+                </CustomProtectedRoute>
+              } 
             />
             <Route 
               path="/admin/relatorios" 
-              element={<RelatoriosAnalises />}
+              element={
+                <CustomProtectedRoute requiredType="admin">
+                  <RelatoriosAnalises />
+                </CustomProtectedRoute>
+              } 
             />
             <Route 
               path="/admin/historico" 
-              element={<HistoricoCupons />}
+              element={
+                <CustomProtectedRoute requiredType="admin">
+                  <HistoricoCupons />
+                </CustomProtectedRoute>
+              } 
             />
             <Route 
               path="/admin/financeiro" 
-              element={<DashboardFinanceiro />}
+              element={
+                <CustomProtectedRoute requiredType="admin">
+                  <DashboardFinanceiro />
+                </CustomProtectedRoute>
+              } 
             />
             <Route 
               path="/admin/lojistas" 
-              element={<GestaoLojistas />}
+              element={
+                <CustomProtectedRoute requiredType="admin">
+                  <GestaoLojistas />
+                </CustomProtectedRoute>
+              } 
             />
             <Route 
               path="/admin/rastreamento" 
-              element={<RastreamentoPorBloco />}
+              element={
+                <CustomProtectedRoute requiredType="admin">
+                  <RastreamentoPorBloco />
+                </CustomProtectedRoute>
+              } 
             />
             <Route 
               path="/admin/monitoramento" 
-              element={<DashboardMonitoramento />}
+              element={
+                <CustomProtectedRoute requiredType="admin">
+                  <DashboardMonitoramento />
+                </CustomProtectedRoute>
+              } 
             />
             <Route 
               path="/admin/business-intelligence" 
-              element={<BusinessIntelligence />}
+              element={
+                <CustomProtectedRoute requiredType="admin">
+                  <BusinessIntelligence />
+                </CustomProtectedRoute>
+              } 
             />
             <Route 
               path="/admin/auditoria" 
-              element={<AuditoriaCompliance />}
+              element={
+                <CustomProtectedRoute requiredType="admin">
+                  <AuditoriaCompliance />
+                </CustomProtectedRoute>
+              } 
             />
             <Route 
               path="/admin/configuracoes" 
-              element={<ConfiguracoesSistema />}
+              element={
+                <CustomProtectedRoute requiredType="admin">
+                  <ConfiguracoesSistema />
+                </CustomProtectedRoute>
+              } 
             />
-            <Route path="/" element={<Home />} />
+            <Route path="/" element={<LoginLojista />} />
             {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
             <Route path="*" element={<NotFound />} />
           </Routes>
         </BrowserRouter>
       </TooltipProvider>
-    </AuthProvider>
+    </CustomAuthProvider>
   </QueryClientProvider>
 );
 

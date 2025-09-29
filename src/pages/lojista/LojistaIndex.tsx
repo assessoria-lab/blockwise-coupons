@@ -38,7 +38,7 @@ const LojistaIndex = () => {
     );
   }
 
-  if (!Array.isArray(lojas) || lojas.length === 0) {
+  if (lojas.length === 0) {
     return (
       <div className="min-h-screen flex items-center justify-center">
         <Card>
@@ -90,7 +90,7 @@ const LojistaIndex = () => {
 
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         {/* Seletor de Loja */}
-        {Array.isArray(lojas) && lojas.length > 1 && (
+        {lojas.length > 1 && (
           <Card className="mb-6">
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
@@ -107,11 +107,11 @@ const LojistaIndex = () => {
                   <SelectValue placeholder="Selecione uma loja" />
                 </SelectTrigger>
                 <SelectContent>
-                  {Array.isArray(lojas) ? lojas.map((loja) => (
+                  {lojas.map((loja) => (
                     <SelectItem key={loja.id} value={loja.id}>
                       {loja.nome_loja} - {loja.cidade}
                     </SelectItem>
-                  )) : null}
+                  ))}
                 </SelectContent>
               </Select>
             </CardContent>

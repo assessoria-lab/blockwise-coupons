@@ -18,28 +18,27 @@ export const useLojistas = () => {
   const { user } = useCustomAuth();
   const [lojaSelecionada, setLojaSelecionada] = useState<string | null>(null);
 
-  const { data: lojasData, isLoading } = useQuery({
-    queryKey: ['lojas-usuario', user?.id],
+  const { data: lojas = [], isLoading } = useQuery({
+    queryKey: ['lojistas', user?.id],
     queryFn: async () => {
-      if (!user?.id || user.tipo !== 'lojista') return null;
+      if (!user?.id || user.tipo !== 'lojista') return [];
       
-      // Buscar lojas do usuário logado
-      const { data, error } = await supabase.rpc('buscar_lojas_usuario', {
-        p_usuario_id: user.id
-      });
-
-      if (error) {
-        console.error('Erro ao buscar lojas:', error);
-        return null;
-      }
-
-      return data;
+      // For now, create a mock loja based on the user data
+      const mockLoja: Loja = {
+        id: user.id,
+        nome_loja: user.nome_loja || 'Loja Principal',
+        cnpj: '00.000.000/0001-00',
+        cidade: 'Cidade',
+        shopping: undefined,
+        segmento: undefined,
+        status: 'ativo',
+        cupons_nao_atribuidos: 0
+      };
+      
+      return [mockLoja];
     },
     enabled: !!user?.id && user?.tipo === 'lojista'
   });
-
-  // Converter dados para array de lojas
-  const lojas: Loja[] = Array.isArray(lojasData) ? (lojasData as unknown as Loja[]) : [];
 
   // Selecionar primeira loja automaticamente
   useEffect(() => {

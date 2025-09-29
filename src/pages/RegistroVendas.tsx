@@ -54,23 +54,37 @@ const RegistroVendas = () => {
   const { data: lojistas, isLoading: loadingLojistas } = useQuery({
     queryKey: ['lojistas-ativas'],
     queryFn: async () => {
-      // Mock data for now to avoid database issues
-      return [
-        {
-          id: '1',
-          nome: 'Loja Exemplo',
-          nome_loja: 'Loja Exemplo',
-          cidade: 'Goiânia',
-          cupons_disponiveis: 50
-        },
-        {
-          id: '2',
-          nome: 'Loja Teste',
-          nome_loja: 'Loja Teste',
-          cidade: 'Anápolis',
-          cupons_disponiveis: 30
-        }
-      ];
+      const { data, error } = await supabase
+        .from('lojistas')
+        .select(`
+          id,
+          nome_loja,
+          cidade,
+          shopping
+        `)
+        .eq('status', 'ativo');
+
+      if (error) throw error;
+
+      // Buscar cupons disponíveis para cada lojista
+      const lojistasComCupons = await Promise.all(
+        (data || []).map(async (lojista) => {
+          const { data: blocos } = await supabase
+            .from('blocos')
+            .select('cupons_disponiveis')
+            .eq('lojista_id', lojista.id)
+            .eq('status', 'vendido');
+
+          const cupons_disponiveis = blocos?.reduce((acc, bloco) => acc + (bloco.cupons_disponiveis || 0), 0) || 0;
+
+          return {
+            ...lojista,
+            cupons_disponiveis
+          };
+        })
+      );
+
+      return lojistasComCupons.filter(l => l.cupons_disponiveis > 0);
     }
   });
 
@@ -78,9 +92,12 @@ const RegistroVendas = () => {
   const atribuirCuponsMutation = useMutation({
     mutationFn: async (dados: FormData) => {
       const { data, error } = await supabase.rpc('atribuir_cupons_para_cliente', {
-        p_cliente_id: dados.cpf.replace(/\D/g, ''),
-        p_quantidade: Math.floor(parseFloat(dados.valor_compra) / 100),
-        p_valor_compra: parseFloat(dados.valor_compra)
+        p_lojista_id: dados.lojista_id,
+        p_cliente_cpf: dados.cpf.replace(/\D/g, ''),
+        p_cliente_nome: dados.nome,
+        p_cliente_telefone: dados.telefone,
+        p_valor_compra: parseFloat(dados.valor_compra),
+        p_tipo_cliente: dados.tipo_cliente
       });
 
       if (error) throw error;

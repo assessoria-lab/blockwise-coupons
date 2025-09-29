@@ -10,7 +10,6 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Loader2, Store, ChevronLeft, Plus, X, CheckCircle, ShoppingCart, UserPlus } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
-import { useAuth } from '@/hooks/useAuth';
 import { z } from 'zod';
 interface Lojista {
   id?: string;
@@ -98,26 +97,27 @@ export default function CadastroLojista() {
   } = useQuery({
     queryKey: ['segmentos'],
     queryFn: async () => {
-      // Mock data for now to avoid database issues
-      return [
-        { id: '1', nome: 'Moda e Vestuário', categoria: 'moda' },
-        { id: '2', nome: 'Calçados', categoria: 'calcados' },
-        { id: '3', nome: 'Acessórios', categoria: 'acessorios' },
-        { id: '4', nome: 'Perfumaria', categoria: 'perfumaria' },
-        { id: '5', nome: 'Ótica', categoria: 'otica' }
-      ] as Segmento[];
+      const {
+        data,
+        error
+      } = await supabase.from('segmentos').select('id, nome, categoria').eq('ativo', true).order('nome');
+      if (error) throw error;
+      return data as Segmento[];
     }
   });
 
   // Mutation para criar novo segmento
   const criarNovoSegmentoMutation = useMutation({
     mutationFn: async (nomeSegmento: string) => {
-      // Mock creation for now
-      return { 
-        id: Date.now().toString(),
+      const {
+        data,
+        error
+      } = await supabase.from('segmentos').insert([{
         nome: nomeSegmento,
         categoria: 'moda_vestuario'
-      };
+      }]).select().single();
+      if (error) throw error;
+      return data;
     },
     onSuccess: novoSegmentoData => {
       queryClient.invalidateQueries({
@@ -143,69 +143,54 @@ export default function CadastroLojista() {
     }
   });
 
-  // Mutation para salvar lojista usando Supabase Auth
+  // Mutation para salvar lojista
   const salvarLojistaMutation = useMutation({
     mutationFn: async (data: Lojista) => {
       try {
-        const { senha, confirmar_senha, ...lojistaData } = data;
-        
         // 1. Criar usuário no Supabase Auth
-        const { data: authData, error: authError } = await supabase.auth.signUp({
-          email: lojistaData.email!,
-          password: senha!,
+        const { data: authUser, error: authError } = await supabase.auth.signUp({
+          email: data.email!,
+          password: data.senha!,
           options: {
-            emailRedirectTo: `${window.location.origin}/login-lojista`,
-            data: {
-              nome: lojistaData.responsavel_nome || lojistaData.nome_loja,
-              telefone: lojistaData.telefone
-            }
+            emailRedirectTo: `${window.location.origin}/lojista`
           }
         });
 
-        if (authError) {
-          console.error('Erro ao criar usuário:', authError);
-          throw new Error(`Erro ao criar usuário: ${authError.message}`);
-        }
+        if (authError) throw authError;
+        if (!authUser.user) throw new Error('Falha ao criar usuário');
 
-        if (!authData.user) {
-          throw new Error('Erro: usuário não foi criado');
-        }
-
-        // 2. Wait for session to be established
-        let attempts = 0;
-        const maxAttempts = 10;
-        
-        while (attempts < maxAttempts) {
-          const { data: { session } } = await supabase.auth.getSession();
-          if (session?.user) {
-            break;
-          }
-          await new Promise(resolve => setTimeout(resolve, 500));
-          attempts++;
-        }
-
-        // 3. Usar função segura para criar loja
-        const { data: lojaResult, error: lojaError } = await supabase.rpc('criar_loja_apos_signup', {
-          p_user_id: authData.user.id,
-          p_nome_loja: lojistaData.nome_loja,
-          p_cnpj: lojistaData.cnpj,
-          p_cidade: lojistaData.cidade,
-          p_shopping: lojistaData.shopping,
-          p_segmento: lojistaData.segmento,
-          p_endereco: lojistaData.endereco
-        });
+        // 2. Criar loja vinculada ao usuário (sem senha)
+        const { senha, confirmar_senha, ...lojistaData } = data;
+        const { data: novaLoja, error: lojaError } = await supabase
+          .from('lojistas')
+          .insert([{
+            ...lojistaData,
+            user_id: authUser.user.id
+          }])
+          .select()
+          .single();
 
         if (lojaError) {
           console.error('Erro ao criar loja:', lojaError);
           throw new Error(`Erro ao criar loja: ${lojaError.message}`);
         }
 
-        const result = lojaResult as any;
-        if (!result?.success) {
-          throw new Error(result?.message || 'Erro ao criar loja');
+        // 3. Criar perfil do usuário (sem referência à loja específica)
+        const { error: profileError } = await supabase
+          .from('profiles')
+          .insert([{
+            user_id: authUser.user.id,
+            nome: data.responsavel_nome || data.nome_loja,
+            email: data.email!,
+            tipo_usuario: 'lojista'
+          }]);
+
+        if (profileError) {
+          console.error('Erro ao criar perfil:', profileError);
+          throw new Error(`Erro ao criar perfil: ${profileError.message}`);
         }
 
-        return { success: true, user: authData.user };
+        return novaLoja;
       } catch (error) {
         console.error('Erro completo no cadastro:', error);
         throw error;
