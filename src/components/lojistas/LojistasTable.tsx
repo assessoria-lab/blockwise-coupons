@@ -1,4 +1,6 @@
-import { useMemo, useState, useEffect } from 'react';
+import { useMemo, useState } from 'react';
+import { useQuery } from '@tanstack/react-query';
+import { supabase } from '@/integrations/supabase/client';
 import {
   flexRender,
   getCoreRowModel,
@@ -16,6 +18,20 @@ import { Search, Plus, Edit, DollarSign } from 'lucide-react';
 import { VendaBlocosModal } from './VendaBlocosModal';
 import { LojistaModal } from './LojistaModal';
 
+interface LojaDB {
+  id: string;
+  nome_loja: string;
+  cnpj?: string;
+  shopping?: string;
+  segmento?: string;
+  ativo: boolean;
+  cidade?: string;
+  endereco?: string;
+  user_id?: string;
+  created_at?: string;
+  updated_at?: string;
+}
+
 interface Lojista {
   id: string;
   nome_loja: string;
@@ -23,13 +39,13 @@ interface Lojista {
   shopping?: string;
   segmento?: string;
   status: string;
-  cupons_nao_atribuidos: number;
-  blocos_comprados?: number;
+  cidade: string;
+  endereco?: string;
   telefone?: string;
   email?: string;
   responsavel_nome?: string;
-  cidade: string;
-  endereco?: string;
+  cupons_nao_atribuidos?: number;
+  blocos_comprados?: number;
 }
 
 export const LojistasTable = () => {
@@ -42,24 +58,54 @@ export const LojistasTable = () => {
   const [showLojistaModal, setShowLojistaModal] = useState(false);
   const [editingLojista, setEditingLojista] = useState<Lojista | null>(null);
 
-  // Mock data
-  const lojistas: Lojista[] = [
-    {
-      id: '1',
-      nome_loja: 'Loja Exemplo',
-      cnpj: '12345678000190',
-      shopping: 'Shopping Center',
-      segmento: 'Vestuário',
-      status: 'ativo',
-      cupons_nao_atribuidos: 150,
-      blocos_comprados: 5,
-      telefone: '(11) 99999-9999',
-      email: 'loja@exemplo.com',
-      responsavel_nome: 'João Silva',
-      cidade: 'São Paulo',
-      endereco: 'Rua Exemplo, 123'
-    }
-  ];
+  // Buscar lojas do banco de dados
+  const { data: lojasDB = [], isLoading, refetch } = useQuery({
+    queryKey: ['lojas', searchInput, statusFilter],
+    queryFn: async () => {
+      console.log('🔍 Buscando lojas do banco de dados...');
+      
+      let query = supabase
+        .from('lojas')
+        .select('*')
+        .order('created_at', { ascending: false });
+
+      // Filtrar por status
+      if (statusFilter !== 'todos') {
+        query = query.eq('ativo', statusFilter === 'ativo');
+      }
+
+      // Buscar por nome
+      if (searchInput) {
+        query = query.ilike('nome_loja', `%${searchInput}%`);
+      }
+
+      const { data, error } = await query;
+
+      if (error) {
+        console.error('❌ Erro ao buscar lojas:', error);
+        return [];
+      }
+
+      console.log('✅ Lojas carregadas:', data?.length);
+      return (data || []) as LojaDB[];
+    },
+  });
+
+  // Converter dados do banco para o formato da interface
+  const lojistas: Lojista[] = useMemo(() => {
+    return lojasDB.map(loja => ({
+      id: loja.id,
+      nome_loja: loja.nome_loja,
+      cnpj: loja.cnpj || '',
+      shopping: loja.shopping,
+      segmento: loja.segmento,
+      status: loja.ativo ? 'ativo' : 'inativo',
+      cidade: loja.cidade || '',
+      endereco: loja.endereco,
+      cupons_nao_atribuidos: 0,
+      blocos_comprados: 0,
+    }));
+  }, [lojasDB]);
 
   const columns = useMemo(() => [
     {
@@ -93,27 +139,10 @@ export const LojistasTable = () => {
       ),
     },
     {
-      accessorKey: 'responsavel_nome',
-      header: 'Responsável',
-    },
-    {
-      accessorKey: 'blocos_comprados',
-      header: 'Blocos Comprados',
+      accessorKey: 'cidade',
+      header: 'Cidade',
       cell: ({ row }: any) => (
-        <div className="text-center font-semibold">
-          {row.getValue('blocos_comprados') || 0}
-        </div>
-      ),
-    },
-    {
-      accessorKey: 'cupons_nao_atribuidos',
-      header: 'Cupons Disponíveis',
-      cell: ({ row }: any) => (
-        <div className="text-center">
-          <Badge variant="outline" className="font-mono">
-            {(row.getValue('cupons_nao_atribuidos') || 0).toLocaleString()}
-          </Badge>
-        </div>
+        <div>{row.getValue('cidade') || 'Não informado'}</div>
       ),
     },
     {
@@ -121,10 +150,9 @@ export const LojistasTable = () => {
       header: 'Status',
       cell: ({ row }: any) => {
         const status = row.getValue('status');
-        const variant = status === 'ativo' ? 'default' : status === 'inativo' ? 'secondary' : 'destructive';
         return (
-          <Badge variant={variant}>
-            {status}
+          <Badge variant={status === 'ativo' ? 'default' : 'secondary'}>
+            {status === 'ativo' ? 'Ativo' : 'Inativo'}
           </Badge>
         );
       },
@@ -231,7 +259,13 @@ export const LojistasTable = () => {
             ))}
           </TableHeader>
           <TableBody>
-            {table.getRowModel().rows?.length ? (
+            {isLoading ? (
+              <TableRow>
+                <TableCell colSpan={columns.length} className="h-24 text-center">
+                  Carregando lojas...
+                </TableCell>
+              </TableRow>
+            ) : table.getRowModel().rows?.length ? (
               table.getRowModel().rows.map((row) => (
                 <TableRow
                   key={row.id}
@@ -247,7 +281,7 @@ export const LojistasTable = () => {
             ) : (
               <TableRow>
                 <TableCell colSpan={columns.length} className="h-24 text-center">
-                  Nenhum lojista encontrado.
+                  Nenhuma loja encontrada.
                 </TableCell>
               </TableRow>
             )}
@@ -263,7 +297,7 @@ export const LojistasTable = () => {
             setSelectedLojista(null);
           }}
           onSuccess={() => {
-            // Refresh data
+            refetch();
           }}
         />
       )}
@@ -276,7 +310,7 @@ export const LojistasTable = () => {
           setEditingLojista(null);
         }}
         onSuccess={() => {
-          // Refresh data
+          refetch();
         }}
       />
     </div>
