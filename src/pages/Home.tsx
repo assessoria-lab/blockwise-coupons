@@ -115,7 +115,7 @@ const Home = () => {
         <div className="grid md:grid-cols-2 gap-6 animate-fade-in" style={{ animationDelay: '0.3s' }}>
           <Button
             onClick={() => navigate('/login')}
-            className="h-20 text-lg bg-[#034001] hover:bg-[#042d01] text-white shadow-xl hover:shadow-2xl transition-all duration-200 border-0"
+            className="h-20 text-lg bg-[#034001] hover:bg-[#042d01] text-white shadow-xl hover:shadow-2xl transition-all duration-200 border-2 border-white/20 hover:border-white/30"
             size="lg"
           >
             <Shield className="mr-3 h-6 w-6" />
@@ -124,7 +124,7 @@ const Home = () => {
           
           <Button
             onClick={() => navigate('/login-lojista')}
-            className="h-20 text-lg bg-[#42A626] hover:bg-[#368a1f] text-white shadow-xl hover:shadow-2xl transition-all duration-200 border-0"
+            className="h-20 text-lg bg-[#42A626] hover:bg-[#368a1f] text-white shadow-xl hover:shadow-2xl transition-all duration-200 border-2 border-white/20 hover:border-white/30"
             size="lg"
           >
             <Store className="mr-3 h-6 w-6" />
