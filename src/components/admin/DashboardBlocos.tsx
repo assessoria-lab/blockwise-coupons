@@ -1,9 +1,10 @@
 import React from 'react';
-import { useQuery } from '@tanstack/react-query';
-import { supabase } from '@/integrations/supabase/client';
 import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Package, Users, TrendingUp, RefreshCw } from 'lucide-react';
+import GraficoRegioesLojistas from './GraficoRegioesLojistas';
+import RankingCompraBlocos from './RankingCompraBlocos';
+import RankingAtribuicaoCupons from './RankingAtribuicaoCupons';
 
 interface DashboardMetrics {
   total_blocos: number;
@@ -129,6 +130,14 @@ const DashboardBlocos = () => {
           </div>
         </CardContent>
       </Card>
+
+      {/* Gráficos e Rankings */}
+      <div className="grid gap-6 md:grid-cols-2">
+        <GraficoRegioesLojistas />
+        <RankingCompraBlocos />
+      </div>
+
+      <RankingAtribuicaoCupons />
     </div>
   );
 };
