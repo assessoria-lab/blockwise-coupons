@@ -25,6 +25,32 @@ export const generateCuponsPDF = async (
   // Usar a arte oficial do Show de Prêmios
   const backgroundImage = '/assets/cupom-template.png';
 
+  // Formato 10x15 cm (283.46 x 425.20 pontos no PDF)
+  // Convertendo para pixels para trabalhar: 10cm = ~378px, 15cm = ~567px (96 DPI)
+  const pageWidthCm = 10;
+  const pageHeightCm = 15;
+  const pageWidth = pageWidthCm * 28.346; // Conversão cm para pontos
+  const pageHeight = pageHeightCm * 28.346;
+  
+  // Criar o PDF no formato 10x15 cm (retrato)
+  const pdf = new jsPDF('portrait', 'pt', [pageWidth, pageHeight]);
+  
+  // Dimensões do cupom proporcional (baseado na arte original 1263x842)
+  const aspectRatio = 1263 / 842; // ~1.5
+  const margin = 5;
+  const cupomHeight = (pageHeight / 2) - (margin * 1.5); // 2 cupons por página verticalmente
+  const cupomWidth = cupomHeight * aspectRatio;
+  
+  // Se o cupom não cabe na largura, ajustar pela largura
+  const maxCupomWidth = pageWidth - (margin * 2);
+  let finalCupomWidth = cupomWidth;
+  let finalCupomHeight = cupomHeight;
+  
+  if (cupomWidth > maxCupomWidth) {
+    finalCupomWidth = maxCupomWidth;
+    finalCupomHeight = finalCupomWidth / aspectRatio;
+  }
+
   // Criar um container temporário fora da tela
   const tempContainer = document.createElement('div');
   tempContainer.style.position = 'absolute';
@@ -34,23 +60,19 @@ export const generateCuponsPDF = async (
   tempContainer.style.height = '842px';  // Altura da arte original
   document.body.appendChild(tempContainer);
 
-  // Criar o PDF - formato landscape para acomodar a arte
-  const pdf = new jsPDF('landscape', 'px', [842, 595]); // A4 landscape
-  const pageWidth = 842;
-  const pageHeight = 595;
-  const cupomWidth = 800;
-  const cupomHeight = 530;
-  const margin = 21;
-
-  let isFirstPage = true;
-
+  // Processar cupons em lotes de 2 por página
   for (let i = 0; i < cupons.length; i++) {
-    if (!isFirstPage) {
+    const cupom = cupons[i];
+    const positionInPage = i % 2; // 0 = primeiro cupom, 1 = segundo cupom
+    
+    // Adicionar nova página se necessário (exceto na primeira vez e no primeiro cupom da página)
+    if (i > 0 && positionInPage === 0) {
       pdf.addPage();
     }
-    isFirstPage = false;
-
-    const cupom = cupons[i];
+    
+    // Calcular posição Y do cupom na página
+    const yPosition = margin + (positionInPage * (finalCupomHeight + margin));
+    const xPosition = (pageWidth - finalCupomWidth) / 2; // Centralizar horizontalmente
 
     // Criar o HTML do cupom usando a arte oficial como fundo
     tempContainer.innerHTML = `
@@ -226,7 +248,7 @@ export const generateCuponsPDF = async (
       });
 
       const imgData = canvas.toDataURL('image/png');
-      pdf.addImage(imgData, 'PNG', margin, margin, cupomWidth, cupomHeight);
+      pdf.addImage(imgData, 'PNG', xPosition, yPosition, finalCupomWidth, finalCupomHeight);
     } catch (error) {
       console.error('Erro ao gerar imagem do cupom:', error);
     }
