@@ -94,7 +94,7 @@ const Login = () => {
           </div>
           <CardTitle className="text-2xl font-bold">SHOW DE PRÊMIOS</CardTitle>
           <CardDescription>
-            Painel Administrativo - Faça login para acessar
+            LOGIN ADMINISTRADOR
           </CardDescription>
         </CardHeader>
         <CardContent>
