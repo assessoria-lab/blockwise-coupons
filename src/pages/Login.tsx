@@ -92,7 +92,7 @@ const Login = () => {
               className="h-16 w-auto"
             />
           </div>
-          <CardTitle className="text-2xl font-bold">Show de Prêmios</CardTitle>
+          <CardTitle className="text-2xl font-bold">SHOW DE PRÊMIOS</CardTitle>
           <CardDescription>
             Painel Administrativo - Faça login para acessar
           </CardDescription>
