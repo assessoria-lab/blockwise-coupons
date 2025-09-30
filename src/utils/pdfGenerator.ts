@@ -57,16 +57,16 @@ const generateSinglePDF = async (
   const cupomHeight = cupomHeightCm * 28.346; // ~425.19 pt
   
   // Calcular quantos cupons cabem por página
-  // Horizontal: 21 cm / 10 cm = 2 cupons
-  // Vertical: 29.7 cm / 15 cm = 1 cupom (sobram ~14.7 cm)
-  const cuponsPerRow = 2;
-  const cuponsPerColumn = 1;
+  // Horizontal: 1 cupom centralizado
+  // Vertical: 2 cupons (um acima do outro)
+  const cuponsPerRow = 1;
+  const cuponsPerColumn = 2;
   const cuponsPerPage = cuponsPerRow * cuponsPerColumn; // 2 cupons por página
   
   // Calcular margens para centralizar os cupons
-  const totalWidth = cuponsPerRow * cupomWidth;
-  const marginX = (pageWidth - totalWidth) / 2;
-  const marginY = (pageHeight - cupomHeight) / 2;
+  const marginX = (pageWidth - cupomWidth) / 2; // Centralizar horizontalmente
+  const totalHeight = cuponsPerColumn * cupomHeight;
+  const marginY = (pageHeight - totalHeight) / 2; // Centralizar verticalmente
 
   // Criar um container temporário
   const tempContainer = document.createElement('div');
@@ -88,11 +88,11 @@ const generateSinglePDF = async (
       pdf.addPage();
     }
     
-    // Calcular posição do cupom na página (2 cupons lado a lado)
-    const row = Math.floor(positionInPage / cuponsPerRow);
-    const col = positionInPage % cuponsPerRow;
+    // Calcular posição do cupom na página (2 cupons verticalmente)
+    const row = Math.floor(positionInPage / cuponsPerRow); // 0 ou 1 (primeiro ou segundo cupom)
+    const col = positionInPage % cuponsPerRow; // Sempre 0 (centralizado)
     
-    const xPosition = marginX + (col * cupomWidth);
+    const xPosition = marginX + (col * cupomWidth); // Sempre marginX (centralizado)
     const yPosition = marginY + (row * cupomHeight);
 
     // Criar o HTML do cupom usando a arte oficial como fundo
