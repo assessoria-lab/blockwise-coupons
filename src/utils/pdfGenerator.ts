@@ -50,11 +50,11 @@ const generateSinglePDF = async (
   // Criar o PDF no formato A4 (retrato)
   const pdf = new jsPDF('portrait', 'pt', 'a4');
   
-  // Dimensões do cupom: 10 x 15 cm em pontos (1 cm = 28.346 pontos)
-  const cupomWidthCm = 10;
-  const cupomHeightCm = 15;
-  const cupomWidth = cupomWidthCm * 28.346; // ~283.46 pt
-  const cupomHeight = cupomHeightCm * 28.346; // ~425.19 pt
+  // Dimensões do cupom: 15 x 10 cm em pontos (1 cm = 28.346 pontos)
+  const cupomWidthCm = 15;
+  const cupomHeightCm = 10;
+  const cupomWidth = cupomWidthCm * 28.346; // ~425.19 pt
+  const cupomHeight = cupomHeightCm * 28.346; // ~283.46 pt
   
   // Calcular quantos cupons cabem por página
   // Horizontal: 1 cupom centralizado
