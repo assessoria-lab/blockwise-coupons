@@ -43,29 +43,30 @@ const generateSinglePDF = async (
   // Usar a arte oficial do Show de Prêmios
   const backgroundImage = '/assets/cupom-template.png';
 
-  // Formato 10x15 cm (283.46 x 425.20 pontos no PDF)
-  const pageWidthCm = 10;
-  const pageHeightCm = 15;
-  const pageWidth = pageWidthCm * 28.346;
-  const pageHeight = pageHeightCm * 28.346;
+  // Formato A4 (21 x 29.7 cm = 595.28 x 841.89 pontos)
+  const pageWidth = 595.28;
+  const pageHeight = 841.89;
   
-  // Criar o PDF no formato 10x15 cm (retrato)
-  const pdf = new jsPDF('portrait', 'pt', [pageWidth, pageHeight]);
+  // Criar o PDF no formato A4 (retrato)
+  const pdf = new jsPDF('portrait', 'pt', 'a4');
   
-  // Dimensões do cupom proporcional
-  const aspectRatio = 1263 / 842;
-  const margin = 5;
-  const cupomHeight = (pageHeight / 2) - (margin * 1.5);
-  const cupomWidth = cupomHeight * aspectRatio;
+  // Dimensões do cupom: 10 x 15 cm em pontos (1 cm = 28.346 pontos)
+  const cupomWidthCm = 10;
+  const cupomHeightCm = 15;
+  const cupomWidth = cupomWidthCm * 28.346; // ~283.46 pt
+  const cupomHeight = cupomHeightCm * 28.346; // ~425.19 pt
   
-  const maxCupomWidth = pageWidth - (margin * 2);
-  let finalCupomWidth = cupomWidth;
-  let finalCupomHeight = cupomHeight;
+  // Calcular quantos cupons cabem por página
+  // Horizontal: 21 cm / 10 cm = 2 cupons
+  // Vertical: 29.7 cm / 15 cm = 1 cupom (sobram ~14.7 cm)
+  const cuponsPerRow = 2;
+  const cuponsPerColumn = 1;
+  const cuponsPerPage = cuponsPerRow * cuponsPerColumn; // 2 cupons por página
   
-  if (cupomWidth > maxCupomWidth) {
-    finalCupomWidth = maxCupomWidth;
-    finalCupomHeight = finalCupomWidth / aspectRatio;
-  }
+  // Calcular margens para centralizar os cupons
+  const totalWidth = cuponsPerRow * cupomWidth;
+  const marginX = (pageWidth - totalWidth) / 2;
+  const marginY = (pageHeight - cupomHeight) / 2;
 
   // Criar um container temporário
   const tempContainer = document.createElement('div');
@@ -76,19 +77,23 @@ const generateSinglePDF = async (
   tempContainer.style.height = '842px';
   document.body.appendChild(tempContainer);
 
-  // Processar cupons em lotes de 2 por página
+  // Processar cupons
   for (let i = 0; i < cupons.length; i++) {
     const cupom = cupons[i];
-    const positionInPage = i % 2; // 0 = primeiro cupom, 1 = segundo cupom
+    const pageIndex = Math.floor(i / cuponsPerPage);
+    const positionInPage = i % cuponsPerPage;
     
-    // Adicionar nova página se necessário (exceto na primeira vez e no primeiro cupom da página)
+    // Adicionar nova página se necessário
     if (i > 0 && positionInPage === 0) {
       pdf.addPage();
     }
     
-    // Calcular posição Y do cupom na página
-    const yPosition = margin + (positionInPage * (finalCupomHeight + margin));
-    const xPosition = (pageWidth - finalCupomWidth) / 2; // Centralizar horizontalmente
+    // Calcular posição do cupom na página (2 cupons lado a lado)
+    const row = Math.floor(positionInPage / cuponsPerRow);
+    const col = positionInPage % cuponsPerRow;
+    
+    const xPosition = marginX + (col * cupomWidth);
+    const yPosition = marginY + (row * cupomHeight);
 
     // Criar o HTML do cupom usando a arte oficial como fundo
     tempContainer.innerHTML = `
@@ -264,7 +269,7 @@ const generateSinglePDF = async (
       });
 
       const imgData = canvas.toDataURL('image/jpeg', 0.85); // JPEG com qualidade 85% para reduzir tamanho
-      pdf.addImage(imgData, 'JPEG', xPosition, yPosition, finalCupomWidth, finalCupomHeight);
+      pdf.addImage(imgData, 'JPEG', xPosition, yPosition, cupomWidth, cupomHeight);
     } catch (error) {
       console.error('Erro ao gerar imagem do cupom:', error);
     }
