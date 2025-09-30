@@ -22,26 +22,42 @@ export const generateCuponsPDF = async (
     throw new Error('Nenhum cupom para gerar PDF');
   }
 
+  // Limitar quantidade de cupons por PDF para evitar erro de memória
+  const MAX_CUPONS_PER_PDF = 50;
+  const totalPDFs = Math.ceil(cupons.length / MAX_CUPONS_PER_PDF);
+  
+  for (let pdfIndex = 0; pdfIndex < totalPDFs; pdfIndex++) {
+    const startIndex = pdfIndex * MAX_CUPONS_PER_PDF;
+    const endIndex = Math.min(startIndex + MAX_CUPONS_PER_PDF, cupons.length);
+    const cuponsBatch = cupons.slice(startIndex, endIndex);
+    
+    await generateSinglePDF(cuponsBatch, pdfIndex + 1, totalPDFs);
+  }
+};
+
+const generateSinglePDF = async (
+  cupons: CupomData[],
+  pdfNumber: number,
+  totalPDFs: number
+): Promise<void> => {
   // Usar a arte oficial do Show de Prêmios
   const backgroundImage = '/assets/cupom-template.png';
 
   // Formato 10x15 cm (283.46 x 425.20 pontos no PDF)
-  // Convertendo para pixels para trabalhar: 10cm = ~378px, 15cm = ~567px (96 DPI)
   const pageWidthCm = 10;
   const pageHeightCm = 15;
-  const pageWidth = pageWidthCm * 28.346; // Conversão cm para pontos
+  const pageWidth = pageWidthCm * 28.346;
   const pageHeight = pageHeightCm * 28.346;
   
   // Criar o PDF no formato 10x15 cm (retrato)
   const pdf = new jsPDF('portrait', 'pt', [pageWidth, pageHeight]);
   
-  // Dimensões do cupom proporcional (baseado na arte original 1263x842)
-  const aspectRatio = 1263 / 842; // ~1.5
+  // Dimensões do cupom proporcional
+  const aspectRatio = 1263 / 842;
   const margin = 5;
-  const cupomHeight = (pageHeight / 2) - (margin * 1.5); // 2 cupons por página verticalmente
+  const cupomHeight = (pageHeight / 2) - (margin * 1.5);
   const cupomWidth = cupomHeight * aspectRatio;
   
-  // Se o cupom não cabe na largura, ajustar pela largura
   const maxCupomWidth = pageWidth - (margin * 2);
   let finalCupomWidth = cupomWidth;
   let finalCupomHeight = cupomHeight;
@@ -51,13 +67,13 @@ export const generateCuponsPDF = async (
     finalCupomHeight = finalCupomWidth / aspectRatio;
   }
 
-  // Criar um container temporário fora da tela
+  // Criar um container temporário
   const tempContainer = document.createElement('div');
   tempContainer.style.position = 'absolute';
   tempContainer.style.left = '-9999px';
   tempContainer.style.top = '-9999px';
-  tempContainer.style.width = '1263px'; // Largura da arte original
-  tempContainer.style.height = '842px';  // Altura da arte original
+  tempContainer.style.width = '1263px';
+  tempContainer.style.height = '842px';
   document.body.appendChild(tempContainer);
 
   // Processar cupons em lotes de 2 por página
@@ -236,19 +252,19 @@ export const generateCuponsPDF = async (
       </div>
     `;
 
-    // Converter para canvas e adicionar ao PDF
+    // Converter para canvas com scale reduzido para diminuir tamanho
     try {
       const canvas = await html2canvas(tempContainer, {
         width: 1263,
         height: 842,
-        scale: 1.5,
+        scale: 1, // Reduzido de 1.5 para 1 para economizar memória
         useCORS: true,
         allowTaint: true,
         backgroundColor: '#ffffff'
       });
 
-      const imgData = canvas.toDataURL('image/png');
-      pdf.addImage(imgData, 'PNG', xPosition, yPosition, finalCupomWidth, finalCupomHeight);
+      const imgData = canvas.toDataURL('image/jpeg', 0.85); // JPEG com qualidade 85% para reduzir tamanho
+      pdf.addImage(imgData, 'JPEG', xPosition, yPosition, finalCupomWidth, finalCupomHeight);
     } catch (error) {
       console.error('Erro ao gerar imagem do cupom:', error);
     }
@@ -258,7 +274,9 @@ export const generateCuponsPDF = async (
   document.body.removeChild(tempContainer);
 
   // Fazer download do PDF
-  const fileName = `cupons_show_premios_${new Date().toISOString().split('T')[0]}.pdf`;
+  const fileName = totalPDFs > 1 
+    ? `cupons_show_premios_parte${pdfNumber}_de_${totalPDFs}_${new Date().toISOString().split('T')[0]}.pdf`
+    : `cupons_show_premios_${new Date().toISOString().split('T')[0]}.pdf`;
   pdf.save(fileName);
 };
 
