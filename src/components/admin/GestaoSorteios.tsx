@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -40,6 +40,7 @@ const GestaoSorteios = () => {
   const { toast } = useToast();
   const [loading, setLoading] = useState(false);
   const [ganhadores, setGanhadores] = useState<Ganhador[]>([]);
+  const isGeneratingPDF = useRef(false);
   const [filtroData, setFiltroData] = useState({
     data_inicio: '',
     data_fim: '',
@@ -104,6 +105,13 @@ const GestaoSorteios = () => {
   };
 
   const handleDownloadCupons = async () => {
+    // Prevenir múltiplas execuções simultâneas
+    if (isGeneratingPDF.current) {
+      console.log('PDF já está sendo gerado, ignorando nova chamada');
+      return;
+    }
+
+    isGeneratingPDF.current = true;
     setLoading(true);
     try {
       let query = supabase
@@ -178,6 +186,7 @@ const GestaoSorteios = () => {
       });
     } finally {
       setLoading(false);
+      isGeneratingPDF.current = false;
     }
   };
 
