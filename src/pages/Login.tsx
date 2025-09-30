@@ -89,7 +89,7 @@ const Login = () => {
             <img 
               src="/assets/logo-show-premios.png" 
               alt="Show de Prêmios" 
-              className="h-16 w-auto"
+              className="h-32 w-auto"
             />
           </div>
           <CardTitle className="text-2xl font-bold">SHOW DE PRÊMIOS</CardTitle>
