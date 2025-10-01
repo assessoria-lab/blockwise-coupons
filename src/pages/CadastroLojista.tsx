@@ -93,18 +93,32 @@ export default function CadastroLojista() {
 
   // Carregar segmentos disponíveis
   const {
-    data: segmentos = []
+    data: segmentos = [],
+    isLoading: isLoadingSegmentos,
+    error: segmentosError
   } = useQuery({
     queryKey: ['segmentos'],
     queryFn: async () => {
+      console.log('Buscando segmentos...');
       const {
         data,
         error
       } = await supabase.from('segmentos').select('id, nome, categoria').eq('ativo', true).order('nome');
-      if (error) throw error;
+      
+      console.log('Resultado da busca:', { data, error });
+      
+      if (error) {
+        console.error('Erro ao buscar segmentos:', error);
+        throw error;
+      }
       return data as Segmento[];
     }
   });
+
+  // Log para debug
+  useEffect(() => {
+    console.log('Segmentos carregados:', segmentos);
+  }, [segmentos]);
 
   // Mutation para criar novo segmento
   const criarNovoSegmentoMutation = useMutation({
@@ -399,7 +413,16 @@ export default function CadastroLojista() {
                     <Label className="text-sm font-medium">
                       Segmento
                     </Label>
-                    {!mostrarNovoSegmento ? <Select value={formData.segmento} onValueChange={value => {
+                    {isLoadingSegmentos ? (
+                      <div className="h-12 flex items-center justify-center border rounded-md bg-white">
+                        <Loader2 className="h-4 w-4 animate-spin text-muted-foreground" />
+                        <span className="ml-2 text-sm text-muted-foreground">Carregando segmentos...</span>
+                      </div>
+                    ) : segmentosError ? (
+                      <div className="h-12 flex items-center px-3 border rounded-md bg-destructive/10 text-destructive text-sm">
+                        Erro ao carregar segmentos
+                      </div>
+                    ) : !mostrarNovoSegmento ? <Select value={formData.segmento} onValueChange={value => {
                     if (value === 'novo') {
                       setMostrarNovoSegmento(true);
                     } else {
@@ -413,12 +436,20 @@ export default function CadastroLojista() {
                           <SelectValue placeholder="Selecione um segmento" />
                         </SelectTrigger>
                         <SelectContent className="bg-white border border-border z-[100] max-h-60">
-                          {segmentos.map(segmento => <SelectItem key={segmento.id} value={segmento.nome} className="text-base py-3">
-                              {segmento.nome}
-                            </SelectItem>)}
-                          <SelectItem value="novo" className="font-semibold text-primary text-base py-3">
-                            + Adicionar novo segmento
-                          </SelectItem>
+                          {segmentos.length === 0 ? (
+                            <div className="px-3 py-2 text-sm text-muted-foreground">
+                              Nenhum segmento disponível
+                            </div>
+                          ) : (
+                            <>
+                              {segmentos.map(segmento => <SelectItem key={segmento.id} value={segmento.nome} className="text-base py-3">
+                                  {segmento.nome}
+                                </SelectItem>)}
+                              <SelectItem value="novo" className="font-semibold text-primary text-base py-3">
+                                + Adicionar novo segmento
+                              </SelectItem>
+                            </>
+                          )}
                         </SelectContent>
                       </Select> : <div className="flex gap-2">
                         <Input value={novoSegmento} onChange={e => setNovoSegmento(e.target.value)} placeholder="Nome do novo segmento" className="flex-1 h-12 text-base" />
