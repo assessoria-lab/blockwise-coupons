@@ -23,19 +23,35 @@ export const useLojistas = () => {
     queryFn: async () => {
       if (!user?.id || user.tipo !== 'lojista') return [];
       
-      // For now, create a mock loja based on the user data
-      const mockLoja: Loja = {
-        id: user.id,
-        nome_loja: user.nome_loja || 'Loja Principal',
-        cnpj: '00.000.000/0001-00',
-        cidade: 'Cidade',
-        shopping: undefined,
-        segmento: undefined,
-        status: 'ativo',
-        cupons_nao_atribuidos: 0
+      // Buscar lojas reais do banco de dados
+      const { data, error } = await supabase
+        .from('lojistas')
+        .select('id, nome_loja, cnpj, cidade, shopping, segmento, status, cupons_nao_atribuidos')
+        .eq('id', user.id)
+        .maybeSingle();
+
+      if (error) {
+        console.error('Erro ao buscar loja:', error);
+        return [];
+      }
+
+      if (!data) {
+        console.warn('Nenhuma loja encontrada para o usuário:', user.id);
+        return [];
+      }
+
+      const loja: Loja = {
+        id: data.id,
+        nome_loja: data.nome_loja,
+        cnpj: data.cnpj,
+        cidade: data.cidade,
+        shopping: data.shopping,
+        segmento: data.segmento,
+        status: data.status || 'ativo',
+        cupons_nao_atribuidos: data.cupons_nao_atribuidos || 0
       };
       
-      return [mockLoja];
+      return [loja];
     },
     enabled: !!user?.id && user?.tipo === 'lojista'
   });

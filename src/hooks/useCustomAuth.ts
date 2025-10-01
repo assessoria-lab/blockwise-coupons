@@ -130,18 +130,28 @@ export const useCustomAuthProvider = () => {
         return { error: error.message };
       }
 
-      const result = data as any;
+      if (!data.user) {
+        return { error: 'Usuário não encontrado' };
+      }
 
-      if (!result.sucesso) {
-        return { error: result.mensagem };
+      // Buscar dados da loja do usuário logado
+      const { data: lojaData, error: lojaError } = await supabase
+        .from('lojistas')
+        .select('id, nome_loja, nome_responsavel')
+        .eq('user_id', data.user.id)
+        .single();
+
+      if (lojaError || !lojaData) {
+        console.error('Erro ao buscar loja:', lojaError);
+        return { error: 'Loja não encontrada para este usuário' };
       }
 
       // Criar sessão lojista
       const lojistaUser: LojistaUser = {
-        id: result.lojista_id,
+        id: lojaData.id,
         email: email,
-        nome_loja: result.nome_loja,
-        nome_responsavel: result.nome_responsavel,
+        nome_loja: lojaData.nome_loja,
+        nome_responsavel: lojaData.nome_responsavel || '',
         tipo: 'lojista'
       };
 
@@ -156,11 +166,21 @@ export const useCustomAuthProvider = () => {
       return { error: null };
 
     } catch (error) {
+      console.error('Erro no signInLojista:', error);
       return { error: 'Erro interno do servidor' };
     }
   };
 
   const signOut = async () => {
+    try {
+      // Fazer logout do Supabase Auth se for lojista
+      if (user?.tipo === 'lojista') {
+        await supabase.auth.signOut();
+      }
+    } catch (error) {
+      console.error('Erro ao fazer logout:', error);
+    }
+    
     localStorage.removeItem('showpremios_user');
     localStorage.removeItem('showpremios_session_expiry');
     setUser(null);
