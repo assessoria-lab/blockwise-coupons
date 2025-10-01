@@ -58,13 +58,33 @@ const BusinessIntelligence = () => {
   const { data: lojasMaisAtivas, isLoading: loadingLojas } = useQuery({
     queryKey: ['lojas-mais-ativas'],
     queryFn: async () => {
+      // Get top lojistas by cupons atribuídos count
       const { data, error } = await supabase
-        .from('mv_ranking_lojistas')
-        .select('*')
-        .order('total_cupons_atribuidos', { ascending: false })
-        .limit(5);
+        .from('cupons')
+        .select('lojista_id, lojistas(nome_loja, cidade)')
+        .not('lojista_id', 'is', null)
+        .eq('status', 'atribuido');
+      
       if (error) throw new Error(error.message);
-      return data || [];
+      
+      // Group by lojista_id and count
+      const grouped = (data || []).reduce((acc: any, item: any) => {
+        const lojistaId = item.lojista_id;
+        if (!acc[lojistaId]) {
+          acc[lojistaId] = {
+            lojista_id: lojistaId,
+            nome_loja: item.lojistas?.nome_loja || 'N/A',
+            cidade: item.lojistas?.cidade || 'N/A',
+            total_cupons_atribuidos: 0
+          };
+        }
+        acc[lojistaId].total_cupons_atribuidos++;
+        return acc;
+      }, {});
+      
+      return Object.values(grouped)
+        .sort((a: any, b: any) => b.total_cupons_atribuidos - a.total_cupons_atribuidos)
+        .slice(0, 5);
     }
   });
 
@@ -267,7 +287,7 @@ const BusinessIntelligence = () => {
           </CardHeader>
           <CardContent>
             <div className="space-y-4">
-              {lojasMaisAtivas?.map((loja, index) => (
+              {lojasMaisAtivas?.map((loja: any, index: number) => (
                 <div key={loja.lojista_id} className="flex items-center justify-between p-3 rounded-lg border">
                   <div className="flex items-center gap-3">
                     <Badge variant={index === 0 ? "default" : "outline"} className="w-8 h-8 rounded-full flex items-center justify-center">
@@ -281,15 +301,6 @@ const BusinessIntelligence = () => {
                   <div className="text-right">
                     <p className="font-bold text-green-600">
                       {loja.total_cupons_atribuidos} cupons
-                    </p>
-                    <p className="text-xs text-muted-foreground">
-                      R$ {loja.volume_vendas_geradas?.toLocaleString('pt-BR', { 
-                        minimumFractionDigits: 2, 
-                        maximumFractionDigits: 2 
-                      })}
-                    </p>
-                    <p className="text-xs text-muted-foreground">
-                      {loja.clientes_unicos_atendidos} cliente{loja.clientes_unicos_atendidos !== 1 ? 's' : ''}
                     </p>
                   </div>
                 </div>

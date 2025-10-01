@@ -120,9 +120,10 @@ export const useCustomAuthProvider = () => {
 
   const signInLojista = async (email: string, password: string) => {
     try {
-      const { data, error } = await supabase.rpc('validar_login_lojista', {
-        p_email: email,
-        p_senha: password
+      // Use Supabase Auth for lojista login
+      const { data, error } = await supabase.auth.signInWithPassword({
+        email,
+        password
       });
 
       if (error) {

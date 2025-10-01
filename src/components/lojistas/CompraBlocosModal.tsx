@@ -41,9 +41,9 @@ export const CompraBlocosModal = ({ lojistaId, open, onOpenChange }: CompraBloco
 
       const { data, error } = await supabase.rpc('vender_blocos_para_lojista_v2', {
         p_lojista_id: lojistaId,
-        p_quantidade_blocos: quantidade,
+        p_quantidade: quantidade,
         p_valor_total: valorTotal,
-        p_forma_pagamento: formaPagamento
+        p_forma_pagamento: formaPagamento as 'pix' | 'cartao_credito' | 'cartao_debito' | 'dinheiro'
       });
 
       if (error) throw error;

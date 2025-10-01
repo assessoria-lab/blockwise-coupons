@@ -17,7 +17,7 @@ interface LogEntry {
   usuario_id: string | null;
   evento: string;
   descricao: string;
-  dados_contexto: any;
+  contexto: any;
   nivel: string;
   ip_address: string | null;
   user_agent: string | null;
@@ -42,7 +42,8 @@ const AuditoriaCompliance = () => {
         p_data_inicio: filtros.dataInicio || null,
         p_data_fim: filtros.dataFim || null,
         p_tabela: (filtros.tabela && filtros.tabela !== 'all') ? filtros.tabela : null,
-        p_limite: 100
+        p_nivel: null,
+        p_busca: null
       });
 
       if (error) throw new Error(error.message);
@@ -82,7 +83,8 @@ const AuditoriaCompliance = () => {
         p_data_inicio: filtros.dataInicio || null,
         p_data_fim: filtros.dataFim || null,
         p_tabela: filtros.tabela || null,
-        p_limite: 1000
+        p_nivel: null,
+        p_busca: null
       });
 
       if (error) throw error;
@@ -324,7 +326,7 @@ const AuditoriaCompliance = () => {
                         )}
                       </div>
                     </div>
-                    {log.dados_contexto && (
+                    {log.contexto && (
                       <Button
                         variant="ghost"
                         size="sm"
@@ -335,11 +337,11 @@ const AuditoriaCompliance = () => {
                     )}
                   </div>
                   
-                  {expandedLog === log.id && log.dados_contexto && (
+                  {expandedLog === log.id && log.contexto && (
                     <div className="mt-4 p-3 bg-muted rounded border">
                       <h4 className="font-medium mb-2">Dados Contextuais:</h4>
                       <pre className="text-xs overflow-auto max-h-40">
-                        {JSON.stringify(log.dados_contexto, null, 2)}
+                        {JSON.stringify(log.contexto, null, 2)}
                       </pre>
                     </div>
                   )}

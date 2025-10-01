@@ -222,18 +222,31 @@ const DashboardBlocos = () => {
   const [lojistaFiltro, setLojistaFiltro] = useState<string>('all');
 
   // Query para performance dos blocos com error handling
-  const { data: utilizacaoBlocos, isLoading: loadingPerformance, error: performanceError } = useQuery<UtilizacaoBloco[]>({
+  const { data: utilizacaoBlocos, isLoading: loadingPerformance, error: performanceError } = useQuery({
     queryKey: ['utilizacao-blocos', lojistaFiltro],
     queryFn: async () => {
       try {
-        const { data, error } = await supabase.rpc('relatorio_utilizacao_blocos', {
-          p_lojista_id: (lojistaFiltro && lojistaFiltro !== 'all') ? lojistaFiltro : null
-        });
+        const { data, error } = await supabase.rpc('relatorio_utilizacao_blocos');
         if (error) {
           console.error('Error fetching block utilization:', error);
           throw new Error(error.message);
         }
-        return data || [];
+        
+        // Map the data to match our interface
+        const mappedData = (data || []).map((item: any) => ({
+          numero_bloco: item.numero_bloco,
+          lojista_nome: item.lojista_nome,
+          cupons_total: item.cupons_totais,
+          cupons_atribuidos: item.cupons_usados,
+          cupons_disponiveis: item.cupons_totais - item.cupons_usados,
+          utilizacao_percentual: item.percentual_uso,
+          comprado_em: item.ultima_atividade,
+          dias_desde_compra: 0,
+          valor_gerado: 0,
+          clientes_atendidos: 0
+        }));
+        
+        return mappedData;
       } catch (error) {
         console.error('Block utilization error:', error);
         return []; // Return empty array to prevent crashes
@@ -268,11 +281,11 @@ const DashboardBlocos = () => {
   });
 
   // Calcular métricas de performance
-  const metricas = utilizacaoBlocos ? {
+  const metricas = utilizacaoBlocos && Array.isArray(utilizacaoBlocos) && utilizacaoBlocos.length > 0 ? {
     totalBlocos: utilizacaoBlocos.length,
-    utilizacaoMedia: utilizacaoBlocos.reduce((acc, bloco) => acc + bloco.utilizacao_percentual, 0) / utilizacaoBlocos.length,
-    valorTotalGerado: utilizacaoBlocos.reduce((acc, bloco) => acc + bloco.valor_gerado, 0),
-    clientesTotais: utilizacaoBlocos.reduce((acc, bloco) => acc + bloco.clientes_atendidos, 0)
+    utilizacaoMedia: utilizacaoBlocos.reduce((acc: number, bloco: any) => acc + (bloco.utilizacao_percentual || 0), 0) / utilizacaoBlocos.length,
+    valorTotalGerado: utilizacaoBlocos.reduce((acc: number, bloco: any) => acc + (bloco.valor_gerado || 0), 0),
+    clientesTotais: utilizacaoBlocos.reduce((acc: number, bloco: any) => acc + (bloco.clientes_atendidos || 0), 0)
   } : null;
 
   if (isLoading || loadingPerformance || !metrics) {

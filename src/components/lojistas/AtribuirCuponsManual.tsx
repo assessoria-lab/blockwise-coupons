@@ -36,14 +36,45 @@ export const AtribuirCuponsManual = ({ lojistaId, onSuccess }: AtribuirCuponsMan
 
   const { mutate: atribuirCupons, isPending } = useMutation({
     mutationFn: async (data: FormData) => {
+      // First, create or find the client
+      const cpfLimpo = data.cpf.replace(/\D/g, '');
+      
+      // Check if client exists
+      let { data: clienteExistente, error: findError } = await supabase
+        .from('clientes')
+        .select('id')
+        .eq('cpf', cpfLimpo)
+        .maybeSingle();
+      
+      let clienteId: string;
+      
+      if (clienteExistente) {
+        clienteId = clienteExistente.id;
+      } else {
+        // Create new client
+        const { data: novoCliente, error: createError } = await supabase
+          .from('clientes')
+          .insert({
+            nome: data.nome,
+            cpf: cpfLimpo,
+            telefone: data.telefone,
+            cidade: data.cidade
+          })
+          .select('id')
+          .single();
+        
+        if (createError) throw new Error(createError.message);
+        clienteId = novoCliente.id;
+      }
+      
+      // Calculate number of coupons based on purchase value (1 coupon per R$ 50)
+      const quantidade = Math.floor(data.valor / 50);
+      
+      // Now assign coupons
       const { data: result, error } = await supabase.rpc('atribuir_cupons_para_cliente', {
-        p_lojista_id: lojistaId,
-        p_cliente_cpf: data.cpf,
-        p_cliente_nome: data.nome,
-        p_cliente_telefone: data.telefone,
-        p_cliente_cidade: data.cidade,
-        p_valor_compra: data.valor,
-        p_tipo_cliente: data.tipoCliente,
+        p_cliente_id: clienteId,
+        p_quantidade: quantidade,
+        p_valor_compra: data.valor
       });
       
       if (error) throw new Error(error.message);

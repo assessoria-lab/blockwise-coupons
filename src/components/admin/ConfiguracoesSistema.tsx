@@ -96,7 +96,8 @@ const ConfiguracoesSistema = () => {
   const createBlocksMutation = useMutation({
     mutationFn: async (quantidade: number) => {
       const { data, error } = await supabase.rpc('criar_blocos_pool', {
-        p_quantidade_blocos: quantidade
+        p_quantidade: quantidade,
+        p_cupons_por_bloco: 100
       });
       
       if (error) throw error;

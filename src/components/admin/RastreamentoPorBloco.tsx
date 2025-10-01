@@ -64,22 +64,24 @@ const RastreamentoPorBloco = () => {
       });
       
       if (error) throw new Error(error.message);
-      if (!data || data.length === 0) throw new Error('Bloco não encontrado');
+      if (!data) throw new Error('Bloco não encontrado');
       
-      const rawData = data[0] as DadosBlocoRaw;
+      // The function returns a jsonb object, not an array
+      const rawData = data as unknown as DadosBlocoRaw;
+      if (!rawData) throw new Error('Bloco não encontrado');
       
       // Transform the raw data to match our interface
       const transformedData: DadosBloco = {
-        bloco_id: rawData.bloco_id,
-        numero_bloco: rawData.numero_bloco,
-        status: rawData.status,
-        cupons_no_bloco: rawData.cupons_no_bloco,
-        cupons_atribuidos: rawData.cupons_atribuidos,
-        cupons_disponiveis: rawData.cupons_disponiveis,
-        data_venda: rawData.data_venda,
-        lojista_id: rawData.lojista_id,
-        lojista_nome: rawData.lojista_nome,
-        lojista_whatsapp: rawData.lojista_whatsapp,
+        bloco_id: rawData.bloco_id || '',
+        numero_bloco: rawData.numero_bloco || '',
+        status: rawData.status || '',
+        cupons_no_bloco: rawData.cupons_no_bloco || 0,
+        cupons_atribuidos: rawData.cupons_atribuidos || 0,
+        cupons_disponiveis: rawData.cupons_disponiveis || 0,
+        data_venda: rawData.data_venda || null,
+        lojista_id: rawData.lojista_id || null,
+        lojista_nome: rawData.lojista_nome || null,
+        lojista_whatsapp: rawData.lojista_whatsapp || null,
         cupons: Array.isArray(rawData.cupons) ? rawData.cupons : []
       };
       
