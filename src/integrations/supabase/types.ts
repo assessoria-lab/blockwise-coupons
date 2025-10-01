@@ -197,6 +197,13 @@ export type Database = {
             referencedColumns: ["id"]
           },
           {
+            foreignKeyName: "cupons_bloco_id_fkey"
+            columns: ["bloco_id"]
+            isOneToOne: false
+            referencedRelation: "mv_dashboard_blocos"
+            referencedColumns: ["bloco_id"]
+          },
+          {
             foreignKeyName: "cupons_cliente_id_fkey"
             columns: ["cliente_id"]
             isOneToOne: false
@@ -653,7 +660,15 @@ export type Database = {
       }
     }
     Views: {
-      [_ in never]: never
+      mv_dashboard_blocos: {
+        Row: {
+          bloco_id: string | null
+          bloco_nome: string | null
+          cupons_disponiveis: number | null
+          cupons_total: number | null
+        }
+        Relationships: []
+      }
     }
     Functions: {
       analise_demanda_cupons: {
