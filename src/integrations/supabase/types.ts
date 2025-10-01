@@ -1051,6 +1051,10 @@ export type Database = {
           similaridade: number
         }[]
       }
+      can_lojista_view_cliente: {
+        Args: { _cliente_id: string; _user_id: string }
+        Returns: boolean
+      }
       confirm_user_email: {
         Args: { p_user_id: string }
         Returns: undefined
