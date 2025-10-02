@@ -187,14 +187,28 @@ export default function CadastroLojista() {
         // 2. Criar loja vinculada ao usuário (sem senha)
         console.log('Passo 2: Criando loja na tabela lojistas...');
         const { senha, confirmar_senha, ...lojistaData } = data;
-        console.log('Dados da loja a serem inseridos:', { ...lojistaData, user_id: authUser.user.id });
+        
+        // Criar objeto limpo apenas com os campos necessários
+        const dadosLoja = {
+          nome_loja: lojistaData.nome_loja,
+          cnpj: lojistaData.cnpj,
+          cidade: lojistaData.cidade,
+          shopping: lojistaData.shopping || null,
+          segmento: lojistaData.segmento || null,
+          status: lojistaData.status || 'ativo',
+          telefone: lojistaData.telefone || null,
+          email: lojistaData.email || null,
+          responsavel_nome: lojistaData.responsavel_nome || null,
+          endereco: lojistaData.endereco || null,
+          user_id: authUser.user.id
+        };
+        
+        console.log('Dados limpos da loja a serem inseridos:', dadosLoja);
+        console.log('Chaves do objeto:', Object.keys(dadosLoja));
         
         const { data: novaLoja, error: lojaError } = await supabase
           .from('lojistas')
-          .insert([{
-            ...lojistaData,
-            user_id: authUser.user.id
-          }])
+          .insert([dadosLoja])
           .select()
           .single();
 
