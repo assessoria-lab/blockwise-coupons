@@ -67,13 +67,12 @@ export const AtribuirCuponsManual = ({ lojistaId, onSuccess }: AtribuirCuponsMan
         clienteId = novoCliente.id;
       }
       
-      // Calculate number of coupons based on purchase value (1 coupon per R$ 50)
-      const quantidade = Math.floor(data.valor / 50);
-      
-      // Now assign coupons
+      // Now assign coupons via RPC using correct parameters
       const { data: result, error } = await supabase.rpc('atribuir_cupons_para_cliente', {
-        p_cliente_id: clienteId,
-        p_quantidade: quantidade,
+        p_lojista_id: lojistaId,
+        p_cliente_cpf: cpfLimpo,
+        p_cliente_nome: data.nome,
+        p_cliente_telefone: data.telefone || '',
         p_valor_compra: data.valor
       });
       

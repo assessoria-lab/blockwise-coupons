@@ -32,9 +32,9 @@ export const VendaBlocosModal = ({ lojista, onClose, onSuccess }: VendaBlocosMod
     mutationFn: async () => {
       const { data, error } = await supabase.rpc('vender_blocos_para_lojista_v2', {
         p_lojista_id: lojista.id,
-        p_quantidade: quantidade,
+        p_quantidade_blocos: quantidade,
         p_valor_total: valor * quantidade,
-        p_forma_pagamento: formaPagamento as 'pix' | 'cartao_credito' | 'cartao_debito' | 'dinheiro',
+        p_forma_pagamento: formaPagamento,
         p_vendedor_nome: vendedorNome.trim() || null,
       });
       

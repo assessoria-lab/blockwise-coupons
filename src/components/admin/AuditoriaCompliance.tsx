@@ -17,11 +17,12 @@ interface LogEntry {
   usuario_id: string | null;
   evento: string;
   descricao: string;
-  contexto: any;
+  dados_contexto: any;
   nivel: string;
-  ip_address: string | null;
+  ip_address: unknown;
   user_agent: string | null;
   usuario_email?: string;
+  lojista_id?: string;
 }
 
 const AuditoriaCompliance = () => {
@@ -38,14 +39,20 @@ const AuditoriaCompliance = () => {
   const { data: logsAuditoria, isLoading, refetch } = useQuery({
     queryKey: ['logs-auditoria', filtros],
     queryFn: async () => {
-      const { data, error } = await supabase.rpc('consultar_logs_auditoria', {
-        p_data_inicio: filtros.dataInicio || null,
-        p_data_fim: filtros.dataFim || null,
-        p_tabela: (filtros.tabela && filtros.tabela !== 'all') ? filtros.tabela : null,
-        p_nivel: null,
-        p_busca: null
-      });
+      // Query logs_sistema directly since consultar_logs_auditoria doesn't exist
+      let query = supabase
+        .from('logs_sistema')
+        .select('*')
+        .order('created_at', { ascending: false });
 
+      if (filtros.dataInicio) {
+        query = query.gte('created_at', `${filtros.dataInicio}T00:00:00`);
+      }
+      if (filtros.dataFim) {
+        query = query.lte('created_at', `${filtros.dataFim}T23:59:59`);
+      }
+
+      const { data, error } = await query.limit(500);
       if (error) throw new Error(error.message);
       return data as LogEntry[];
     }
@@ -79,14 +86,19 @@ const AuditoriaCompliance = () => {
 
   const exportarRelatorio = async () => {
     try {
-      const { data, error } = await supabase.rpc('consultar_logs_auditoria', {
-        p_data_inicio: filtros.dataInicio || null,
-        p_data_fim: filtros.dataFim || null,
-        p_tabela: filtros.tabela || null,
-        p_nivel: null,
-        p_busca: null
-      });
+      let query = supabase
+        .from('logs_sistema')
+        .select('*')
+        .order('created_at', { ascending: false });
 
+      if (filtros.dataInicio) {
+        query = query.gte('created_at', `${filtros.dataInicio}T00:00:00`);
+      }
+      if (filtros.dataFim) {
+        query = query.lte('created_at', `${filtros.dataFim}T23:59:59`);
+      }
+
+      const { data, error } = await query;
       if (error) throw error;
 
       // Converte para CSV
@@ -322,11 +334,11 @@ const AuditoriaCompliance = () => {
                           <p>Usuário: {log.usuario_email}</p>
                         )}
                         {log.ip_address && (
-                          <p>IP: {log.ip_address}</p>
+                          <p>IP: {String(log.ip_address)}</p>
                         )}
                       </div>
                     </div>
-                    {log.contexto && (
+                    {log.dados_contexto && (
                       <Button
                         variant="ghost"
                         size="sm"
@@ -337,11 +349,11 @@ const AuditoriaCompliance = () => {
                     )}
                   </div>
                   
-                  {expandedLog === log.id && log.contexto && (
+                  {expandedLog === log.id && log.dados_contexto && (
                     <div className="mt-4 p-3 bg-muted rounded border">
                       <h4 className="font-medium mb-2">Dados Contextuais:</h4>
                       <pre className="text-xs overflow-auto max-h-40">
-                        {JSON.stringify(log.contexto, null, 2)}
+                        {JSON.stringify(log.dados_contexto, null, 2)}
                       </pre>
                     </div>
                   )}

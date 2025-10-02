@@ -122,13 +122,12 @@ const RegistroVendas = () => {
         clienteId = novoCliente.id;
       }
       
-      // Calculate number of coupons based on purchase value (1 coupon per R$ 50)
-      const quantidade = Math.floor(parseFloat(dados.valor_compra) / 50);
-      
-      // Now assign coupons
+      // Now assign coupons using correct parameters
       const { data, error } = await supabase.rpc('atribuir_cupons_para_cliente', {
-        p_cliente_id: clienteId,
-        p_quantidade: quantidade,
+        p_lojista_id: dados.lojista_id,
+        p_cliente_cpf: cpfLimpo,
+        p_cliente_nome: dados.nome,
+        p_cliente_telefone: dados.telefone || '',
         p_valor_compra: parseFloat(dados.valor_compra)
       });
 
