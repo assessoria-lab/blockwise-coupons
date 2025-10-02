@@ -515,22 +515,7 @@ export type Database = {
           usuario_email?: string | null
           usuario_id?: string | null
         }
-        Relationships: [
-          {
-            foreignKeyName: "logs_sistema_lojista_id_fkey"
-            columns: ["lojista_id"]
-            isOneToOne: false
-            referencedRelation: "lojistas"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "logs_sistema_lojista_id_fkey"
-            columns: ["lojista_id"]
-            isOneToOne: false
-            referencedRelation: "mv_ranking_lojistas"
-            referencedColumns: ["lojista_id"]
-          },
-        ]
+        Relationships: []
       }
       lojistas: {
         Row: {

@@ -161,7 +161,11 @@ export default function CadastroLojista() {
   const salvarLojistaMutation = useMutation({
     mutationFn: async (data: Lojista) => {
       try {
+        console.log('=== INICIANDO CADASTRO DE LOJISTA ===');
+        console.log('Dados recebidos:', { ...data, senha: '***', confirmar_senha: '***' });
+
         // 1. Criar usuário no Supabase Auth
+        console.log('Passo 1: Criando usuário no Auth...');
         const { data: authUser, error: authError } = await supabase.auth.signUp({
           email: data.email!,
           password: data.senha!,
@@ -170,11 +174,21 @@ export default function CadastroLojista() {
           }
         });
 
-        if (authError) throw authError;
-        if (!authUser.user) throw new Error('Falha ao criar usuário');
+        if (authError) {
+          console.error('❌ Erro no Auth:', authError);
+          throw authError;
+        }
+        if (!authUser.user) {
+          console.error('❌ Usuário não foi criado');
+          throw new Error('Falha ao criar usuário');
+        }
+        console.log('✅ Usuário criado no Auth:', authUser.user.id);
 
         // 2. Criar loja vinculada ao usuário (sem senha)
+        console.log('Passo 2: Criando loja na tabela lojistas...');
         const { senha, confirmar_senha, ...lojistaData } = data;
+        console.log('Dados da loja a serem inseridos:', { ...lojistaData, user_id: authUser.user.id });
+        
         const { data: novaLoja, error: lojaError } = await supabase
           .from('lojistas')
           .insert([{
@@ -185,11 +199,14 @@ export default function CadastroLojista() {
           .single();
 
         if (lojaError) {
-          console.error('Erro ao criar loja:', lojaError);
+          console.error('❌ Erro ao criar loja:', lojaError);
+          console.error('Detalhes completos do erro:', JSON.stringify(lojaError, null, 2));
           throw new Error(`Erro ao criar loja: ${lojaError.message}`);
         }
+        console.log('✅ Loja criada com sucesso:', novaLoja);
 
         // 3. Criar perfil do usuário (sem referência à loja específica)
+        console.log('Passo 3: Criando perfil do usuário...');
         const { error: profileError } = await supabase
           .from('profiles')
           .insert([{
@@ -200,13 +217,16 @@ export default function CadastroLojista() {
           }]);
 
         if (profileError) {
-          console.error('Erro ao criar perfil:', profileError);
+          console.error('❌ Erro ao criar perfil:', profileError);
+          console.error('Detalhes completos do erro:', JSON.stringify(profileError, null, 2));
           throw new Error(`Erro ao criar perfil: ${profileError.message}`);
         }
+        console.log('✅ Perfil criado com sucesso');
+        console.log('=== CADASTRO CONCLUÍDO COM SUCESSO ===');
 
         return novaLoja;
       } catch (error) {
-        console.error('Erro completo no cadastro:', error);
+        console.error('❌ ERRO COMPLETO NO CADASTRO:', error);
         throw error;
       }
     },
