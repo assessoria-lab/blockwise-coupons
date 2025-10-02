@@ -23,35 +23,34 @@ export const useLojistas = () => {
     queryFn: async () => {
       if (!user?.id || user.tipo !== 'lojista') return [];
       
-      // Buscar lojas reais do banco de dados
+      // Buscar TODAS as lojas vinculadas ao user_id (um usuário pode ter várias lojas)
       const { data, error } = await supabase
         .from('lojistas')
         .select('id, nome_loja, cnpj, cidade, shopping, segmento, status, cupons_nao_atribuidos')
-        .eq('id', user.id)
-        .maybeSingle();
+        .eq('user_id', user.id);
 
       if (error) {
-        console.error('Erro ao buscar loja:', error);
+        console.error('Erro ao buscar lojas:', error);
         return [];
       }
 
-      if (!data) {
+      if (!data || data.length === 0) {
         console.warn('Nenhuma loja encontrada para o usuário:', user.id);
         return [];
       }
 
-      const loja: Loja = {
-        id: data.id,
-        nome_loja: data.nome_loja,
-        cnpj: data.cnpj,
-        cidade: data.cidade,
-        shopping: data.shopping,
-        segmento: data.segmento,
-        status: data.status || 'ativo',
-        cupons_nao_atribuidos: data.cupons_nao_atribuidos || 0
-      };
+      const lojasFormatadas: Loja[] = data.map(loja => ({
+        id: loja.id,
+        nome_loja: loja.nome_loja,
+        cnpj: loja.cnpj,
+        cidade: loja.cidade,
+        shopping: loja.shopping,
+        segmento: loja.segmento,
+        status: loja.status || 'ativo',
+        cupons_nao_atribuidos: loja.cupons_nao_atribuidos || 0
+      }));
       
-      return [loja];
+      return lojasFormatadas;
     },
     enabled: !!user?.id && user?.tipo === 'lojista'
   });
