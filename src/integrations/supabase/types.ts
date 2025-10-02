@@ -10,7 +10,7 @@ export type Database = {
   // Allows to automatically instantiate createClient with right options
   // instead of createClient<Database, { PostgrestVersion: 'XX' }>(URL, KEY)
   __InternalSupabase: {
-    PostgrestVersion: "13.0.5"
+    PostgrestVersion: "12.2.3 (519615d)"
   }
   public: {
     Tables: {
@@ -62,13 +62,50 @@ export type Database = {
             referencedRelation: "lojistas"
             referencedColumns: ["id"]
           },
+          {
+            foreignKeyName: "blocos_lojista_id_fkey"
+            columns: ["lojista_id"]
+            isOneToOne: false
+            referencedRelation: "mv_ranking_lojistas"
+            referencedColumns: ["lojista_id"]
+          },
         ]
+      }
+      caroline_veras_follow_up: {
+        Row: {
+          created_at: string
+          desejo: string | null
+          etapa: number | null
+          id: number
+          nome: string | null
+          number: string | null
+          ultimaMensagem: string | null
+        }
+        Insert: {
+          created_at?: string
+          desejo?: string | null
+          etapa?: number | null
+          id?: number
+          nome?: string | null
+          number?: string | null
+          ultimaMensagem?: string | null
+        }
+        Update: {
+          created_at?: string
+          desejo?: string | null
+          etapa?: number | null
+          id?: number
+          nome?: string | null
+          number?: string | null
+          ultimaMensagem?: string | null
+        }
+        Relationships: []
       }
       clientes: {
         Row: {
           cidade: string | null
           cpf: string
-          created_at: string | null
+          created_at: string
           data_primeiro_cupom: string | null
           email: string | null
           id: string
@@ -78,12 +115,12 @@ export type Database = {
           telefone: string | null
           total_cupons_recebidos: number | null
           total_valor_compras: number | null
-          updated_at: string | null
+          updated_at: string
         }
         Insert: {
           cidade?: string | null
           cpf: string
-          created_at?: string | null
+          created_at?: string
           data_primeiro_cupom?: string | null
           email?: string | null
           id?: string
@@ -93,12 +130,12 @@ export type Database = {
           telefone?: string | null
           total_cupons_recebidos?: number | null
           total_valor_compras?: number | null
-          updated_at?: string | null
+          updated_at?: string
         }
         Update: {
           cidade?: string | null
           cpf?: string
-          created_at?: string | null
+          created_at?: string
           data_primeiro_cupom?: string | null
           email?: string | null
           id?: string
@@ -108,7 +145,7 @@ export type Database = {
           telefone?: string | null
           total_cupons_recebidos?: number | null
           total_valor_compras?: number | null
-          updated_at?: string | null
+          updated_at?: string
         }
         Relationships: []
       }
@@ -197,13 +234,6 @@ export type Database = {
             referencedColumns: ["id"]
           },
           {
-            foreignKeyName: "cupons_bloco_id_fkey"
-            columns: ["bloco_id"]
-            isOneToOne: false
-            referencedRelation: "mv_dashboard_blocos"
-            referencedColumns: ["bloco_id"]
-          },
-          {
             foreignKeyName: "cupons_cliente_id_fkey"
             columns: ["cliente_id"]
             isOneToOne: false
@@ -217,50 +247,153 @@ export type Database = {
             referencedRelation: "lojistas"
             referencedColumns: ["id"]
           },
+          {
+            foreignKeyName: "cupons_lojista_id_fkey"
+            columns: ["lojista_id"]
+            isOneToOne: false
+            referencedRelation: "mv_ranking_lojistas"
+            referencedColumns: ["lojista_id"]
+          },
         ]
+      }
+      disparo_apl_maria: {
+        Row: {
+          created_at: string
+          desejo: string | null
+          etapa: number | null
+          id: number
+          instancia: string | null
+          nome: string | null
+          number: string | null
+          ultimaMensagem: string | null
+        }
+        Insert: {
+          created_at?: string
+          desejo?: string | null
+          etapa?: number | null
+          id?: number
+          instancia?: string | null
+          nome?: string | null
+          number?: string | null
+          ultimaMensagem?: string | null
+        }
+        Update: {
+          created_at?: string
+          desejo?: string | null
+          etapa?: number | null
+          id?: number
+          instancia?: string | null
+          nome?: string | null
+          number?: string | null
+          ultimaMensagem?: string | null
+        }
+        Relationships: []
+      }
+      documents: {
+        Row: {
+          content: string | null
+          embedding: string | null
+          fts: unknown | null
+          id: number
+        }
+        Insert: {
+          content?: string | null
+          embedding?: string | null
+          fts?: unknown | null
+          id?: never
+        }
+        Update: {
+          content?: string | null
+          embedding?: string | null
+          fts?: unknown | null
+          id?: never
+        }
+        Relationships: []
+      }
+      embeddings_diarios: {
+        Row: {
+          conteudo: string
+          criado_em: string | null
+          data: string
+          embedding: string | null
+          id: string
+          metadados: Json | null
+        }
+        Insert: {
+          conteudo: string
+          criado_em?: string | null
+          data: string
+          embedding?: string | null
+          id?: string
+          metadados?: Json | null
+        }
+        Update: {
+          conteudo?: string
+          criado_em?: string | null
+          data?: string
+          embedding?: string | null
+          id?: string
+          metadados?: Json | null
+        }
+        Relationships: []
+      }
+      followup_rafaela_conecta: {
+        Row: {
+          created_at: string
+          id: number
+        }
+        Insert: {
+          created_at?: string
+          id?: number
+        }
+        Update: {
+          created_at?: string
+          id?: number
+        }
+        Relationships: []
       }
       ganhadores_sorteios: {
         Row: {
           cliente_id: string | null
-          created_at: string | null
+          created_at: string
           cupom_id: string | null
-          data_sorteio: string | null
+          data_sorteio: string
           id: string
           lojista_id: string | null
           numero_cupom: string
           observacoes: string | null
           premio: string
-          tipo_sorteio: string | null
-          updated_at: string | null
-          valor_premio: number | null
+          tipo_sorteio: string
+          updated_at: string
+          valor_premio: number
         }
         Insert: {
           cliente_id?: string | null
-          created_at?: string | null
+          created_at?: string
           cupom_id?: string | null
-          data_sorteio?: string | null
+          data_sorteio?: string
           id?: string
           lojista_id?: string | null
           numero_cupom: string
           observacoes?: string | null
           premio: string
-          tipo_sorteio?: string | null
-          updated_at?: string | null
-          valor_premio?: number | null
+          tipo_sorteio?: string
+          updated_at?: string
+          valor_premio?: number
         }
         Update: {
           cliente_id?: string | null
-          created_at?: string | null
+          created_at?: string
           cupom_id?: string | null
-          data_sorteio?: string | null
+          data_sorteio?: string
           id?: string
           lojista_id?: string | null
           numero_cupom?: string
           observacoes?: string | null
           premio?: string
-          tipo_sorteio?: string | null
-          updated_at?: string | null
-          valor_premio?: number | null
+          tipo_sorteio?: string
+          updated_at?: string
+          valor_premio?: number
         }
         Relationships: [
           {
@@ -278,13 +411,69 @@ export type Database = {
             referencedColumns: ["id"]
           },
           {
+            foreignKeyName: "ganhadores_sorteios_cupom_id_fkey"
+            columns: ["cupom_id"]
+            isOneToOne: false
+            referencedRelation: "mv_historico_cupons"
+            referencedColumns: ["id"]
+          },
+          {
             foreignKeyName: "ganhadores_sorteios_lojista_id_fkey"
             columns: ["lojista_id"]
             isOneToOne: false
             referencedRelation: "lojistas"
             referencedColumns: ["id"]
           },
+          {
+            foreignKeyName: "ganhadores_sorteios_lojista_id_fkey"
+            columns: ["lojista_id"]
+            isOneToOne: false
+            referencedRelation: "mv_ranking_lojistas"
+            referencedColumns: ["lojista_id"]
+          },
         ]
+      }
+      h_hospedagem: {
+        Row: {
+          content: string | null
+          embedding: string | null
+          id: number
+          metadata: Json | null
+        }
+        Insert: {
+          content?: string | null
+          embedding?: string | null
+          id?: number
+          metadata?: Json | null
+        }
+        Update: {
+          content?: string | null
+          embedding?: string | null
+          id?: number
+          metadata?: Json | null
+        }
+        Relationships: []
+      }
+      jose_alberto: {
+        Row: {
+          content: string | null
+          embedding: string | null
+          id: number
+          metadata: Json | null
+        }
+        Insert: {
+          content?: string | null
+          embedding?: string | null
+          id?: number
+          metadata?: Json | null
+        }
+        Update: {
+          content?: string | null
+          embedding?: string | null
+          id?: number
+          metadata?: Json | null
+        }
+        Relationships: []
       }
       logs_sistema: {
         Row: {
@@ -334,6 +523,13 @@ export type Database = {
             referencedRelation: "lojistas"
             referencedColumns: ["id"]
           },
+          {
+            foreignKeyName: "logs_sistema_lojista_id_fkey"
+            columns: ["lojista_id"]
+            isOneToOne: false
+            referencedRelation: "mv_ranking_lojistas"
+            referencedColumns: ["lojista_id"]
+          },
         ]
       }
       lojistas: {
@@ -341,7 +537,7 @@ export type Database = {
           bloqueado_ate: string | null
           cidade: string
           cnpj: string
-          created_at: string | null
+          created_at: string
           cupons_nao_atribuidos: number
           data_cadastro: string | null
           data_ultima_compra: string | null
@@ -363,7 +559,7 @@ export type Database = {
           telefone: string | null
           tentativas_login: number | null
           ultimo_login: string | null
-          updated_at: string | null
+          updated_at: string
           user_id: string | null
           whatsapp: string | null
         }
@@ -371,7 +567,7 @@ export type Database = {
           bloqueado_ate?: string | null
           cidade: string
           cnpj: string
-          created_at?: string | null
+          created_at?: string
           cupons_nao_atribuidos?: number
           data_cadastro?: string | null
           data_ultima_compra?: string | null
@@ -393,7 +589,7 @@ export type Database = {
           telefone?: string | null
           tentativas_login?: number | null
           ultimo_login?: string | null
-          updated_at?: string | null
+          updated_at?: string
           user_id?: string | null
           whatsapp?: string | null
         }
@@ -401,7 +597,7 @@ export type Database = {
           bloqueado_ate?: string | null
           cidade?: string
           cnpj?: string
-          created_at?: string | null
+          created_at?: string
           cupons_nao_atribuidos?: number
           data_cadastro?: string | null
           data_ultima_compra?: string | null
@@ -423,7 +619,7 @@ export type Database = {
           telefone?: string | null
           tentativas_login?: number | null
           ultimo_login?: string | null
-          updated_at?: string | null
+          updated_at?: string
           user_id?: string | null
           whatsapp?: string | null
         }
@@ -486,38 +682,90 @@ export type Database = {
             referencedRelation: "lojistas"
             referencedColumns: ["id"]
           },
+          {
+            foreignKeyName: "pagamentos_lojista_id_fkey"
+            columns: ["lojista_id"]
+            isOneToOne: false
+            referencedRelation: "mv_ranking_lojistas"
+            referencedColumns: ["lojista_id"]
+          },
         ]
       }
       profiles: {
         Row: {
           ativo: boolean
-          created_at: string | null
+          created_at: string
           email: string
           id: string
           nome: string
           tipo_usuario: string
-          updated_at: string | null
+          updated_at: string
           user_id: string
         }
         Insert: {
           ativo?: boolean
-          created_at?: string | null
+          created_at?: string
           email: string
           id?: string
           nome: string
           tipo_usuario: string
-          updated_at?: string | null
+          updated_at?: string
           user_id: string
         }
         Update: {
           ativo?: boolean
-          created_at?: string | null
+          created_at?: string
           email?: string
           id?: string
           nome?: string
           tipo_usuario?: string
-          updated_at?: string | null
+          updated_at?: string
           user_id?: string
+        }
+        Relationships: []
+      }
+      query_history: {
+        Row: {
+          apenas_ativas: boolean | null
+          capital_social_max: number | null
+          capital_social_min: number | null
+          cnae: string | null
+          custo_api: number | null
+          data_atividade_fim: string | null
+          data_atividade_inicio: string | null
+          estados: string | null
+          id: number
+          lista_disparo: boolean | null
+          qtd_contatos: number | null
+          timestamp: string | null
+        }
+        Insert: {
+          apenas_ativas?: boolean | null
+          capital_social_max?: number | null
+          capital_social_min?: number | null
+          cnae?: string | null
+          custo_api?: number | null
+          data_atividade_fim?: string | null
+          data_atividade_inicio?: string | null
+          estados?: string | null
+          id?: number
+          lista_disparo?: boolean | null
+          qtd_contatos?: number | null
+          timestamp?: string | null
+        }
+        Update: {
+          apenas_ativas?: boolean | null
+          capital_social_max?: number | null
+          capital_social_min?: number | null
+          cnae?: string | null
+          custo_api?: number | null
+          data_atividade_fim?: string | null
+          data_atividade_inicio?: string | null
+          estados?: string | null
+          id?: number
+          lista_disparo?: boolean | null
+          qtd_contatos?: number | null
+          timestamp?: string | null
         }
         Relationships: []
       }
@@ -619,8 +867,8 @@ export type Database = {
       }
       vendas_blocos: {
         Row: {
-          created_at: string | null
-          data_venda: string | null
+          created_at: string
+          data_venda: string
           forma_pagamento: string
           id: string
           lojista_id: string
@@ -629,8 +877,8 @@ export type Database = {
           valor_total: number
         }
         Insert: {
-          created_at?: string | null
-          data_venda?: string | null
+          created_at?: string
+          data_venda?: string
           forma_pagamento: string
           id?: string
           lojista_id: string
@@ -639,8 +887,8 @@ export type Database = {
           valor_total: number
         }
         Update: {
-          created_at?: string | null
-          data_venda?: string | null
+          created_at?: string
+          data_venda?: string
           forma_pagamento?: string
           id?: string
           lojista_id?: string
@@ -656,23 +904,69 @@ export type Database = {
             referencedRelation: "lojistas"
             referencedColumns: ["id"]
           },
+          {
+            foreignKeyName: "vendas_blocos_lojista_id_fkey"
+            columns: ["lojista_id"]
+            isOneToOne: false
+            referencedRelation: "mv_ranking_lojistas"
+            referencedColumns: ["lojista_id"]
+          },
         ]
       }
     }
     Views: {
       mv_dashboard_blocos: {
         Row: {
-          bloco_id: string | null
-          bloco_nome: string | null
-          cupons_disponiveis: number | null
-          cupons_total: number | null
+          blocos_com_lojistas: number | null
+          blocos_pool_geral: number | null
+          blocos_vendidos_hoje: number | null
+          cupons_atribuidos: number | null
+          cupons_atribuidos_hoje: number | null
+          cupons_nao_atribuidos: number | null
+          ultima_atualizacao: string | null
+        }
+        Relationships: []
+      }
+      mv_historico_cupons: {
+        Row: {
+          cidade_cliente: string | null
+          cidade_loja: string | null
+          cpf_cliente: string | null
+          data_atribuicao: string | null
+          data_criacao: string | null
+          id: string | null
+          mes_atribuicao: string | null
+          nome_cliente: string | null
+          nome_loja: string | null
+          numero_bloco: string | null
+          numero_cupom: string | null
+          semana_atribuicao: string | null
+          status: string | null
+          ultima_atualizacao: string | null
+          valor_compra: number | null
+        }
+        Relationships: []
+      }
+      mv_ranking_lojistas: {
+        Row: {
+          cidade: string | null
+          clientes_unicos_atendidos: number | null
+          cupons_disponiveis_lojista: number | null
+          lojista_id: string | null
+          nome_loja: string | null
+          ranking_cupons: number | null
+          ranking_vendas: number | null
+          total_cupons_atribuidos: number | null
+          ultima_atribuicao: string | null
+          ultima_atualizacao: string | null
+          volume_vendas_geradas: number | null
         }
         Relationships: []
       }
     }
     Functions: {
       analise_demanda_cupons: {
-        Args: Record<PropertyKey, never>
+        Args: { p_lojista_id?: string }
         Returns: Json
       }
       analise_padroes_temporais: {
@@ -680,51 +974,102 @@ export type Database = {
         Returns: Json
       }
       atribuir_cupons_para_cliente: {
-        Args: {
-          p_cliente_id: string
-          p_quantidade: number
-          p_valor_compra?: number
-        }
+        Args:
+          | {
+              p_cliente_cidade: string
+              p_cliente_cpf: string
+              p_cliente_nome: string
+              p_cliente_telefone: string
+              p_lojista_id: string
+              p_tipo_cliente?: string
+              p_valor_compra: number
+            }
+          | {
+              p_cliente_cidade: string
+              p_cliente_cpf: string
+              p_cliente_nome: string
+              p_cliente_telefone: string
+              p_lojista_id: string
+              p_valor_compra: number
+            }
+          | {
+              p_cliente_cpf: string
+              p_cliente_nome: string
+              p_cliente_telefone: string
+              p_lojista_id: string
+              p_tipo_cliente?: string
+              p_valor_compra: number
+            }
+          | {
+              p_cliente_cpf: string
+              p_cliente_nome: string
+              p_cliente_telefone: string
+              p_lojista_id: string
+              p_valor_compra: number
+            }
+          | {
+              p_cliente_cpf: string
+              p_cliente_nome: string
+              p_cliente_telefone: string
+              p_lojista_id: string
+              p_valor_compra: number
+            }
         Returns: Json
+      }
+      binary_quantize: {
+        Args: { "": string } | { "": unknown }
+        Returns: unknown
       }
       buscar_detalhes_bloco: {
         Args: { p_numero_bloco: string }
-        Returns: Json
-      }
-      buscar_lojas_usuario: {
-        Args: { p_usuario_id: string }
-        Returns: Json
-      }
-      buscar_lojas_usuario_auth: {
-        Args: Record<PropertyKey, never>
         Returns: {
-          ativo: boolean
-          cidade: string
-          cnpj: string
-          created_at: string
-          endereco: string
+          bloco_id: string
+          cupons: Json
+          cupons_atribuidos: number
+          cupons_disponiveis: number
+          cupons_no_bloco: number
+          data_venda: string
+          lojista_id: string
+          lojista_nome: string
+          lojista_whatsapp: string
+          numero_bloco: string
+          status: string
+        }[]
+      }
+      buscar_embeddings_similares: {
+        Args: {
+          data_filtro: string
+          limite?: number
+          limite_similaridade?: number
+          query_embedding: string
+        }
+        Returns: {
+          conteudo: string
+          data: string
           id: string
-          nome_loja: string
-          segmento: string
-          shopping: string
-          updated_at: string
+          metadados: Json
+          similaridade: number
         }[]
       }
       can_lojista_view_cliente: {
         Args: { _cliente_id: string; _user_id: string }
         Returns: boolean
       }
+      confirm_user_email: {
+        Args: { p_user_id: string }
+        Returns: undefined
+      }
       consultar_logs_auditoria: {
         Args: {
-          p_busca?: string
           p_data_fim?: string
           p_data_inicio?: string
-          p_nivel?: string
+          p_limite?: number
           p_tabela?: string
+          p_usuario_id?: string
         }
         Returns: {
-          contexto: Json
           created_at: string
+          dados_contexto: Json
           descricao: string
           evento: string
           id: string
@@ -734,39 +1079,115 @@ export type Database = {
           usuario_id: string
         }[]
       }
-      criar_admin_completo: {
+      consultar_saldo_lojista: {
+        Args: { p_whatsapp_lojista: string }
+        Returns: Json
+      }
+      create_missing_profile: {
         Args: {
-          p_criado_por?: string
           p_email: string
           p_nome: string
-          p_perfil?: string
-          p_permissoes?: Json
-        }
-        Returns: Json
-      }
-      criar_blocos_pool: {
-        Args: { p_cupons_por_bloco?: number; p_quantidade: number }
-        Returns: Json
-      }
-      criar_loja_apos_signup: {
-        Args: {
-          p_cidade: string
-          p_cnpj: string
-          p_endereco?: string
-          p_nome_loja: string
-          p_segmento?: string
-          p_shopping?: string
+          p_tipo_usuario: string
           p_user_id: string
         }
+        Returns: undefined
+      }
+      criar_blocos_pool: {
+        Args: { p_quantidade_blocos: number }
         Returns: Json
       }
-      dummy_function: {
+      get_dashboard_metrics: {
         Args: Record<PropertyKey, never>
-        Returns: string
+        Returns: {
+          blocos_com_lojistas: number
+          blocos_pool_geral: number
+          blocos_vendidos_hoje: number
+          cupons_atribuidos: number
+          cupons_atribuidos_hoje: number
+          cupons_nao_atribuidos: number
+          ultima_atualizacao: string
+        }[]
       }
       get_dashboard_metrics_optimized: {
         Args: Record<PropertyKey, never>
-        Returns: Json
+        Returns: {
+          blocos_com_lojistas: number
+          blocos_pool_geral: number
+          blocos_vendidos_hoje: number
+          cupons_atribuidos: number
+          cupons_atribuidos_hoje: number
+          cupons_nao_atribuidos: number
+          ultima_atualizacao: string
+        }[]
+      }
+      get_historico_cupons: {
+        Args: {
+          p_data_fim?: string
+          p_data_inicio?: string
+          p_limite?: number
+          p_lojista_id?: string
+        }
+        Returns: {
+          cidade_cliente: string
+          cidade_loja: string
+          cpf_cliente: string
+          data_atribuicao: string
+          data_criacao: string
+          id: string
+          mes_atribuicao: string
+          nome_cliente: string
+          nome_loja: string
+          numero_bloco: string
+          numero_cupom: string
+          semana_atribuicao: string
+          status: string
+          valor_compra: number
+        }[]
+      }
+      get_ranking_lojistas: {
+        Args: Record<PropertyKey, never>
+        Returns: {
+          cidade: string
+          clientes_unicos_atendidos: number
+          cupons_disponiveis_lojista: number
+          lojista_id: string
+          nome_loja: string
+          ranking_cupons: number
+          ranking_vendas: number
+          total_cupons_atribuidos: number
+          ultima_atribuicao: string
+          ultima_atualizacao: string
+          volume_vendas_geradas: number
+        }[]
+      }
+      get_user_profile: {
+        Args: { user_uuid: string }
+        Returns: {
+          ativo: boolean
+          email: string
+          id: string
+          lojista_id: string
+          lojista_info: Json
+          nome: string
+          tipo_usuario: string
+          user_id: string
+        }[]
+      }
+      halfvec_avg: {
+        Args: { "": number[] }
+        Returns: unknown
+      }
+      halfvec_out: {
+        Args: { "": unknown }
+        Returns: unknown
+      }
+      halfvec_send: {
+        Args: { "": unknown }
+        Returns: string
+      }
+      halfvec_typmod_in: {
+        Args: { "": unknown[] }
+        Returns: number
       }
       has_role: {
         Args: {
@@ -774,6 +1195,38 @@ export type Database = {
           _user_id: string
         }
         Returns: boolean
+      }
+      hnsw_bit_support: {
+        Args: { "": unknown }
+        Returns: unknown
+      }
+      hnsw_halfvec_support: {
+        Args: { "": unknown }
+        Returns: unknown
+      }
+      hnsw_sparsevec_support: {
+        Args: { "": unknown }
+        Returns: unknown
+      }
+      hnswhandler: {
+        Args: { "": unknown }
+        Returns: unknown
+      }
+      hybrid_search: {
+        Args: {
+          full_text_weight?: number
+          match_count: number
+          query_embedding: string
+          query_text: string
+          rrf_k?: number
+          semantic_weight?: number
+        }
+        Returns: {
+          content: string | null
+          embedding: string | null
+          fts: unknown | null
+          id: number
+        }[]
       }
       is_admin: {
         Args: { user_uuid: string }
@@ -783,48 +1236,189 @@ export type Database = {
         Args: { target_lojista_id: string; user_uuid: string }
         Returns: boolean
       }
+      ivfflat_bit_support: {
+        Args: { "": unknown }
+        Returns: unknown
+      }
+      ivfflat_halfvec_support: {
+        Args: { "": unknown }
+        Returns: unknown
+      }
+      ivfflathandler: {
+        Args: { "": unknown }
+        Returns: unknown
+      }
+      l2_norm: {
+        Args: { "": unknown } | { "": unknown }
+        Returns: number
+      }
+      l2_normalize: {
+        Args: { "": string } | { "": unknown } | { "": unknown }
+        Returns: string
+      }
+      log_sistema_evento: {
+        Args: {
+          p_dados_contexto?: Json
+          p_descricao?: string
+          p_evento: string
+          p_ip_address?: unknown
+          p_nivel?: string
+          p_user_agent?: string
+          p_usuario_email?: string
+          p_usuario_id?: string
+        }
+        Returns: string
+      }
+      match_documents: {
+        Args: { filter?: Json; match_count?: number; query_embedding: string }
+        Returns: {
+          content: string
+          id: number
+          metadata: Json
+          similarity: number
+        }[]
+      }
+      match_documents_apl_alana: {
+        Args: { filter?: Json; match_count?: number; query_embedding: string }
+        Returns: {
+          content: string
+          id: number
+          metadata: Json
+          similarity: number
+        }[]
+      }
+      match_documents_delbo_sophia: {
+        Args: { filter?: Json; match_count?: number; query_embedding: string }
+        Returns: {
+          content: string
+          id: number
+          metadata: Json
+          similarity: number
+        }[]
+      }
+      match_documents_h_hospedagem: {
+        Args: { filter?: Json; match_count?: number; query_embedding: string }
+        Returns: {
+          content: string
+          id: number
+          metadata: Json
+          similarity: number
+        }[]
+      }
+      match_documents_jose_alberto: {
+        Args: { filter?: Json; match_count?: number; query_embedding: string }
+        Returns: {
+          content: string
+          id: number
+          metadata: Json
+          similarity: number
+        }[]
+      }
+      match_documents_rb_5g: {
+        Args: { filter?: Json; match_count?: number; query_embedding: string }
+        Returns: {
+          content: string
+          id: number
+          metadata: Json
+          similarity: number
+        }[]
+      }
       metricas_tempo_real: {
         Args: Record<PropertyKey, never>
         Returns: Json
       }
-      relatorio_utilizacao_blocos: {
+      refresh_dashboard_views: {
         Args: Record<PropertyKey, never>
+        Returns: undefined
+      }
+      relatorio_utilizacao_blocos: {
+        Args: { p_lojista_id?: string }
         Returns: {
-          bloco_id: string
-          cupons_totais: number
-          cupons_usados: number
+          clientes_atendidos: number
+          comprado_em: string
+          cupons_atribuidos: number
+          cupons_disponiveis: number
+          cupons_total: number
+          dias_desde_compra: number
           lojista_nome: string
           numero_bloco: string
-          percentual_uso: number
-          ultima_atividade: string
+          utilizacao_percentual: number
+          valor_gerado: number
         }[]
+      }
+      sparsevec_out: {
+        Args: { "": unknown }
+        Returns: unknown
+      }
+      sparsevec_send: {
+        Args: { "": unknown }
+        Returns: string
+      }
+      sparsevec_typmod_in: {
+        Args: { "": unknown[] }
+        Returns: number
       }
       validar_login_admin: {
         Args: { p_email: string; p_senha: string }
         Returns: Json
       }
-      validar_login_admin_completo: {
+      validar_login_lojista: {
         Args: { p_email: string; p_senha: string }
         Returns: Json
       }
-      vender_blocos_para_lojista_v2: {
+      vector_avg: {
+        Args: { "": number[] }
+        Returns: string
+      }
+      vector_dims: {
+        Args: { "": string } | { "": unknown }
+        Returns: number
+      }
+      vector_norm: {
+        Args: { "": string }
+        Returns: number
+      }
+      vector_out: {
+        Args: { "": string }
+        Returns: unknown
+      }
+      vector_send: {
+        Args: { "": string }
+        Returns: string
+      }
+      vector_typmod_in: {
+        Args: { "": unknown[] }
+        Returns: number
+      }
+      vender_blocos_para_lojista: {
         Args: {
-          p_forma_pagamento: Database["public"]["Enums"]["forma_pagamento"]
+          p_forma_pagamento: string
           p_lojista_id: string
-          p_quantidade: number
+          p_quantidade_blocos: number
           p_valor_total: number
-          p_vendedor_nome?: string
         }
+        Returns: Json
+      }
+      vender_blocos_para_lojista_v2: {
+        Args:
+          | {
+              p_forma_pagamento: string
+              p_lojista_id: string
+              p_quantidade_blocos: number
+              p_valor_total: number
+            }
+          | {
+              p_forma_pagamento: string
+              p_lojista_id: string
+              p_quantidade_blocos: number
+              p_valor_total: number
+              p_vendedor_nome?: string
+            }
         Returns: Json
       }
     }
     Enums: {
-      app_role: "admin" | "moderator" | "user"
-      forma_pagamento: "dinheiro" | "pix" | "cartao_credito" | "cartao_debito"
-      status_bloco: "disponivel" | "em_uso" | "vendido"
-      status_cliente: "ativo" | "inativo" | "suspenso"
-      status_cupom: "disponivel" | "atribuido" | "usado" | "expirado"
-      status_sorteio: "agendado" | "em_andamento" | "finalizado" | "cancelado"
+      app_role: "super_admin" | "admin" | "gerente" | "operador" | "auditor"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -952,12 +1546,7 @@ export type CompositeTypes<
 export const Constants = {
   public: {
     Enums: {
-      app_role: ["admin", "moderator", "user"],
-      forma_pagamento: ["dinheiro", "pix", "cartao_credito", "cartao_debito"],
-      status_bloco: ["disponivel", "em_uso", "vendido"],
-      status_cliente: ["ativo", "inativo", "suspenso"],
-      status_cupom: ["disponivel", "atribuido", "usado", "expirado"],
-      status_sorteio: ["agendado", "em_andamento", "finalizado", "cancelado"],
+      app_role: ["super_admin", "admin", "gerente", "operador", "auditor"],
     },
   },
 } as const
