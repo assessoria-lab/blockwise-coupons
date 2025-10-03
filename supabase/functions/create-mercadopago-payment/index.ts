@@ -80,9 +80,9 @@ serve(async (req) => {
         name: lojista.nome_loja,
       },
       back_urls: {
-        success: `${Deno.env.get('SUPABASE_URL')?.replace('.supabase.co', '')}.lovableproject.com/lojista?payment=success`,
-        failure: `${Deno.env.get('SUPABASE_URL')?.replace('.supabase.co', '')}.lovableproject.com/lojista?payment=failure`,
-        pending: `${Deno.env.get('SUPABASE_URL')?.replace('.supabase.co', '')}.lovableproject.com/lojista?payment=pending`,
+        success: `${Deno.env.get('APP_URL')}/lojista?payment=success`,
+        failure: `${Deno.env.get('APP_URL')}/lojista?payment=failure`,
+        pending: `${Deno.env.get('APP_URL')}/lojista?payment=pending`,
       },
       auto_return: 'approved',
       external_reference: pagamento.id,
