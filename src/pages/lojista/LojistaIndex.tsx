@@ -5,12 +5,13 @@ import { useCuponsStats } from '@/hooks/useCuponsStats';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { LogOut, Store, BarChart3, UserPlus, Building2, ShoppingCart, Ticket, TrendingUp, Users, Package } from 'lucide-react';
+import { LogOut, Store, BarChart3, UserPlus, Building2, ShoppingCart, Ticket, TrendingUp, Users, Package, Plus } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { AtribuirCuponsManual } from '@/components/lojistas/AtribuirCuponsManual';
 import { CompraBlocosModal } from '@/components/lojistas/CompraBlocosModal';
 import { HistoricoCompras } from '@/components/lojistas/HistoricoCompras';
 import { HistoricoAtribuicoes } from '@/components/lojistas/HistoricoAtribuicoes';
+import { NovaLojaModal } from '@/components/lojistas/NovaLojaModal';
 import { useSearchParams } from 'react-router-dom';
 
 const LojistaIndex = () => {
@@ -19,6 +20,7 @@ const LojistaIndex = () => {
   const { data: stats, isLoading: statsLoading } = useCuponsStats(loja?.id);
   const { toast } = useToast();
   const [showCompraBlocos, setShowCompraBlocos] = useState(false);
+  const [showNovaLoja, setShowNovaLoja] = useState(false);
   const [searchParams, setSearchParams] = useSearchParams();
 
   // Verifica status do pagamento na URL
@@ -120,18 +122,30 @@ const LojistaIndex = () => {
       </header>
 
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        {/* Seletor de Loja */}
-        {lojas.length > 1 && (
-          <Card className="mb-6">
-            <CardHeader>
-              <CardTitle className="flex items-center gap-2">
-                <Building2 className="h-5 w-5" />
-                Selecionar Loja
-              </CardTitle>
-              <CardDescription>
-                Escolha qual loja deseja gerenciar
-              </CardDescription>
-            </CardHeader>
+        {/* Seletor de Loja e Botão Adicionar */}
+        <Card className="mb-6">
+          <CardHeader>
+            <div className="flex items-center justify-between">
+              <div>
+                <CardTitle className="flex items-center gap-2">
+                  <Building2 className="h-5 w-5" />
+                  {lojas.length > 1 ? 'Selecionar Loja' : 'Minhas Lojas'}
+                </CardTitle>
+                <CardDescription>
+                  {lojas.length > 1 ? 'Escolha qual loja deseja gerenciar' : 'Gerencie suas lojas'}
+                </CardDescription>
+              </div>
+              <Button 
+                onClick={() => setShowNovaLoja(true)}
+                size="sm"
+                variant="outline"
+              >
+                <Plus className="h-4 w-4 mr-2" />
+                Adicionar Loja
+              </Button>
+            </div>
+          </CardHeader>
+          {lojas.length > 1 && (
             <CardContent>
               <Select value={lojaSelecionada || ''} onValueChange={setLojaSelecionada}>
                 <SelectTrigger className="w-full">
@@ -146,8 +160,8 @@ const LojistaIndex = () => {
                 </SelectContent>
               </Select>
             </CardContent>
-          </Card>
-        )}
+          )}
+        </Card>
 
         {loja && (
           <>
@@ -330,6 +344,18 @@ const LojistaIndex = () => {
           onOpenChange={setShowCompraBlocos}
         />
       )}
+
+      {/* Modal de nova loja */}
+      <NovaLojaModal
+        isOpen={showNovaLoja}
+        onClose={() => setShowNovaLoja(false)}
+        onSuccess={() => {
+          toast({
+            title: "Loja adicionada!",
+            description: "Sua nova loja foi cadastrada com sucesso.",
+          });
+        }}
+      />
     </div>
   );
 };
