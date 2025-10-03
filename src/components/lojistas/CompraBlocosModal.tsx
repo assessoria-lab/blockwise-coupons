@@ -26,7 +26,6 @@ interface VendaBlocosResponse {
 
 export const CompraBlocosModal = ({ lojistaId, open, onOpenChange }: CompraBlocosModalProps) => {
   const [quantidade, setQuantidade] = useState(1);
-  const [formaPagamento, setFormaPagamento] = useState<string>('');
   const { toast } = useToast();
   const queryClient = useQueryClient();
 
@@ -35,67 +34,26 @@ export const CompraBlocosModal = ({ lojistaId, open, onOpenChange }: CompraBloco
 
   const comprarBlocosMutation = useMutation({
     mutationFn: async () => {
-      if (!formaPagamento) {
-        throw new Error('Selecione uma forma de pagamento');
-      }
-
-      // Se for PIX ou Cartão, usa Mercado Pago
-      if (formaPagamento === 'pix' || formaPagamento === 'cartao') {
-        const { data, error } = await supabase.functions.invoke('create-mercadopago-payment', {
-          body: {
-            lojistaId,
-            quantidadeBlocos: quantidade,
-            valorTotal,
-            formaPagamento,
-          },
-        });
-
-        if (error) throw error;
-        if (!data.success) throw new Error(data.error || 'Erro ao criar pagamento');
-
-        // Redireciona para o checkout do Mercado Pago
-        window.location.href = data.initPoint;
-        return data;
-      }
-
-      // Para outras formas de pagamento, usa o fluxo antigo
-      const { data, error } = await supabase.rpc('vender_blocos_para_lojista_v2', {
-        p_lojista_id: lojistaId,
-        p_quantidade_blocos: quantidade,
-        p_valor_total: valorTotal,
-        p_forma_pagamento: formaPagamento
+      const { data, error } = await supabase.functions.invoke('create-mercadopago-payment', {
+        body: {
+          lojistaId,
+          quantidadeBlocos: quantidade,
+          valorTotal,
+        },
       });
 
       if (error) throw error;
-      
-      const resultado = data as unknown as VendaBlocosResponse;
-      if (!resultado?.sucesso) throw new Error(resultado?.mensagem || 'Erro na compra');
+      if (!data.success) throw new Error(data.error || 'Erro ao criar pagamento');
 
-      return resultado;
+      // Redireciona para o checkout do Mercado Pago
+      window.location.href = data.initPoint;
+      return data;
     },
-    onSuccess: (data) => {
-      // Se for Mercado Pago, não mostra toast pois vai redirecionar
-      if (formaPagamento === 'pix' || formaPagamento === 'cartao') {
-        toast({
-          title: "🔄 Redirecionando...",
-          description: "Você será redirecionado para o pagamento.",
-        });
-        return;
-      }
-
+    onSuccess: () => {
       toast({
-        title: "✅ Compra realizada!",
-        description: `${data.blocos_transferidos} blocos adquiridos com sucesso. Total: R$ ${valorTotal.toFixed(2)}`,
+        title: "🔄 Redirecionando...",
+        description: "Você será redirecionado para o pagamento.",
       });
-      
-      // Invalidar queries para atualizar dados
-      queryClient.invalidateQueries({ queryKey: ['cupons-stats'] });
-      queryClient.invalidateQueries({ queryKey: ['lojistas'] });
-      queryClient.invalidateQueries({ queryKey: ['historico-compras'] });
-      
-      onOpenChange(false);
-      setQuantidade(1);
-      setFormaPagamento('');
     },
     onError: (error: any) => {
       toast({
@@ -168,28 +126,6 @@ export const CompraBlocosModal = ({ lojistaId, open, onOpenChange }: CompraBloco
               </p>
             </div>
 
-            <div className="space-y-2">
-              <Label>Forma de pagamento</Label>
-              <Select value={formaPagamento} onValueChange={setFormaPagamento}>
-                <SelectTrigger>
-                  <SelectValue placeholder="Selecione a forma de pagamento" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="pix">
-                    <div className="flex items-center gap-2">
-                      <CreditCard className="h-4 w-4" />
-                      PIX
-                    </div>
-                  </SelectItem>
-                  <SelectItem value="cartao">
-                    <div className="flex items-center gap-2">
-                      <CreditCard className="h-4 w-4" />
-                      Cartão
-                    </div>
-                  </SelectItem>
-                </SelectContent>
-              </Select>
-            </div>
           </div>
 
           {/* Botões */}
@@ -204,7 +140,7 @@ export const CompraBlocosModal = ({ lojistaId, open, onOpenChange }: CompraBloco
             </Button>
             <Button 
               onClick={() => comprarBlocosMutation.mutate()}
-              disabled={!formaPagamento || comprarBlocosMutation.isPending}
+              disabled={comprarBlocosMutation.isPending}
               className="flex-1"
             >
               {comprarBlocosMutation.isPending && (

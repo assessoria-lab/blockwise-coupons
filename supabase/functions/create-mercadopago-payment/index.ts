@@ -12,12 +12,12 @@ serve(async (req) => {
   }
 
   try {
-    const { lojistaId, quantidadeBlocos, valorTotal, formaPagamento } = await req.json();
+    const { lojistaId, quantidadeBlocos, valorTotal } = await req.json();
 
-    console.log('Creating Mercado Pago payment:', { lojistaId, quantidadeBlocos, valorTotal, formaPagamento });
+    console.log('Creating Mercado Pago payment:', { lojistaId, quantidadeBlocos, valorTotal });
 
     // Valida entrada
-    if (!lojistaId || !quantidadeBlocos || !valorTotal || !formaPagamento) {
+    if (!lojistaId || !quantidadeBlocos || !valorTotal) {
       throw new Error('Dados incompletos');
     }
 
@@ -44,7 +44,7 @@ serve(async (req) => {
         lojista_id: lojistaId,
         quantidade_blocos: quantidadeBlocos,
         valor: valorTotal,
-        forma_pagamento: formaPagamento,
+        forma_pagamento: 'mercadopago',
         status_pagamento: 'pendente',
       })
       .select()
@@ -83,8 +83,7 @@ serve(async (req) => {
       external_reference: pagamento.id,
       notification_url: `${Deno.env.get('SUPABASE_URL')}/functions/v1/mercadopago-webhook`,
       payment_methods: {
-        excluded_payment_types: formaPagamento === 'pix' ? [{ id: 'credit_card' }, { id: 'debit_card' }] : [],
-        installments: formaPagamento === 'cartao' ? 12 : 1,
+        installments: 12,
       },
     };
 
