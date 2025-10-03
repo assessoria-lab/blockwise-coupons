@@ -36,6 +36,8 @@ const useHistoricoCompras = (lojistaId: string) => {
       return data as Pagamento[];
     },
     enabled: !!lojistaId,
+    refetchOnWindowFocus: false,
+    staleTime: 30000, // 30 segundos
   });
 };
 
