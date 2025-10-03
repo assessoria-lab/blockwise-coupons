@@ -148,7 +148,7 @@ export const useCustomAuthProvider = () => {
 
       // Criar sessão lojista
       const lojistaUser: LojistaUser = {
-        id: lojaData.id,
+        id: data.user.id, // ID do usuário auth, não da loja
         email: email,
         nome_loja: lojaData.nome_loja,
         nome_responsavel: lojaData.nome_responsavel || '',
