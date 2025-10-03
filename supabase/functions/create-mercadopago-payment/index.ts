@@ -51,7 +51,8 @@ serve(async (req) => {
       .single();
 
     if (pagamentoError) {
-      throw new Error('Erro ao criar registro de pagamento');
+      console.error('Erro ao criar pagamento:', pagamentoError);
+      throw new Error(`Erro ao criar registro de pagamento: ${pagamentoError.message}`);
     }
 
     // Cria preferência no Mercado Pago
