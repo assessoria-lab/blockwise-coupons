@@ -118,14 +118,23 @@ serve(async (req) => {
       })
       .eq('id', pagamento.id);
 
-    console.log('Payment created successfully:', { paymentId: pagamento.id, preferenceId: mpData.id });
+    // Usa sandbox_init_point se for ambiente de teste
+    const initPoint = isTestMode ? mpData.sandbox_init_point : mpData.init_point;
+    
+    console.log('Payment created successfully:', { 
+      paymentId: pagamento.id, 
+      preferenceId: mpData.id,
+      mode: isTestMode ? 'TEST' : 'PRODUCTION',
+      initPoint 
+    });
 
     return new Response(
       JSON.stringify({
         success: true,
         paymentId: pagamento.id,
-        initPoint: mpData.init_point,
+        initPoint: initPoint,
         preferenceId: mpData.id,
+        testMode: isTestMode,
       }),
       {
         headers: { ...corsHeaders, 'Content-Type': 'application/json' },
