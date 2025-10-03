@@ -7,7 +7,6 @@ import { MapPin } from 'lucide-react';
 
 interface CidadeData {
   cidade: string;
-  total_cupons: number;
   total_clientes: number;
   percentual: number;
 }
@@ -21,7 +20,7 @@ const fetchDadosCidades = async (): Promise<CidadeData[]> => {
   // Busca todos os clientes com cidade definida
   const { data: clientes, error } = await supabase
     .from('clientes')
-    .select('id, cidade')
+    .select('cidade')
     .not('cidade', 'is', null);
 
   if (error) throw new Error(error.message);
@@ -30,8 +29,8 @@ const fetchDadosCidades = async (): Promise<CidadeData[]> => {
     return [];
   }
 
-  // Agrupar por cidade
-  const cidadesMap = new Map<string, { clientes: Set<string> }>();
+  // Agrupar por cidade e contar clientes
+  const cidadesMap = new Map<string, number>();
   
   clientes.forEach((cliente) => {
     const cidade = cliente.cidade?.trim();
@@ -39,41 +38,17 @@ const fetchDadosCidades = async (): Promise<CidadeData[]> => {
     // Ignora se não tem cidade definida
     if (!cidade || cidade === '') return;
     
-    if (!cidadesMap.has(cidade)) {
-      cidadesMap.set(cidade, { clientes: new Set() });
-    }
-    
-    cidadesMap.get(cidade)!.clientes.add(cliente.id);
+    cidadesMap.set(cidade, (cidadesMap.get(cidade) || 0) + 1);
   });
 
-  // Buscar total de cupons por cliente
-  const { data: cupons } = await supabase
-    .from('cupons')
-    .select('cliente_id')
-    .eq('status', 'atribuido')
-    .in('cliente_id', clientes.map(c => c.id));
-
-  // Contar cupons por cidade
-  const cuponsPorCidade = new Map<string, number>();
-  
-  cupons?.forEach((cupom) => {
-    const cliente = clientes.find(c => c.id === cupom.cliente_id);
-    if (cliente?.cidade) {
-      const cidade = cliente.cidade.trim();
-      cuponsPorCidade.set(cidade, (cuponsPorCidade.get(cidade) || 0) + 1);
-    }
-  });
-
-  const totalCupons = cupons?.length || 0;
+  const totalClientes = clientes.length;
   
   const resultado = Array.from(cidadesMap.entries())
-    .map(([cidade, dados]) => ({
+    .map(([cidade, total]) => ({
       cidade,
-      total_cupons: cuponsPorCidade.get(cidade) || 0,
-      total_clientes: dados.clientes.size,
-      percentual: totalCupons > 0 ? ((cuponsPorCidade.get(cidade) || 0) / totalCupons) * 100 : 0
+      total_clientes: total,
+      percentual: totalClientes > 0 ? (total / totalClientes) * 100 : 0
     }))
-    .filter(item => item.total_clientes > 0)
     .sort((a, b) => b.total_clientes - a.total_clientes)
     .slice(0, 10); // Top 10 cidades
 
@@ -86,9 +61,6 @@ const CustomTooltip = ({ active, payload }: any) => {
     return (
       <div className="bg-white p-3 border border-border rounded-lg shadow-lg">
         <p className="font-semibold text-foreground">{data.cidade}</p>
-        <p className="text-sm text-muted-foreground">
-          Cupons: <span className="font-medium text-foreground">{data.total_cupons}</span>
-        </p>
         <p className="text-sm text-muted-foreground">
           Clientes: <span className="font-medium text-foreground">{data.total_clientes}</span>
         </p>
@@ -170,7 +142,7 @@ export const GraficoCidadesClientes = () => {
             Cidade Cliente
           </CardTitle>
         <p className="text-sm text-muted-foreground">
-          Distribuição dos {dadosCidades.reduce((acc, cidade) => acc + cidade.total_cupons, 0)} cupons atribuídos por cidade
+          Distribuição dos {dadosCidades.reduce((acc, cidade) => acc + cidade.total_clientes, 0)} clientes por cidade
         </p>
       </CardHeader>
       <CardContent className="p-6">
@@ -188,7 +160,7 @@ export const GraficoCidadesClientes = () => {
                   }
                   outerRadius={120}
                   fill="#8884d8"
-                  dataKey="total_cupons"
+                  dataKey="total_clientes"
                 >
                   {dadosCidades.map((_, index) => (
                     <Cell key={`cell-${index}`} fill={CORES_GRAFICOS[index % CORES_GRAFICOS.length]} />
