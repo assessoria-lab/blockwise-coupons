@@ -36,38 +36,9 @@ export const AtribuirCuponsManual = ({ lojistaId, onSuccess }: AtribuirCuponsMan
 
   const { mutate: atribuirCupons, isPending } = useMutation({
     mutationFn: async (data: FormData) => {
-      // First, create or find the client
       const cpfLimpo = data.cpf.replace(/\D/g, '');
       
-      // Check if client exists
-      let { data: clienteExistente, error: findError } = await supabase
-        .from('clientes')
-        .select('id')
-        .eq('cpf', cpfLimpo)
-        .maybeSingle();
-      
-      let clienteId: string;
-      
-      if (clienteExistente) {
-        clienteId = clienteExistente.id;
-      } else {
-        // Create new client
-        const { data: novoCliente, error: createError } = await supabase
-          .from('clientes')
-          .insert({
-            nome: data.nome,
-            cpf: cpfLimpo,
-            telefone: data.telefone,
-            cidade: data.cidade
-          })
-          .select('id')
-          .single();
-        
-        if (createError) throw new Error(createError.message);
-        clienteId = novoCliente.id;
-      }
-      
-      // Now assign coupons via RPC using correct parameters
+      // A função RPC já cuida de criar/atualizar o cliente com privilégios elevados
       const { data: result, error } = await supabase.rpc('atribuir_cupons_para_cliente', {
         p_lojista_id: lojistaId,
         p_cliente_cpf: cpfLimpo,
