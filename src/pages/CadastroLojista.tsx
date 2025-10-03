@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
+import { useCustomAuth } from '@/hooks/useCustomAuth';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
@@ -66,9 +67,8 @@ const lojistaSchema = z.object({
   path: ["confirmar_senha"]
 });
 export default function CadastroLojista() {
-  const {
-    toast
-  } = useToast();
+  const { toast } = useToast();
+  const { signInLojista } = useCustomAuth();
   const navigate = useNavigate();
   const queryClient = useQueryClient();
   const [novoSegmento, setNovoSegmento] = useState('');
@@ -244,7 +244,7 @@ export default function CadastroLojista() {
         throw error;
       }
     },
-    onSuccess: () => {
+    onSuccess: async () => {
       queryClient.invalidateQueries({
         queryKey: ['lojistas']
       });
@@ -252,12 +252,20 @@ export default function CadastroLojista() {
       // Salva o nome da loja para o modal
       setNomeLojaRegistrada(formData.nome_loja);
       
+      // Fazer login automático após cadastro
+      try {
+        await signInLojista(formData.email!, formData.senha);
+        console.log('✅ Login automático realizado após cadastro');
+      } catch (error) {
+        console.error('Erro no login automático:', error);
+      }
+      
       // Mostra o modal de sucesso
       setShowSucessoModal(true);
 
       toast({
         title: "✅ Lojista cadastrado!",
-        description: `${formData.nome_loja} foi cadastrado com sucesso. Verifique seu email para confirmar a conta.`
+        description: `${formData.nome_loja} foi cadastrado com sucesso e você já está logado!`
       });
 
       // Reset form
