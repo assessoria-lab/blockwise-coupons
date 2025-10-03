@@ -35,7 +35,6 @@ export const VendaBlocosModal = ({ lojista, onClose, onSuccess }: VendaBlocosMod
         p_quantidade_blocos: quantidade,
         p_valor_total: valor * quantidade,
         p_forma_pagamento: formaPagamento,
-        p_vendedor_nome: vendedorNome.trim() || null,
       });
       
       if (error) throw new Error(error.message);

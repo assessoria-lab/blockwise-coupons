@@ -10,6 +10,7 @@ import { useToast } from '@/hooks/use-toast';
 import { AtribuirCuponsManual } from '@/components/lojistas/AtribuirCuponsManual';
 import { CompraBlocosModal } from '@/components/lojistas/CompraBlocosModal';
 import { HistoricoCompras } from '@/components/lojistas/HistoricoCompras';
+import { HistoricoAtribuicoes } from '@/components/lojistas/HistoricoAtribuicoes';
 
 const LojistaIndex = () => {
   const { user, signOut } = useCustomAuth();
@@ -281,6 +282,11 @@ const LojistaIndex = () => {
             {/* Histórico de Compras */}
             <div className="mb-8">
               <HistoricoCompras lojistaId={loja.id} />
+            </div>
+
+            {/* Histórico de Atribuições */}
+            <div className="mb-8">
+              <HistoricoAtribuicoes lojistaId={loja.id} />
             </div>
           </>
         )}
