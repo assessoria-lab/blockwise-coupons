@@ -20,12 +20,15 @@ const fetchDadosCidades = async (): Promise<CidadeData[]> => {
   // Busca todos os clientes com cidade definida
   const { data: clientes, error } = await supabase
     .from('clientes')
-    .select('cidade')
-    .not('cidade', 'is', null);
+    .select('cidade');
+
+  console.log('Dados brutos de clientes:', clientes);
+  console.log('Erro na busca:', error);
 
   if (error) throw new Error(error.message);
   
   if (!clientes || clientes.length === 0) {
+    console.log('Nenhum cliente encontrado');
     return [];
   }
 
