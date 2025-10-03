@@ -17,6 +17,10 @@ const CORES_GRAFICOS = [
 ];
 
 const fetchDadosCidades = async (): Promise<CidadeData[]> => {
+  // Verifica autenticação
+  const { data: { user } } = await supabase.auth.getUser();
+  console.log('Usuário autenticado:', user?.id);
+
   // Busca todos os clientes com cidade definida
   const { data: clientes, error } = await supabase
     .from('clientes')
@@ -25,7 +29,10 @@ const fetchDadosCidades = async (): Promise<CidadeData[]> => {
   console.log('Dados brutos de clientes:', clientes);
   console.log('Erro na busca:', error);
 
-  if (error) throw new Error(error.message);
+  if (error) {
+    console.error('Erro ao buscar clientes:', error);
+    throw new Error(error.message);
+  }
   
   if (!clientes || clientes.length === 0) {
     console.log('Nenhum cliente encontrado');
