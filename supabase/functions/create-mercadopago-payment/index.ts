@@ -37,14 +37,14 @@ serve(async (req) => {
       throw new Error('Lojista não encontrado');
     }
 
-    // Cria registro de pagamento
+    // Cria registro de pagamento (usa 'pix' como forma padrão já que MP aceita múltiplas formas)
     const { data: pagamento, error: pagamentoError } = await supabase
       .from('pagamentos')
       .insert({
         lojista_id: lojistaId,
         quantidade_blocos: quantidadeBlocos,
         valor: valorTotal,
-        forma_pagamento: 'mercadopago',
+        forma_pagamento: 'pix',
         status_pagamento: 'pendente',
       })
       .select()
