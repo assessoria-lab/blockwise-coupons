@@ -18,32 +18,42 @@ const CORES_GRAFICOS = [
 ];
 
 const fetchDadosCidades = async (): Promise<CidadeData[]> => {
+  // Busca cupons atribuídos com dados dos clientes
   const { data, error } = await supabase
     .from('cupons')
     .select(`
       id,
       cliente_id,
-      clientes!inner(id, cidade)
+      clientes!inner(
+        id,
+        cidade
+      )
     `)
-    .eq('status', 'atribuido')
-    .not('clientes.cidade', 'is', null);
+    .eq('status', 'atribuido');
 
   if (error) throw new Error(error.message);
+  
+  if (!data || data.length === 0) {
+    return [];
+  }
 
-  // Agrupar por cidade
+  // Agrupar por cidade (da tabela clientes, coluna cidade)
   const cidadesMap = new Map<string, { cupons: number; clientes: Set<string> }>();
   
   data.forEach((cupom: any) => {
     const cidade = cupom.clientes?.cidade;
     const clienteId = cupom.clientes?.id;
     
-    if (!cidade) return;
+    // Ignora se não tem cidade definida
+    if (!cidade || cidade.trim() === '') return;
     
     if (!cidadesMap.has(cidade)) {
       cidadesMap.set(cidade, { cupons: 0, clientes: new Set() });
     }
+    
     const cidadeData = cidadesMap.get(cidade)!;
     cidadeData.cupons++;
+    
     if (clienteId) {
       cidadeData.clientes.add(clienteId);
     }
@@ -56,7 +66,7 @@ const fetchDadosCidades = async (): Promise<CidadeData[]> => {
       cidade,
       total_cupons: dados.cupons,
       total_clientes: dados.clientes.size,
-      percentual: (dados.cupons / totalCupons) * 100
+      percentual: totalCupons > 0 ? (dados.cupons / totalCupons) * 100 : 0
     }))
     .sort((a, b) => b.total_cupons - a.total_cupons)
     .slice(0, 10); // Top 10 cidades
