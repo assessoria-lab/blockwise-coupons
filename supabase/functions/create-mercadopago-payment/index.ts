@@ -27,6 +27,23 @@ serve(async (req) => {
       Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') ?? ''
     );
 
+    // Verifica se há blocos disponíveis no pool
+    const { count: blocosDisponiveis, error: countError } = await supabase
+      .from('blocos')
+      .select('*', { count: 'exact', head: true })
+      .is('lojista_id', null)
+      .eq('status', 'disponivel');
+
+    if (countError) {
+      console.error('Erro ao verificar blocos disponíveis:', countError);
+      throw new Error('Erro ao verificar disponibilidade de blocos');
+    }
+
+    if (!blocosDisponiveis || blocosDisponiveis < quantidadeBlocos) {
+      console.warn('Blocos insuficientes:', { solicitado: quantidadeBlocos, disponivel: blocosDisponiveis });
+      throw new Error(`Não há blocos suficientes disponíveis. Disponível: ${blocosDisponiveis || 0}, Solicitado: ${quantidadeBlocos}`);
+    }
+
     const { data: lojista, error: lojistaError } = await supabase
       .from('lojistas')
       .select('nome_loja, email')
