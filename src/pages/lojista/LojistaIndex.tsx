@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useCustomAuth } from '@/hooks/useCustomAuth';
 import { useLojistas } from '@/hooks/useLojistas';
 import { useCuponsStats } from '@/hooks/useCuponsStats';
@@ -11,6 +11,7 @@ import { AtribuirCuponsManual } from '@/components/lojistas/AtribuirCuponsManual
 import { CompraBlocosModal } from '@/components/lojistas/CompraBlocosModal';
 import { HistoricoCompras } from '@/components/lojistas/HistoricoCompras';
 import { HistoricoAtribuicoes } from '@/components/lojistas/HistoricoAtribuicoes';
+import { useSearchParams } from 'react-router-dom';
 
 const LojistaIndex = () => {
   const { user, signOut } = useCustomAuth();
@@ -18,6 +19,35 @@ const LojistaIndex = () => {
   const { data: stats, isLoading: statsLoading } = useCuponsStats(loja?.id);
   const { toast } = useToast();
   const [showCompraBlocos, setShowCompraBlocos] = useState(false);
+  const [searchParams, setSearchParams] = useSearchParams();
+
+  // Verifica status do pagamento na URL
+  useEffect(() => {
+    const paymentStatus = searchParams.get('payment');
+    if (paymentStatus === 'success') {
+      toast({
+        title: "✅ Pagamento aprovado!",
+        description: "Seus blocos foram adicionados com sucesso.",
+      });
+      searchParams.delete('payment');
+      setSearchParams(searchParams);
+    } else if (paymentStatus === 'failure') {
+      toast({
+        title: "❌ Pagamento não aprovado",
+        description: "Houve um problema com seu pagamento. Tente novamente.",
+        variant: "destructive",
+      });
+      searchParams.delete('payment');
+      setSearchParams(searchParams);
+    } else if (paymentStatus === 'pending') {
+      toast({
+        title: "⏳ Pagamento pendente",
+        description: "Seu pagamento está sendo processado. Aguarde a confirmação.",
+      });
+      searchParams.delete('payment');
+      setSearchParams(searchParams);
+    }
+  }, [searchParams, setSearchParams, toast]);
 
   const handleSignOut = async () => {
     await signOut();

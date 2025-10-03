@@ -39,6 +39,26 @@ export const CompraBlocosModal = ({ lojistaId, open, onOpenChange }: CompraBloco
         throw new Error('Selecione uma forma de pagamento');
       }
 
+      // Se for PIX ou Cartão, usa Mercado Pago
+      if (formaPagamento === 'pix' || formaPagamento === 'cartao') {
+        const { data, error } = await supabase.functions.invoke('create-mercadopago-payment', {
+          body: {
+            lojistaId,
+            quantidadeBlocos: quantidade,
+            valorTotal,
+            formaPagamento,
+          },
+        });
+
+        if (error) throw error;
+        if (!data.success) throw new Error(data.error || 'Erro ao criar pagamento');
+
+        // Redireciona para o checkout do Mercado Pago
+        window.location.href = data.initPoint;
+        return data;
+      }
+
+      // Para outras formas de pagamento, usa o fluxo antigo
       const { data, error } = await supabase.rpc('vender_blocos_para_lojista_v2', {
         p_lojista_id: lojistaId,
         p_quantidade_blocos: quantidade,
@@ -54,6 +74,15 @@ export const CompraBlocosModal = ({ lojistaId, open, onOpenChange }: CompraBloco
       return resultado;
     },
     onSuccess: (data) => {
+      // Se for Mercado Pago, não mostra toast pois vai redirecionar
+      if (formaPagamento === 'pix' || formaPagamento === 'cartao') {
+        toast({
+          title: "🔄 Redirecionando...",
+          description: "Você será redirecionado para o pagamento.",
+        });
+        return;
+      }
+
       toast({
         title: "✅ Compra realizada!",
         description: `${data.blocos_transferidos} blocos adquiridos com sucesso. Total: R$ ${valorTotal.toFixed(2)}`,
