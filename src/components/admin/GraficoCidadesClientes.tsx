@@ -18,57 +18,63 @@ const CORES_GRAFICOS = [
 ];
 
 const fetchDadosCidades = async (): Promise<CidadeData[]> => {
-  // Busca cupons atribuídos com dados dos clientes
-  const { data, error } = await supabase
-    .from('cupons')
-    .select(`
-      id,
-      cliente_id,
-      clientes!inner(
-        id,
-        cidade
-      )
-    `)
-    .eq('status', 'atribuido');
+  // Busca todos os clientes com cidade definida
+  const { data: clientes, error } = await supabase
+    .from('clientes')
+    .select('id, cidade')
+    .not('cidade', 'is', null);
 
   if (error) throw new Error(error.message);
   
-  if (!data || data.length === 0) {
+  if (!clientes || clientes.length === 0) {
     return [];
   }
 
-  // Agrupar por cidade (da tabela clientes, coluna cidade)
-  const cidadesMap = new Map<string, { cupons: number; clientes: Set<string> }>();
+  // Agrupar por cidade
+  const cidadesMap = new Map<string, { clientes: Set<string> }>();
   
-  data.forEach((cupom: any) => {
-    const cidade = cupom.clientes?.cidade;
-    const clienteId = cupom.clientes?.id;
+  clientes.forEach((cliente) => {
+    const cidade = cliente.cidade?.trim();
     
     // Ignora se não tem cidade definida
-    if (!cidade || cidade.trim() === '') return;
+    if (!cidade || cidade === '') return;
     
     if (!cidadesMap.has(cidade)) {
-      cidadesMap.set(cidade, { cupons: 0, clientes: new Set() });
+      cidadesMap.set(cidade, { clientes: new Set() });
     }
     
-    const cidadeData = cidadesMap.get(cidade)!;
-    cidadeData.cupons++;
-    
-    if (clienteId) {
-      cidadeData.clientes.add(clienteId);
+    cidadesMap.get(cidade)!.clientes.add(cliente.id);
+  });
+
+  // Buscar total de cupons por cliente
+  const { data: cupons } = await supabase
+    .from('cupons')
+    .select('cliente_id')
+    .eq('status', 'atribuido')
+    .in('cliente_id', clientes.map(c => c.id));
+
+  // Contar cupons por cidade
+  const cuponsPorCidade = new Map<string, number>();
+  
+  cupons?.forEach((cupom) => {
+    const cliente = clientes.find(c => c.id === cupom.cliente_id);
+    if (cliente?.cidade) {
+      const cidade = cliente.cidade.trim();
+      cuponsPorCidade.set(cidade, (cuponsPorCidade.get(cidade) || 0) + 1);
     }
   });
 
-  const totalCupons = data.length;
+  const totalCupons = cupons?.length || 0;
   
   const resultado = Array.from(cidadesMap.entries())
     .map(([cidade, dados]) => ({
       cidade,
-      total_cupons: dados.cupons,
+      total_cupons: cuponsPorCidade.get(cidade) || 0,
       total_clientes: dados.clientes.size,
-      percentual: totalCupons > 0 ? (dados.cupons / totalCupons) * 100 : 0
+      percentual: totalCupons > 0 ? ((cuponsPorCidade.get(cidade) || 0) / totalCupons) * 100 : 0
     }))
-    .sort((a, b) => b.total_cupons - a.total_cupons)
+    .filter(item => item.total_clientes > 0)
+    .sort((a, b) => b.total_clientes - a.total_clientes)
     .slice(0, 10); // Top 10 cidades
 
   return resultado;
