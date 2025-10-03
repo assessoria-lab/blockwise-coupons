@@ -21,8 +21,9 @@ const fetchDadosCidades = async (): Promise<CidadeData[]> => {
   const { data, error } = await supabase
     .from('cupons')
     .select(`
-      clientes!inner(cidade),
-      id
+      id,
+      cliente_id,
+      clientes!inner(id, cidade)
     `)
     .eq('status', 'atribuido')
     .not('clientes.cidade', 'is', null);
@@ -33,13 +34,19 @@ const fetchDadosCidades = async (): Promise<CidadeData[]> => {
   const cidadesMap = new Map<string, { cupons: number; clientes: Set<string> }>();
   
   data.forEach((cupom: any) => {
-    const cidade = cupom.clientes.cidade;
+    const cidade = cupom.clientes?.cidade;
+    const clienteId = cupom.clientes?.id;
+    
+    if (!cidade) return;
+    
     if (!cidadesMap.has(cidade)) {
       cidadesMap.set(cidade, { cupons: 0, clientes: new Set() });
     }
     const cidadeData = cidadesMap.get(cidade)!;
     cidadeData.cupons++;
-    cidadeData.clientes.add(cupom.clientes.id);
+    if (clienteId) {
+      cidadeData.clientes.add(clienteId);
+    }
   });
 
   const totalCupons = data.length;

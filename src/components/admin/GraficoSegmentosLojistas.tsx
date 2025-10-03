@@ -21,9 +21,9 @@ const fetchDadosSegmentos = async (): Promise<SegmentoData[]> => {
   const { data, error } = await supabase
     .from('cupons')
     .select(`
-      lojistas!inner(segmento),
       id,
-      lojista_id
+      lojista_id,
+      lojistas!inner(id, segmento)
     `)
     .eq('status', 'atribuido')
     .not('lojistas.segmento', 'is', null);
@@ -34,13 +34,19 @@ const fetchDadosSegmentos = async (): Promise<SegmentoData[]> => {
   const segmentosMap = new Map<string, { cupons: number; lojistas: Set<string> }>();
   
   data.forEach((cupom: any) => {
-    const segmento = cupom.lojistas.segmento;
+    const segmento = cupom.lojistas?.segmento;
+    const lojistaId = cupom.lojista_id;
+    
+    if (!segmento) return;
+    
     if (!segmentosMap.has(segmento)) {
       segmentosMap.set(segmento, { cupons: 0, lojistas: new Set() });
     }
     const segmentoData = segmentosMap.get(segmento)!;
     segmentoData.cupons++;
-    segmentoData.lojistas.add(cupom.lojista_id);
+    if (lojistaId) {
+      segmentoData.lojistas.add(lojistaId);
+    }
   });
 
   const totalCupons = data.length;
