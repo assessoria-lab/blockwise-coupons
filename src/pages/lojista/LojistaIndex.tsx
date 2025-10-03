@@ -134,6 +134,9 @@ const LojistaIndex = () => {
                 <CardDescription>
                   {lojas.length > 1 ? 'Escolha qual loja deseja gerenciar' : 'Gerencie suas lojas'}
                 </CardDescription>
+                <p className="text-sm text-muted-foreground mt-2 bg-muted/50 p-2 rounded border border-border">
+                  ℹ️ Os cupons devem ser adquiridos de forma individual. Cada loja tem os seus cupons
+                </p>
               </div>
               <Button 
                 onClick={() => setShowNovaLoja(true)}
