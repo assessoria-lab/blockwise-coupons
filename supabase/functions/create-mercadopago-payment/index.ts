@@ -61,6 +61,10 @@ serve(async (req) => {
       throw new Error('Token do Mercado Pago não configurado');
     }
 
+    // Detecta se é ambiente de teste (token começa com TEST-)
+    const isTestMode = accessToken.startsWith('TEST-');
+    console.log('Mercado Pago mode:', isTestMode ? 'TEST' : 'PRODUCTION');
+
     const preference = {
       items: [
         {
