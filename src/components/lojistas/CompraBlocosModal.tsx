@@ -45,14 +45,21 @@ export const CompraBlocosModal = ({ lojistaId, open, onOpenChange }: CompraBloco
       if (error) throw error;
       if (!data.success) throw new Error(data.error || 'Erro ao criar pagamento');
 
+      console.log('Payment response:', data);
+
       // Redireciona para o checkout do Mercado Pago
       window.location.href = data.initPoint;
       return data;
     },
-    onSuccess: () => {
+    onSuccess: (data) => {
+      const modeMessage = data.testMode 
+        ? "⚠️ MODO DE TESTE: Use um usuário de teste do Mercado Pago" 
+        : "Você será redirecionado para o pagamento.";
+      
       toast({
         title: "🔄 Redirecionando...",
-        description: "Você será redirecionado para o pagamento.",
+        description: modeMessage,
+        duration: 3000,
       });
     },
     onError: (error: any) => {
