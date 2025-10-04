@@ -114,6 +114,15 @@ export const AtribuirCuponsManual = ({ lojistaId, onSuccess }: AtribuirCuponsMan
       return;
     }
     
+    if (!formData.telefone.trim()) {
+      toast({
+        title: "Telefone Obrigatório",
+        description: "Por favor, informe o telefone do cliente.",
+        variant: "destructive",
+      });
+      return;
+    }
+    
     if (!formData.cidade.trim()) {
       toast({
         title: "Cidade Obrigatória",
@@ -173,7 +182,7 @@ export const AtribuirCuponsManual = ({ lojistaId, onSuccess }: AtribuirCuponsMan
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div className="space-y-2">
-              <Label htmlFor="telefone">Telefone (Opcional)</Label>
+              <Label htmlFor="telefone">Telefone *</Label>
               <Input
                 id="telefone"
                 value={formData.telefone}
