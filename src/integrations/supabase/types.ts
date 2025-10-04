@@ -1239,6 +1239,10 @@ export type Database = {
         }
         Returns: string
       }
+      lojista_pode_ver_cliente: {
+        Args: { p_cliente_id: string }
+        Returns: boolean
+      }
       match_documents: {
         Args: { filter?: Json; match_count?: number; query_embedding: string }
         Returns: {
