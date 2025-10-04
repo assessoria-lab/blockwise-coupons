@@ -23,6 +23,7 @@ export const HistoricoAtribuicoes = ({ lojistaId }: HistoricoAtribuicoesProps) =
           valor_compra,
           data_atribuicao,
           status,
+          lojista_id,
           clientes:cliente_id (
             id,
             nome,
@@ -35,7 +36,10 @@ export const HistoricoAtribuicoes = ({ lojistaId }: HistoricoAtribuicoesProps) =
         .order('data_atribuicao', { ascending: false })
         .limit(50);
 
-      if (error) throw error;
+      if (error) {
+        console.error('Erro ao buscar atribuições:', error);
+        throw error;
+      }
       return data || [];
     },
     refetchInterval: 30000, // Atualiza a cada 30 segundos
