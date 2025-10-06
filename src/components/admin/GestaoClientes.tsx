@@ -726,70 +726,20 @@ const GestaoClientes = () => {
                   <CardTitle className="text-lg">Informações Pessoais</CardTitle>
                 </CardHeader>
                 <CardContent>
-                  <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-                    <div className="space-y-3">
-                      <div>
-                        <p className="text-sm text-muted-foreground mb-1">Nome Completo</p>
-                        <p className="font-semibold">{clienteDetalhes.cliente.nome}</p>
-                      </div>
-                      <div>
-                        <p className="text-sm text-muted-foreground mb-1">CPF</p>
-                        <p className="font-mono">{formatCPF(clienteDetalhes.cliente.cpf)}</p>
-                      </div>
+                  <div className="grid grid-cols-2 gap-4">
+                    <div>
+                      <p><strong>Nome:</strong> {clienteDetalhes.cliente.nome}</p>
+                      <p><strong>CPF:</strong> {formatCPF(clienteDetalhes.cliente.cpf)}</p>
+                      <p><strong>Telefone:</strong> {clienteDetalhes.cliente.telefone ? formatPhone(clienteDetalhes.cliente.telefone) : 'Não informado'}</p>
                     </div>
-                    
-                    <div className="space-y-3">
-                      <div>
-                        <p className="text-sm text-muted-foreground mb-1">Telefone</p>
-                        <p>{clienteDetalhes.cliente.telefone ? formatPhone(clienteDetalhes.cliente.telefone) : 'Não informado'}</p>
-                      </div>
-                      <div>
-                        <p className="text-sm text-muted-foreground mb-1">Email</p>
-                        <p className="break-all">{clienteDetalhes.cliente.email || 'Não informado'}</p>
-                      </div>
-                    </div>
-                    
-                    <div className="space-y-3">
-                      <div>
-                        <p className="text-sm text-muted-foreground mb-1">Localização</p>
-                        <p>
-                          {clienteDetalhes.cliente.cidade || 'Cidade não informada'}
-                          {clienteDetalhes.cliente.estado && ` - ${clienteDetalhes.cliente.estado}`}
-                        </p>
-                      </div>
-                      <div>
-                        <p className="text-sm text-muted-foreground mb-1">Status</p>
-                        <Badge variant={clienteDetalhes.cliente.status === 'ativo' ? 'default' : 'secondary'}>
+                    <div>
+                      <p><strong>Email:</strong> {clienteDetalhes.cliente.email || 'Não informado'}</p>
+                      <p><strong>Cidade:</strong> {clienteDetalhes.cliente.cidade || 'Não informado'}</p>
+                      <p><strong>Status:</strong> 
+                        <Badge className="ml-2" variant={clienteDetalhes.cliente.status === 'ativo' ? 'default' : 'secondary'}>
                           {clienteDetalhes.cliente.status}
                         </Badge>
-                      </div>
-                      <div>
-                        <p className="text-sm text-muted-foreground mb-1">Cliente desde</p>
-                        <p className="text-sm">{format(new Date(clienteDetalhes.cliente.created_at), 'dd/MM/yyyy', { locale: ptBR })}</p>
-                      </div>
-                    </div>
-                  </div>
-                  
-                  <div className="mt-4 pt-4 border-t">
-                    <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                      <div className="text-center">
-                        <p className="text-2xl font-bold text-blue-600">{clienteDetalhes.cliente.total_cupons_recebidos || 0}</p>
-                        <p className="text-xs text-muted-foreground">Total de Cupons</p>
-                      </div>
-                      <div className="text-center">
-                        <p className="text-2xl font-bold text-green-600">
-                          R$ {Number(clienteDetalhes.cliente.total_valor_compras || 0).toLocaleString('pt-BR', { minimumFractionDigits: 2 })}
-                        </p>
-                        <p className="text-xs text-muted-foreground">Volume Total de Compras</p>
-                      </div>
-                      <div className="text-center">
-                        <p className="text-2xl font-bold text-purple-600">
-                          R$ {clienteDetalhes.cliente.total_cupons_recebidos > 0 
-                            ? (Number(clienteDetalhes.cliente.total_valor_compras) / clienteDetalhes.cliente.total_cupons_recebidos).toLocaleString('pt-BR', { minimumFractionDigits: 2 })
-                            : '0,00'}
-                        </p>
-                        <p className="text-xs text-muted-foreground">Ticket Médio por Cupom</p>
-                      </div>
+                      </p>
                     </div>
                   </div>
                 </CardContent>
@@ -828,73 +778,38 @@ const GestaoClientes = () => {
               {/* Cupons do Cliente */}
               <Card>
                 <CardHeader>
-                  <CardTitle className="text-lg flex items-center justify-between">
-                    <span>Cupons do Cliente ({clienteDetalhes.cupons?.length || 0})</span>
-                    <Badge variant="outline" className="text-base">
-                      Total: R$ {clienteDetalhes.cupons?.reduce((acc: number, c: any) => acc + Number(c.valor_compra || 0), 0).toLocaleString('pt-BR', { minimumFractionDigits: 2 })}
-                    </Badge>
-                  </CardTitle>
+                  <CardTitle className="text-lg">Cupons do Cliente ({clienteDetalhes.cupons?.length || 0})</CardTitle>
                 </CardHeader>
                 <CardContent>
                   {!clienteDetalhes.cupons || clienteDetalhes.cupons.length === 0 ? (
                     <p className="text-center py-4 text-muted-foreground">Nenhum cupom encontrado</p>
                   ) : (
-                    <div className="space-y-3 max-h-[400px] overflow-y-auto pr-2">
+                    <div className="space-y-3 max-h-60 overflow-y-auto">
                       {clienteDetalhes.cupons.map((cupom: any) => (
-                        <div key={cupom.id} className="border rounded-lg p-4 hover:bg-muted/50 transition-colors">
-                          <div className="flex items-start justify-between gap-4">
-                            <div className="flex-1 space-y-2">
-                              <div className="flex items-center gap-2 flex-wrap">
-                                <code className="bg-primary/10 text-primary px-3 py-1 rounded text-sm font-mono font-semibold">
+                        <div key={cupom.id} className="border rounded-lg p-3">
+                          <div className="flex justify-between items-start">
+                            <div className="flex-1">
+                              <div className="flex items-center gap-2 mb-1">
+                                <code className="bg-muted px-2 py-1 rounded text-sm font-mono">
                                   {cupom.numero_formatado}
                                 </code>
-                                <Badge 
-                                  variant={cupom.status === 'atribuido' ? 'default' : 'secondary'}
-                                  className="capitalize"
-                                >
-                                  {cupom.status}
-                                </Badge>
-                                {cupom.tipo_cliente && (
-                                  <Badge variant="outline" className="capitalize">
-                                    {cupom.tipo_cliente}
-                                  </Badge>
-                                )}
+                                <Badge variant="outline">{cupom.status}</Badge>
                               </div>
-                              
-                              <div className="grid grid-cols-1 md:grid-cols-2 gap-2 text-sm">
-                                <div className="space-y-1">
-                                  <div className="flex items-start gap-2">
-                                    <Store className="h-4 w-4 text-muted-foreground mt-0.5 flex-shrink-0" />
-                                    <div>
-                                      <p className="font-semibold text-foreground">{cupom.lojistas?.nome_loja || 'Loja não identificada'}</p>
-                                      <p className="text-muted-foreground">
-                                        {cupom.lojistas?.cidade || 'Cidade não informada'}
-                                        {cupom.lojistas?.shopping && (
-                                          <span className="block text-xs">Shopping: {cupom.lojistas.shopping}</span>
-                                        )}
-                                      </p>
-                                    </div>
-                                  </div>
-                                </div>
-                                
-                                <div className="space-y-1">
-                                  <div className="flex items-center gap-2">
-                                    <Receipt className="h-4 w-4 text-muted-foreground" />
-                                    <div>
-                                      <p className="text-muted-foreground text-xs">Valor da Compra</p>
-                                      <p className="font-bold text-green-600">
-                                        R$ {Number(cupom.valor_compra || 0).toLocaleString('pt-BR', { minimumFractionDigits: 2 })}
-                                      </p>
-                                    </div>
-                                  </div>
-                                  <div className="text-xs text-muted-foreground mt-1">
-                                    <p>Atribuído em:</p>
-                                    <p className="font-medium text-foreground">
-                                      {format(new Date(cupom.data_atribuicao), "dd/MM/yyyy 'às' HH:mm", { locale: ptBR })}
-                                    </p>
-                                  </div>
-                                </div>
-                              </div>
+                              <p className="text-sm">
+                                <strong>Loja:</strong> {cupom.lojistas?.nome_loja}
+                              </p>
+                              <p className="text-sm">
+                                <strong>Cidade:</strong> {cupom.lojistas?.cidade}
+                                {cupom.lojistas?.shopping && ` - ${cupom.lojistas.shopping}`}
+                              </p>
+                            </div>
+                            <div className="text-right text-sm">
+                              <p className="font-semibold">
+                                R$1 {Number(cupom.valor_compra || 0).toLocaleString('pt-BR', { minimumFractionDigits: 2 })}
+                              </p>
+                              <p className="text-muted-foreground">
+                                {format(new Date(cupom.data_atribuicao), 'dd/MM/yyyy HH:mm', { locale: ptBR })}
+                              </p>
                             </div>
                           </div>
                         </div>
