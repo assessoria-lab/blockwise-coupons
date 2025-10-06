@@ -236,14 +236,14 @@ const DashboardBlocos = () => {
         const mappedData = (data || []).map((item: any) => ({
           numero_bloco: item.numero_bloco,
           lojista_nome: item.lojista_nome,
-          cupons_total: item.cupons_totais,
-          cupons_atribuidos: item.cupons_usados,
-          cupons_disponiveis: item.cupons_totais - item.cupons_usados,
-          utilizacao_percentual: item.percentual_uso,
-          comprado_em: item.ultima_atividade,
-          dias_desde_compra: 0,
-          valor_gerado: 0,
-          clientes_atendidos: 0
+          cupons_total: item.cupons_total,
+          cupons_atribuidos: item.cupons_atribuidos,
+          cupons_disponiveis: item.cupons_disponiveis,
+          utilizacao_percentual: Number(item.utilizacao_percentual || 0),
+          comprado_em: item.comprado_em,
+          dias_desde_compra: item.dias_desde_compra || 0,
+          valor_gerado: Number(item.valor_gerado || 0),
+          clientes_atendidos: Number(item.clientes_atendidos || 0)
         }));
         
         return mappedData;
