@@ -878,31 +878,40 @@ const GestaoClientes = () => {
                           if (!acc[loja]) {
                             acc[loja] = {
                               quantidade: 0,
-                              valor_total: 0,
+                              blocos: new Set(),
+                              valores_por_bloco: {},
                               cidade: cupom.lojistas?.cidade || '',
                               shopping: cupom.lojistas?.shopping || ''
                             };
                           }
                           acc[loja].quantidade += 1;
-                          acc[loja].valor_total += Number(cupom.valor_compra || 0);
+                          acc[loja].blocos.add(cupom.bloco_id);
+                          // Armazena o valor apenas uma vez por bloco
+                          if (!acc[loja].valores_por_bloco[cupom.bloco_id]) {
+                            acc[loja].valores_por_bloco[cupom.bloco_id] = Number(cupom.valor_compra || 0);
+                          }
                           return acc;
                         }, {})
-                      ).map(([loja, dados]: [string, any]) => (
-                        <div key={loja} className="flex justify-between items-center p-2 bg-muted rounded">
-                          <div>
-                            <p className="font-medium">{loja}</p>
-                            <p className="text-sm text-muted-foreground">
-                              {dados.cidade}{dados.shopping && ` - ${dados.shopping}`}
-                            </p>
+                      ).map(([loja, dados]: [string, any]) => {
+                        // Soma os valores únicos de cada bloco
+                        const valor_total = Object.values(dados.valores_por_bloco as Record<string, number>).reduce((sum, val) => sum + val, 0);
+                        return (
+                          <div key={loja} className="flex justify-between items-center p-2 bg-muted rounded">
+                            <div>
+                              <p className="font-medium">{loja}</p>
+                              <p className="text-sm text-muted-foreground">
+                                {dados.cidade}{dados.shopping && ` - ${dados.shopping}`}
+                              </p>
+                            </div>
+                            <div className="text-right">
+                              <p className="font-semibold">{dados.quantidade} cupons</p>
+                              <p className="text-sm text-muted-foreground">
+                                R$ {valor_total.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}
+                              </p>
+                            </div>
                           </div>
-                          <div className="text-right">
-                            <p className="font-semibold">{dados.quantidade} cupons</p>
-                            <p className="text-sm text-muted-foreground">
-                              R$ {dados.valor_total.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}
-                            </p>
-                          </div>
-                        </div>
-                      ))}
+                        );
+                      })}
                     </div>
                   </CardContent>
                 </Card>
