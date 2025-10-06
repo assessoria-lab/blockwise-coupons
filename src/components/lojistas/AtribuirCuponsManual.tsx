@@ -194,13 +194,32 @@ export const AtribuirCuponsManual = ({ lojistaId, onSuccess }: AtribuirCuponsMan
             
             <div className="space-y-2">
               <Label htmlFor="cidade">Cidade *</Label>
-              <Input
-                id="cidade"
-                value={formData.cidade}
-                onChange={(e) => setFormData(prev => ({ ...prev, cidade: e.target.value }))}
-                placeholder="Ex: São Paulo, Brasília, Rio de Janeiro"
+              <Select 
+                value={formData.cidade} 
+                onValueChange={(value) => setFormData(prev => ({ ...prev, cidade: value }))}
                 disabled={isPending}
-              />
+              >
+                <SelectTrigger>
+                  <SelectValue placeholder="Selecione a cidade" />
+                </SelectTrigger>
+                <SelectContent className="z-50 bg-background">
+                  <SelectItem value="Goiânia">Goiânia</SelectItem>
+                  <SelectItem value="Aparecida de Goiânia">Aparecida de Goiânia</SelectItem>
+                  <SelectItem value="Anápolis">Anápolis</SelectItem>
+                  <SelectItem value="Rio Verde">Rio Verde</SelectItem>
+                  <SelectItem value="Luziânia">Luziânia</SelectItem>
+                  <SelectItem value="Águas Lindas de Goiás">Águas Lindas de Goiás</SelectItem>
+                  <SelectItem value="Valparaíso de Goiás">Valparaíso de Goiás</SelectItem>
+                  <SelectItem value="Trindade">Trindade</SelectItem>
+                  <SelectItem value="Formosa">Formosa</SelectItem>
+                  <SelectItem value="Novo Gama">Novo Gama</SelectItem>
+                  <SelectItem value="Itumbiara">Itumbiara</SelectItem>
+                  <SelectItem value="Senador Canedo">Senador Canedo</SelectItem>
+                  <SelectItem value="Catalão">Catalão</SelectItem>
+                  <SelectItem value="Jataí">Jataí</SelectItem>
+                  <SelectItem value="Planaltina">Planaltina</SelectItem>
+                </SelectContent>
+              </Select>
             </div>
           </div>
 
