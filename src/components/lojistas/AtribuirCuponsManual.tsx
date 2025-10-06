@@ -1,13 +1,16 @@
-import { useState } from 'react';
-import { useMutation } from '@tanstack/react-query';
+import { useState, useEffect } from 'react';
+import { useMutation, useQuery } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem, CommandList } from '@/components/ui/command';
+import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { useToast } from '@/hooks/use-toast';
-import { Loader2, Gift } from 'lucide-react';
+import { Loader2, Gift, Check, ChevronsUpDown } from 'lucide-react';
+import { cn } from '@/lib/utils';
 
 interface AtribuirCuponsManualProps {
   lojistaId: string;
@@ -18,9 +21,21 @@ interface FormData {
   cpf: string;
   nome: string;
   telefone: string;
+  estado: string;
   cidade: string;
   valor: number;
   tipoCliente: 'varejo' | 'atacado';
+}
+
+interface Estado {
+  id: number;
+  sigla: string;
+  nome: string;
+}
+
+interface Cidade {
+  id: number;
+  nome: string;
 }
 
 export const AtribuirCuponsManual = ({ lojistaId, onSuccess }: AtribuirCuponsManualProps) => {
@@ -28,11 +43,39 @@ export const AtribuirCuponsManual = ({ lojistaId, onSuccess }: AtribuirCuponsMan
     cpf: '',
     nome: '',
     telefone: '',
+    estado: '',
     cidade: '',
     valor: 0,
     tipoCliente: 'varejo',
   });
+  const [openEstado, setOpenEstado] = useState(false);
+  const [openCidade, setOpenCidade] = useState(false);
   const { toast } = useToast();
+
+  // Buscar estados da API do IBGE
+  const { data: estados = [] } = useQuery<Estado[]>({
+    queryKey: ['estados'],
+    queryFn: async () => {
+      const response = await fetch('https://servicodados.ibge.gov.br/api/v1/localidades/estados?orderBy=nome');
+      return response.json();
+    },
+  });
+
+  // Buscar cidades baseado no estado selecionado
+  const { data: cidades = [] } = useQuery<Cidade[]>({
+    queryKey: ['cidades', formData.estado],
+    queryFn: async () => {
+      if (!formData.estado) return [];
+      const response = await fetch(`https://servicodados.ibge.gov.br/api/v1/localidades/estados/${formData.estado}/municipios`);
+      return response.json();
+    },
+    enabled: !!formData.estado,
+  });
+
+  // Limpar cidade quando estado mudar
+  useEffect(() => {
+    setFormData(prev => ({ ...prev, cidade: '' }));
+  }, [formData.estado]);
 
   const { mutate: atribuirCupons, isPending } = useMutation({
     mutationFn: async (data: FormData) => {
@@ -76,6 +119,7 @@ export const AtribuirCuponsManual = ({ lojistaId, onSuccess }: AtribuirCuponsMan
         cpf: '',
         nome: '',
         telefone: '',
+        estado: '',
         cidade: '',
         valor: 0,
         tipoCliente: 'varejo',
@@ -123,10 +167,19 @@ export const AtribuirCuponsManual = ({ lojistaId, onSuccess }: AtribuirCuponsMan
       return;
     }
     
+    if (!formData.estado.trim()) {
+      toast({
+        title: "Estado Obrigatório",
+        description: "Por favor, selecione o estado do cliente.",
+        variant: "destructive",
+      });
+      return;
+    }
+    
     if (!formData.cidade.trim()) {
       toast({
         title: "Cidade Obrigatória",
-        description: "Por favor, informe a cidade do cliente.",
+        description: "Por favor, selecione a cidade do cliente.",
         variant: "destructive",
       });
       return;
@@ -193,34 +246,98 @@ export const AtribuirCuponsManual = ({ lojistaId, onSuccess }: AtribuirCuponsMan
             </div>
             
             <div className="space-y-2">
-              <Label htmlFor="cidade">Cidade *</Label>
-              <Select 
-                value={formData.cidade} 
-                onValueChange={(value) => setFormData(prev => ({ ...prev, cidade: value }))}
-                disabled={isPending}
-              >
-                <SelectTrigger>
-                  <SelectValue placeholder="Selecione a cidade" />
-                </SelectTrigger>
-                <SelectContent className="z-50 bg-background">
-                  <SelectItem value="Goiânia">Goiânia</SelectItem>
-                  <SelectItem value="Aparecida de Goiânia">Aparecida de Goiânia</SelectItem>
-                  <SelectItem value="Anápolis">Anápolis</SelectItem>
-                  <SelectItem value="Rio Verde">Rio Verde</SelectItem>
-                  <SelectItem value="Luziânia">Luziânia</SelectItem>
-                  <SelectItem value="Águas Lindas de Goiás">Águas Lindas de Goiás</SelectItem>
-                  <SelectItem value="Valparaíso de Goiás">Valparaíso de Goiás</SelectItem>
-                  <SelectItem value="Trindade">Trindade</SelectItem>
-                  <SelectItem value="Formosa">Formosa</SelectItem>
-                  <SelectItem value="Novo Gama">Novo Gama</SelectItem>
-                  <SelectItem value="Itumbiara">Itumbiara</SelectItem>
-                  <SelectItem value="Senador Canedo">Senador Canedo</SelectItem>
-                  <SelectItem value="Catalão">Catalão</SelectItem>
-                  <SelectItem value="Jataí">Jataí</SelectItem>
-                  <SelectItem value="Planaltina">Planaltina</SelectItem>
-                </SelectContent>
-              </Select>
+              <Label htmlFor="estado">Estado *</Label>
+              <Popover open={openEstado} onOpenChange={setOpenEstado}>
+                <PopoverTrigger asChild>
+                  <Button
+                    variant="outline"
+                    role="combobox"
+                    aria-expanded={openEstado}
+                    className="w-full justify-between"
+                    disabled={isPending}
+                  >
+                    {formData.estado
+                      ? estados.find((estado) => estado.sigla === formData.estado)?.nome
+                      : "Selecione o estado..."}
+                    <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
+                  </Button>
+                </PopoverTrigger>
+                <PopoverContent className="w-full p-0 z-50" align="start">
+                  <Command>
+                    <CommandInput placeholder="Buscar estado..." />
+                    <CommandList>
+                      <CommandEmpty>Nenhum estado encontrado.</CommandEmpty>
+                      <CommandGroup>
+                        {estados.map((estado) => (
+                          <CommandItem
+                            key={estado.id}
+                            value={estado.nome}
+                            onSelect={() => {
+                              setFormData(prev => ({ ...prev, estado: estado.sigla }));
+                              setOpenEstado(false);
+                            }}
+                          >
+                            <Check
+                              className={cn(
+                                "mr-2 h-4 w-4",
+                                formData.estado === estado.sigla ? "opacity-100" : "opacity-0"
+                              )}
+                            />
+                            {estado.nome} ({estado.sigla})
+                          </CommandItem>
+                        ))}
+                      </CommandGroup>
+                    </CommandList>
+                  </Command>
+                </PopoverContent>
+              </Popover>
             </div>
+          </div>
+
+          <div className="space-y-2">
+            <Label htmlFor="cidade">Cidade *</Label>
+            <Popover open={openCidade} onOpenChange={setOpenCidade}>
+              <PopoverTrigger asChild>
+                <Button
+                  variant="outline"
+                  role="combobox"
+                  aria-expanded={openCidade}
+                  className="w-full justify-between"
+                  disabled={isPending || !formData.estado}
+                >
+                  {formData.cidade || "Selecione a cidade..."}
+                  <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
+                </Button>
+              </PopoverTrigger>
+              <PopoverContent className="w-full p-0 z-50" align="start">
+                <Command>
+                  <CommandInput placeholder="Buscar cidade..." />
+                  <CommandList>
+                    <CommandEmpty>Nenhuma cidade encontrada.</CommandEmpty>
+                    <CommandGroup>
+                      {cidades.map((cidade) => (
+                        <CommandItem
+                          key={cidade.id}
+                          value={cidade.nome}
+                          onSelect={(currentValue) => {
+                            setFormData(prev => ({ ...prev, cidade: currentValue }));
+                            setOpenCidade(false);
+                          }}
+                        >
+                          <Check
+                            className={cn(
+                              "mr-2 h-4 w-4",
+                              formData.cidade === cidade.nome ? "opacity-100" : "opacity-0"
+                            )}
+                          />
+                          {cidade.nome}
+                        </CommandItem>
+                      ))}
+                    </CommandGroup>
+                  </CommandList>
+                </Command>
+              </PopoverContent>
+            </Popover>
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
