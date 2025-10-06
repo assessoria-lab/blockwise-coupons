@@ -121,7 +121,7 @@ const GestaoSorteios = () => {
           data_atribuicao,
           valor_compra,
           tipo_cliente,
-          clientes(nome, cpf, cidade),
+          clientes(nome, cpf, cidade, telefone, email),
           lojistas(nome_loja, shopping)
         `)
         .eq('status', 'atribuido');
@@ -141,7 +141,7 @@ const GestaoSorteios = () => {
           data_atribuicao,
           valor_compra,
           tipo_cliente,
-          clientes(nome, cpf, cidade),
+          clientes(nome, cpf, cidade, telefone, email),
           lojistas(nome_loja, shopping)
         `)
         .order('data_atribuicao', { ascending: true });
@@ -162,11 +162,14 @@ const GestaoSorteios = () => {
         numero_formatado: cupom.numero_formatado,
         nome_cliente: cupom.clientes?.nome || 'N/A',
         cpf_cliente: cupom.clientes?.cpf || 'N/A',
+        telefone_cliente: cupom.clientes?.telefone || '',
+        email_cliente: cupom.clientes?.email || '',
         nome_loja: cupom.lojistas?.nome_loja || 'N/A',
         shopping: cupom.lojistas?.shopping || 'N/A',
         data_atribuicao: cupom.data_atribuicao,
         valor_compra: cupom.valor_compra || 0,
-        tipo_cliente: (cupom.tipo_cliente as 'varejo' | 'atacado') || 'varejo'
+        tipo_cliente: (cupom.tipo_cliente as 'varejo' | 'atacado') || 'varejo',
+        vendedor: ''
       }));
 
       // Gerar PDF com arte
