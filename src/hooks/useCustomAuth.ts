@@ -1,22 +1,29 @@
 import { useState, useEffect, createContext, useContext } from 'react';
 import { supabase } from '@/integrations/supabase/client';
-import type { User as SupabaseUser, Session } from '@supabase/supabase-js';
 
-interface UserProfile {
+interface AdminUser {
   id: string;
   email: string;
   nome: string;
-  tipo: 'admin' | 'lojista';
-  nome_loja?: string;
-  nome_responsavel?: string;
-  hasAdminRole?: boolean;
+  nivel_permissao: string;
+  tipo: 'admin';
 }
 
+interface LojistaUser {
+  id: string;
+  email: string;
+  nome_loja: string;
+  nome_responsavel: string;
+  tipo: 'lojista';
+}
+
+type User = AdminUser | LojistaUser;
+
 interface AuthContextType {
-  user: UserProfile | null;
-  session: Session | null;
+  user: User | null;
   loading: boolean;
-  signIn: (email: string, password: string) => Promise<{ error: any }>;
+  signInAdmin: (email: string, password: string) => Promise<{ error: any }>;
+  signInLojista: (email: string, password: string) => Promise<{ error: any }>;
   signOut: () => Promise<void>;
   isAdmin: boolean;
   isLojista: boolean;
@@ -25,9 +32,9 @@ interface AuthContextType {
 // Create context with default values
 const AuthContext = createContext<AuthContextType>({
   user: null,
-  session: null,
   loading: true,
-  signIn: async () => ({ error: 'Not implemented' }),
+  signInAdmin: async () => ({ error: 'Not implemented' }),
+  signInLojista: async () => ({ error: 'Not implemented' }),
   signOut: async () => {},
   isAdmin: false,
   isLojista: false,
@@ -39,104 +46,81 @@ export const useCustomAuth = () => {
 };
 
 export const useCustomAuthProvider = () => {
-  const [user, setUser] = useState<UserProfile | null>(null);
-  const [session, setSession] = useState<Session | null>(null);
+  const [user, setUser] = useState<User | null>(null);
   const [loading, setLoading] = useState(true);
 
-  // Fetch user profile and check admin role
-  const fetchUserProfile = async (supabaseUser: SupabaseUser): Promise<UserProfile | null> => {
-    try {
-      // Get profile data
-      const { data: profile, error: profileError } = await supabase
-        .from('profiles')
-        .select('*')
-        .eq('user_id', supabaseUser.id)
-        .single();
-
-      if (profileError || !profile) {
-        console.error('Error fetching profile:', profileError);
-        return null;
-      }
-
-      // Check if user has admin role via RPC
-      const { data: hasAdminRole, error: roleError } = await supabase
-        .rpc('has_role', {
-          _user_id: supabaseUser.id,
-          _role: 'admin'
-        });
-
-      if (roleError) {
-        console.error('Error checking admin role:', roleError);
-      }
-
-      // If user is lojista, fetch store data
-      let lojaData = null;
-      if (profile.tipo_usuario === 'lojista') {
-        const { data, error: lojaError } = await supabase
-          .from('lojistas')
-          .select('nome_loja, nome_responsavel')
-          .eq('user_id', supabaseUser.id)
-          .single();
-
-        if (!lojaError && data) {
-          lojaData = data;
+  useEffect(() => {
+    // Verifica se há sessão ativa no localStorage
+    const checkStoredSession = () => {
+      try {
+        const storedUser = localStorage.getItem('showpremios_user');
+        const sessionExpiry = localStorage.getItem('showpremios_session_expiry');
+        
+        if (storedUser && sessionExpiry) {
+          const expiryTime = new Date(sessionExpiry);
+          if (expiryTime > new Date()) {
+            setUser(JSON.parse(storedUser));
+          } else {
+            // Sessão expirada
+            localStorage.removeItem('showpremios_user');
+            localStorage.removeItem('showpremios_session_expiry');
+          }
         }
+      } catch (error) {
+        console.error('Erro ao verificar sessão:', error);
+        localStorage.removeItem('showpremios_user');
+        localStorage.removeItem('showpremios_session_expiry');
+      }
+      setLoading(false);
+    };
+
+    checkStoredSession();
+  }, []);
+
+  const signInAdmin = async (email: string, password: string) => {
+    try {
+      const { data, error } = await supabase.rpc('validar_login_admin', {
+        p_email: email,
+        p_senha: password
+      });
+
+      if (error) {
+        return { error: error.message };
       }
 
-      return {
-        id: supabaseUser.id,
-        email: supabaseUser.email || '',
-        nome: profile.nome,
-        tipo: profile.tipo_usuario === 'admin' ? 'admin' : 'lojista',
-        nome_loja: lojaData?.nome_loja,
-        nome_responsavel: lojaData?.nome_responsavel,
-        hasAdminRole: hasAdminRole || false,
+      const result = data as any;
+
+      if (!result.sucesso) {
+        return { error: result.mensagem };
+      }
+
+      // Criar sessão admin
+      const adminUser: AdminUser = {
+        id: result.usuario_id,
+        email: email,
+        nome: result.nome,
+        nivel_permissao: result.nivel_permissao,
+        tipo: 'admin'
       };
+
+      // Armazenar sessão (8 horas de duração)
+      const expiryTime = new Date();
+      expiryTime.setHours(expiryTime.getHours() + 8);
+      
+      localStorage.setItem('showpremios_user', JSON.stringify(adminUser));
+      localStorage.setItem('showpremios_session_expiry', expiryTime.toISOString());
+
+      setUser(adminUser);
+      return { error: null };
+
     } catch (error) {
-      console.error('Error in fetchUserProfile:', error);
-      return null;
+      return { error: 'Erro interno do servidor' };
     }
   };
 
-  useEffect(() => {
-    // Set up auth state listener FIRST
-    const { data: { subscription } } = supabase.auth.onAuthStateChange(
-      async (event, currentSession) => {
-        setSession(currentSession);
-        
-        if (currentSession?.user) {
-          // Defer profile fetching with setTimeout to prevent deadlock
-          setTimeout(async () => {
-            const profile = await fetchUserProfile(currentSession.user);
-            setUser(profile);
-            setLoading(false);
-          }, 0);
-        } else {
-          setUser(null);
-          setLoading(false);
-        }
-      }
-    );
-
-    // THEN check for existing session
-    supabase.auth.getSession().then(({ data: { session: currentSession } }) => {
-      setSession(currentSession);
-      
-      if (currentSession?.user) {
-        fetchUserProfile(currentSession.user).then((profile) => {
-          setUser(profile);
-          setLoading(false);
-        });
-      } else {
-        setLoading(false);
-      }
-    });
-
-    return () => subscription.unsubscribe();
-  }, []);
-
-  const signIn = async (email: string, password: string) => {
+  const signInLojista = async (email: string, password: string) => {
     try {
+      // Use Supabase Auth for lojista login
       const { data, error } = await supabase.auth.signInWithPassword({
         email,
         password
@@ -146,36 +130,70 @@ export const useCustomAuthProvider = () => {
         return { error: error.message };
       }
 
-      if (!data.user || !data.session) {
-        return { error: 'Falha na autenticação' };
+      if (!data.user) {
+        return { error: 'Usuário não encontrado' };
       }
 
-      // Profile will be fetched by onAuthStateChange listener
+      // Buscar dados da loja do usuário logado
+      const { data: lojaData, error: lojaError } = await supabase
+        .from('lojistas')
+        .select('id, nome_loja, nome_responsavel')
+        .eq('user_id', data.user.id)
+        .single();
+
+      if (lojaError || !lojaData) {
+        console.error('Erro ao buscar loja:', lojaError);
+        return { error: 'Loja não encontrada para este usuário' };
+      }
+
+      // Criar sessão lojista
+      const lojistaUser: LojistaUser = {
+        id: data.user.id, // ID do usuário auth, não da loja
+        email: email,
+        nome_loja: lojaData.nome_loja,
+        nome_responsavel: lojaData.nome_responsavel || '',
+        tipo: 'lojista'
+      };
+
+      // Armazenar sessão (8 horas de duração)
+      const expiryTime = new Date();
+      expiryTime.setHours(expiryTime.getHours() + 8);
+      
+      localStorage.setItem('showpremios_user', JSON.stringify(lojistaUser));
+      localStorage.setItem('showpremios_session_expiry', expiryTime.toISOString());
+
+      setUser(lojistaUser);
       return { error: null };
+
     } catch (error) {
-      console.error('Error in signIn:', error);
+      console.error('Erro no signInLojista:', error);
       return { error: 'Erro interno do servidor' };
     }
   };
 
   const signOut = async () => {
     try {
-      await supabase.auth.signOut();
-      setUser(null);
-      setSession(null);
+      // Fazer logout do Supabase Auth se for lojista
+      if (user?.tipo === 'lojista') {
+        await supabase.auth.signOut();
+      }
     } catch (error) {
-      console.error('Error signing out:', error);
+      console.error('Erro ao fazer logout:', error);
     }
+    
+    localStorage.removeItem('showpremios_user');
+    localStorage.removeItem('showpremios_session_expiry');
+    setUser(null);
   };
 
-  const isAdmin = user?.hasAdminRole || false;
+  const isAdmin = user?.tipo === 'admin';
   const isLojista = user?.tipo === 'lojista';
 
   return {
     user,
-    session,
     loading,
-    signIn,
+    signInAdmin,
+    signInLojista,
     signOut,
     isAdmin,
     isLojista,

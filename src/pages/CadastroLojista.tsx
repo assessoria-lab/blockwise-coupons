@@ -68,7 +68,7 @@ const lojistaSchema = z.object({
 });
 export default function CadastroLojista() {
   const { toast } = useToast();
-  const { signIn } = useCustomAuth();
+  const { signInLojista } = useCustomAuth();
   const navigate = useNavigate();
   const queryClient = useQueryClient();
   const [novoSegmento, setNovoSegmento] = useState('');
@@ -219,9 +219,23 @@ export default function CadastroLojista() {
         }
         console.log('✅ Loja criada com sucesso:', novaLoja);
 
-        // O perfil é criado automaticamente pelo trigger handle_new_user()
-        // quando o usuário é criado no Supabase Auth
-        console.log('✅ Perfil criado automaticamente pelo trigger');
+        // 3. Criar perfil do usuário (sem referência à loja específica)
+        console.log('Passo 3: Criando perfil do usuário...');
+        const { error: profileError } = await supabase
+          .from('profiles')
+          .insert([{
+            user_id: authUser.user.id,
+            nome: data.responsavel_nome || data.nome_loja,
+            email: data.email!,
+            tipo_usuario: 'lojista'
+          }]);
+
+        if (profileError) {
+          console.error('❌ Erro ao criar perfil:', profileError);
+          console.error('Detalhes completos do erro:', JSON.stringify(profileError, null, 2));
+          throw new Error(`Erro ao criar perfil: ${profileError.message}`);
+        }
+        console.log('✅ Perfil criado com sucesso');
         console.log('=== CADASTRO CONCLUÍDO COM SUCESSO ===');
 
         return novaLoja;
@@ -240,7 +254,7 @@ export default function CadastroLojista() {
       
       // Fazer login automático após cadastro
       try {
-        await signIn(formData.email!, formData.senha!);
+        await signInLojista(formData.email!, formData.senha);
         console.log('✅ Login automático realizado após cadastro');
       } catch (error) {
         console.error('Erro no login automático:', error);
