@@ -108,6 +108,7 @@ export type Database = {
           created_at: string
           data_primeiro_cupom: string | null
           email: string | null
+          estado: string | null
           id: string
           nome: string
           observacoes: string | null
@@ -123,6 +124,7 @@ export type Database = {
           created_at?: string
           data_primeiro_cupom?: string | null
           email?: string | null
+          estado?: string | null
           id?: string
           nome: string
           observacoes?: string | null
@@ -138,6 +140,7 @@ export type Database = {
           created_at?: string
           data_primeiro_cupom?: string | null
           email?: string | null
+          estado?: string | null
           id?: string
           nome?: string
           observacoes?: string | null
@@ -972,6 +975,15 @@ export type Database = {
           | {
               p_cliente_cidade: string
               p_cliente_cpf: string
+              p_cliente_nome: string
+              p_cliente_telefone: string
+              p_lojista_id: string
+              p_valor_compra: number
+            }
+          | {
+              p_cliente_cidade?: string
+              p_cliente_cpf: string
+              p_cliente_estado?: string
               p_cliente_nome: string
               p_cliente_telefone: string
               p_lojista_id: string

@@ -87,7 +87,9 @@ export const AtribuirCuponsManual = ({ lojistaId, onSuccess }: AtribuirCuponsMan
         p_cliente_cpf: cpfLimpo,
         p_cliente_nome: data.nome,
         p_cliente_telefone: data.telefone || '',
-        p_valor_compra: data.valor
+        p_valor_compra: data.valor,
+        p_cliente_estado: data.estado,
+        p_cliente_cidade: data.cidade
       });
       
       if (error) throw new Error(error.message);
