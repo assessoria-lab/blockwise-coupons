@@ -13,16 +13,16 @@ const LoginLojista = () => {
   const [password, setPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
-  const { signInLojista, user, loading } = useCustomAuth();
+  const { signIn, user, loading, isAdmin } = useCustomAuth();
   const { toast } = useToast();
   const navigate = useNavigate();
 
   // Redirect if already authenticated
   useEffect(() => {
     if (!loading && user) {
-      if (user.tipo === 'lojista') {
+      if (!isAdmin) {
         // Already a lojista, stay here or redirect to lojista dashboard
-      } else if (user.tipo === 'admin') {
+      } else {
         // Admin user trying to access lojista login, redirect to admin login
         toast({
           title: "Acesso negado",
@@ -31,7 +31,7 @@ const LoginLojista = () => {
         });
       }
     }
-  }, [user, loading, toast]);
+  }, [user, loading, isAdmin, toast]);
 
   if (loading) {
     return (
@@ -43,9 +43,9 @@ const LoginLojista = () => {
 
   // Redirect based on user type
   if (user) {
-    if (user.tipo === 'lojista') {
+    if (!isAdmin) {
       return <Navigate to="/lojista" replace />;
-    } else if (user.tipo === 'admin') {
+    } else {
       return <Navigate to="/login" replace />; // Redirect admin to admin login
     }
   }
@@ -65,7 +65,7 @@ const LoginLojista = () => {
     setIsLoading(true);
     
     try {
-      const { error } = await signInLojista(email, password);
+      const { error } = await signIn(email, password);
       
       if (error) {
         toast({

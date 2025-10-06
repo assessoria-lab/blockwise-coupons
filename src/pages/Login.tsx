@@ -13,7 +13,7 @@ const Login = () => {
   const [password, setPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
-  const { signInAdmin, user, loading } = useCustomAuth();
+  const { signIn, user, loading, isAdmin } = useCustomAuth();
   const { toast } = useToast();
   const navigate = useNavigate();
 
@@ -34,9 +34,9 @@ const Login = () => {
 
   // Redirect based on user type - Only admin access here
   if (user) {
-    if (user.tipo === 'admin') {
+    if (isAdmin) {
       return <Navigate to="/admin" replace />;
-    } else if (user.tipo === 'lojista') {
+    } else {
       return <Navigate to="/lojista" replace />;
     }
   }
@@ -56,7 +56,7 @@ const Login = () => {
     setIsLoading(true);
     
     try {
-      const { error } = await signInAdmin(email, password);
+      const { error } = await signIn(email, password);
       
       if (error) {
         toast({
