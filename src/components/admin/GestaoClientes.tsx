@@ -805,7 +805,7 @@ const GestaoClientes = () => {
                             </div>
                             <div className="text-right text-sm">
                               <p className="font-semibold">
-                                R$1 {Number(cupom.valor_compra || 0).toLocaleString('pt-BR', { minimumFractionDigits: 2 })}
+                                R$ {Number(cupom.valor_compra || 0).toLocaleString('pt-BR', { minimumFractionDigits: 2 })}
                               </p>
                               <p className="text-muted-foreground">
                                 {format(new Date(cupom.data_atribuicao), 'dd/MM/yyyy HH:mm', { locale: ptBR })}
