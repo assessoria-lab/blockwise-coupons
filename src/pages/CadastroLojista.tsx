@@ -68,7 +68,7 @@ const lojistaSchema = z.object({
 });
 export default function CadastroLojista() {
   const { toast } = useToast();
-  const { signInLojista } = useCustomAuth();
+  const { signIn } = useCustomAuth();
   const navigate = useNavigate();
   const queryClient = useQueryClient();
   const [novoSegmento, setNovoSegmento] = useState('');
@@ -240,7 +240,7 @@ export default function CadastroLojista() {
       
       // Fazer login automático após cadastro
       try {
-        await signInLojista(formData.email!, formData.senha);
+        await signIn(formData.email!, formData.senha!);
         console.log('✅ Login automático realizado após cadastro');
       } catch (error) {
         console.error('Erro no login automático:', error);

@@ -71,36 +71,6 @@ export type Database = {
           },
         ]
       }
-      caroline_veras_follow_up: {
-        Row: {
-          created_at: string
-          desejo: string | null
-          etapa: number | null
-          id: number
-          nome: string | null
-          number: string | null
-          ultimaMensagem: string | null
-        }
-        Insert: {
-          created_at?: string
-          desejo?: string | null
-          etapa?: number | null
-          id?: number
-          nome?: string | null
-          number?: string | null
-          ultimaMensagem?: string | null
-        }
-        Update: {
-          created_at?: string
-          desejo?: string | null
-          etapa?: number | null
-          id?: number
-          nome?: string | null
-          number?: string | null
-          ultimaMensagem?: string | null
-        }
-        Relationships: []
-      }
       clientes: {
         Row: {
           cidade: string | null
@@ -259,60 +229,6 @@ export type Database = {
           },
         ]
       }
-      disparo_apl_maria: {
-        Row: {
-          created_at: string
-          desejo: string | null
-          etapa: number | null
-          id: number
-          instancia: string | null
-          nome: string | null
-          number: string | null
-          ultimaMensagem: string | null
-        }
-        Insert: {
-          created_at?: string
-          desejo?: string | null
-          etapa?: number | null
-          id?: number
-          instancia?: string | null
-          nome?: string | null
-          number?: string | null
-          ultimaMensagem?: string | null
-        }
-        Update: {
-          created_at?: string
-          desejo?: string | null
-          etapa?: number | null
-          id?: number
-          instancia?: string | null
-          nome?: string | null
-          number?: string | null
-          ultimaMensagem?: string | null
-        }
-        Relationships: []
-      }
-      documents: {
-        Row: {
-          content: string | null
-          embedding: string | null
-          fts: unknown | null
-          id: number
-        }
-        Insert: {
-          content?: string | null
-          embedding?: string | null
-          fts?: unknown | null
-          id?: never
-        }
-        Update: {
-          content?: string | null
-          embedding?: string | null
-          fts?: unknown | null
-          id?: never
-        }
-        Relationships: []
-      }
       embeddings_diarios: {
         Row: {
           conteudo: string
@@ -337,21 +253,6 @@ export type Database = {
           embedding?: string | null
           id?: string
           metadados?: Json | null
-        }
-        Relationships: []
-      }
-      followup_rafaela_conecta: {
-        Row: {
-          created_at: string
-          id: number
-        }
-        Insert: {
-          created_at?: string
-          id?: number
-        }
-        Update: {
-          created_at?: string
-          id?: number
         }
         Relationships: []
       }
@@ -435,48 +336,6 @@ export type Database = {
             referencedColumns: ["lojista_id"]
           },
         ]
-      }
-      h_hospedagem: {
-        Row: {
-          content: string | null
-          embedding: string | null
-          id: number
-          metadata: Json | null
-        }
-        Insert: {
-          content?: string | null
-          embedding?: string | null
-          id?: number
-          metadata?: Json | null
-        }
-        Update: {
-          content?: string | null
-          embedding?: string | null
-          id?: number
-          metadata?: Json | null
-        }
-        Relationships: []
-      }
-      jose_alberto: {
-        Row: {
-          content: string | null
-          embedding: string | null
-          id: number
-          metadata: Json | null
-        }
-        Insert: {
-          content?: string | null
-          embedding?: string | null
-          id?: number
-          metadata?: Json | null
-        }
-        Update: {
-          content?: string | null
-          embedding?: string | null
-          id?: number
-          metadata?: Json | null
-        }
-        Relationships: []
       }
       logs_sistema: {
         Row: {
@@ -961,6 +820,13 @@ export type Database = {
         Args: Record<PropertyKey, never>
         Returns: Json
       }
+      assign_user_role: {
+        Args: {
+          target_role: Database["public"]["Enums"]["app_role"]
+          target_user_id: string
+        }
+        Returns: undefined
+      }
       atribuir_cupons_para_cliente: {
         Args:
           | {
@@ -1194,22 +1060,6 @@ export type Database = {
         Args: { "": unknown }
         Returns: unknown
       }
-      hybrid_search: {
-        Args: {
-          full_text_weight?: number
-          match_count: number
-          query_embedding: string
-          query_text: string
-          rrf_k?: number
-          semantic_weight?: number
-        }
-        Returns: {
-          content: string | null
-          embedding: string | null
-          fts: unknown | null
-          id: number
-        }[]
-      }
       is_admin: {
         Args: { user_uuid: string }
         Returns: boolean
@@ -1343,10 +1193,6 @@ export type Database = {
       sparsevec_typmod_in: {
         Args: { "": unknown[] }
         Returns: number
-      }
-      validar_login_admin: {
-        Args: { p_email: string; p_senha: string }
-        Returns: Json
       }
       validar_login_lojista: {
         Args: { p_email: string; p_senha: string }
