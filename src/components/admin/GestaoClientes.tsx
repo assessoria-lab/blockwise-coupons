@@ -198,6 +198,7 @@ const GestaoClientes = () => {
           valor_compra,
           data_atribuicao,
           status,
+          bloco_id,
           lojistas!inner(
             nome_loja,
             cidade,
