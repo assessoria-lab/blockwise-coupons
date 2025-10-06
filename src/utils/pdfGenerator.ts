@@ -187,18 +187,18 @@ const generateSinglePDF = async (
         <!-- Marcar X dentro da bolinha correta baseado no tipo_cliente salvo -->
         <div style="
           position: absolute;
-          top: 590px;
-          left: ${cupom.tipo_cliente === 'varejo' ? '940' : '1150'}px;
-          width: 20px;
-          height: 20px;
+          top: 595px;
+          left: ${cupom.tipo_cliente === 'varejo' ? '965' : '1070'}px;
+          width: 25px;
+          height: 25px;
           display: flex;
           align-items: center;
           justify-content: center;
-          font-size: 18px;
+          font-size: 24px;
           font-weight: bold;
           color: #1f2937;
         ">
-          ✗
+          X
         </div>
 
         <!-- Email - dados corretos (email do cliente) ajustado mais para cima e direita -->
